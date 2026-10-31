@@ -163,7 +163,7 @@ class EngagementBody(BaseModel):
 
 
 class ConvertBody(EngagementBody):
-    employee_id: UUID
+    employee_id: UUID | None = None
 
 
 class DocumentBody(BaseModel):
@@ -446,6 +446,7 @@ def list_hire_notices(request: Request, status: str | None = None) -> list[dict[
                 "id": str(n.id),
                 "application_id": str(n.application_id),
                 "job_id": str(n.job_id),
+                "person_id": str(n.person_id) if n.person_id else None,
                 "status": n.status,
                 "engagement_id": str(n.engagement_id) if n.engagement_id else None,
             }

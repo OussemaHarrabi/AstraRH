@@ -46,5 +46,5 @@ publishes:
   - finance.payment.reconciled.v1
 
 consumes:
-  - talent.application.stage_changed.v1
+  - talent.candidate.hired.v1
   - trust.action.executed.v1

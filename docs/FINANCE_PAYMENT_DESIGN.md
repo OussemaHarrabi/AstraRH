@@ -161,14 +161,15 @@ Fallback if K4 is declined: a stateless simulator inside the adapter that derive
 
 | Request | Status on `main` | Note |
 |---|---|---|
-| K1 hire event | Open, and larger than assumed | No `talent.candidate.hired.v1` anywhere. Worse, **talent never moves a candidate to a `hired` stage**, and `talent.application.stage_changed.v1` carries only IDs (no employee, salary or start date). So even the fallback cannot fire today. Finance therefore records a hire notice for HR to complete (decision D23) |
+| K1 hire event | **Fixed on `finance-v2`, for the kernel owner to review.** Originally open and larger than assumed: | No `talent.candidate.hired.v1` anywhere. Worse, **talent never moves a candidate to a `hired` stage**, and `talent.application.stage_changed.v1` carries only IDs (no employee, salary or start date). So even the fallback cannot fire today. Finance therefore records a hire notice for HR to complete (decision D23) |
 | K2 look up `unknown` executions | Open | `trust` and the executor are unchanged |
 | K3 executor poll hook | Open | Unchanged |
 | K4 sandbox bank and adapter | Open | Unchanged |
 | K5 `finance` queue | Open | `WORKER_QUEUES` is still `["default", "agents"]` |
 | K6 events for failed or unknown executions | Open | Unchanged. The sweep job is the default |
-| K7 pack event consumers | **Open, with a known pattern** (finance has a consumer and a strict expected-failure test waiting for it) | Packs are wired by importing their module in `apps/worker/main.py` (`talent` does it, and the kernel does it through `install_kernel_consumers`). Finance can do the same with one import line there, which is a kernel-owner file. The manifest `consumers:` section is still the cleaner fix |
+| K7 pack event consumers | **Worked around on `finance-v2`**: `apps/worker/main.py` imports the finance consumers, as for talent. The manifest `consumers:` section is still the cleaner fix | Packs are wired by importing their module in `apps/worker/main.py` (`talent` does it, and the kernel does it through `install_kernel_consumers`). Finance can do the same with one import line there, which is a kernel-owner file. The manifest `consumers:` section is still the cleaner fix |
 | K8 macOS init script | **Fixed on `finance-v2`** | `main` still has `01-init.sh`. Needs review and merge by the kernel owner |
+| K13 talent API fails to load in the API image | **Fixed on `finance-v2`** | `communications.py` imported `langgraph` at module level. See `FINANCE_ENGAGEMENTS.md` section 7. Recommend keeping the new test |
 | K9 API cannot insert proposals | Open | Verified again: `has_table_privilege('astra_api','trust.proposal','INSERT')` is false |
 | K10 to K12 | Open | Small confirmations |
 
@@ -181,7 +182,8 @@ New on `main` that finance can reuse: periodic worker tasks (the daily digest an
 > **K8 (fixed on `finance-v1`, please review):** on Docker Desktop for Mac, `ops/postgres/init/01-init.sh` failed with `bad interpreter: Permission denied`, so a fresh clone never got its roles. It is now `ops/postgres/init/01-init.sql` (psql `\getenv` for the passwords, same SQL). Verified identical to the old result on a fresh database; details in `docs/FINANCE_RUNBOOK.md` section 3.
 > **K7:** packs cannot register plain event consumers; please add a manifest `consumers:` section wired like agents.
 > **K2:** let `reconcile_stale` also resolve executions left `unknown` by a timeout. **K3:** an adapter `poll` hook in the executor loop. **K4:** a sandbox bank container on an executor-only network plus adapter `payment.release` (we will write both). **K5:** a `finance` job queue. **K6:** confirm whether failed and unknown executions should publish events, or whether we sweep the proposal table.
-> **K1** is yours: please emit `talent.candidate.hired.v1`. K10 to K12 are small confirmations. Details in `docs/FINANCE_PAYMENT_DESIGN.md` section 8.
+> **K1 (done on `finance-v2`, please review):** talent could not hire anyone (no `hired` stage). I added the R3 action `talent.application.hire`, its handler, `POST /applications/{id}/hire`, and the event `talent.candidate.hired.v1` (IDs only). The worker also imports the finance consumers (K7 workaround).
+> **K13 (bug, fixed on `finance-v2`):** the API image has no `langgraph`, but `talent/api.py` imports `communications`, which imported it at the top, so the **whole talent pack failed to load in the running API** (the registry only logs it). I made the import lazy and added `tests/test_api_loads_without_agent_libraries.py`. K10 to K12 are small confirmations. Details in `docs/FINANCE_PAYMENT_DESIGN.md` section 8.
 
 ## 9. Test plan for this design
 

@@ -18,6 +18,7 @@ from kernel.db import global_session, tenant_session
 from kernel.errors import Conflict, PermissionDenied, ValidationFailed
 from kernel.events.models import EventOutbox
 from kernel.identity.models import Tenant
+from kernel.people.models import Employee
 from kernel.trust.models import Proposal
 from packs.finance import api, consumers, engagements  # noqa: F401 - registers the consumer
 from packs.finance.models import (
@@ -27,7 +28,7 @@ from packs.finance.models import (
     HireNotice,
     PayItem,
 )
-from packs.talent.events import StageChanged
+from packs.talent.events import CandidateHired, StageChanged
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "/packs/finance"
@@ -578,50 +579,64 @@ def test_hr_cannot_propose_a_pay_change_over_http(tenant, slug):
     assert hr.post(f"{BASE}/engagements/{engagement_id}/amendments", json=body).status_code == 403
 
 
-def test_a_hired_candidate_gets_one_notice_however_often_the_event_arrives(tenant):
-    application, job = uuid4(), uuid4()
+def publish_hire(tenant, application=None, person=None, job=None) -> dict:
+    ids = {
+        "application_id": application or uuid4(),
+        "job_id": job or uuid4(),
+        "candidate_id": uuid4(),
+        "person_id": person or uuid4(),
+    }
     with as_role("worker"), tenant_session(tenant) as session:
-        for stage in ("hired", "hired"):
-            events.publish(
-                session,
-                tenant,
-                StageChanged(
-                    application_id=application, job_id=job, from_stage="shortlisted", to_stage=stage
-                ),
-            )
+        events.publish(session, tenant, CandidateHired(**ids))
+    with as_role("worker"):
+        events.relay_once(tenant)
+    return ids
+
+
+def notices(tenant) -> list[HireNotice]:
+    with as_role("worker"), tenant_session(tenant) as session:
+        return session.scalars(select(HireNotice)).all()
+
+
+def person_of(tenant, employee_id: UUID) -> UUID:
+    with as_role("owner"), tenant_session(tenant) as session:
+        return session.get(Employee, employee_id).person_id
+
+
+def test_a_hired_candidate_gets_one_notice_however_often_the_event_arrives(tenant):
+    ids = publish_hire(tenant)
+    publish_hire(tenant, application=ids["application_id"], person=ids["person_id"])
+    [notice] = notices(tenant)
+    assert (notice.application_id, notice.job_id, notice.status) == (
+        ids["application_id"],
+        ids["job_id"],
+        "awaiting_terms",
+    )
+    assert (notice.candidate_id, notice.person_id) == (ids["candidate_id"], ids["person_id"])
+
+
+def test_a_stage_change_alone_does_not_create_a_notice(tenant):
+    with as_role("worker"), tenant_session(tenant) as session:
         events.publish(
             session,
             tenant,
             StageChanged(
-                application_id=uuid4(), job_id=job, from_stage="applied", to_stage="shortlisted"
+                application_id=uuid4(), job_id=uuid4(), from_stage="interview", to_stage="hired"
             ),
         )
     with as_role("worker"):
         events.relay_once(tenant)
-    with as_role("worker"), tenant_session(tenant) as session:
-        notices = session.scalars(select(HireNotice)).all()
-    assert [(n.application_id, n.job_id, n.status) for n in notices] == [
-        (application, job, "awaiting_terms")
-    ]
+    assert notices(tenant) == []
 
 
 def test_hr_completes_a_hire_notice_with_the_employee_and_terms(tenant, slug):
-    application = uuid4()
-    with as_role("worker"), tenant_session(tenant) as session:
-        events.publish(
-            session,
-            tenant,
-            StageChanged(
-                application_id=application, job_id=uuid4(), from_stage="offer", to_stage="hired"
-            ),
-        )
-    with as_role("worker"):
-        events.relay_once(tenant)
+    employee = make_employee(tenant)
+    ids = publish_hire(tenant, person=person_of(tenant, employee))
     hr = signed_in(slug, make_user(tenant, ("hr",)))
     waiting = hr.get(f"{BASE}/hire-notices", params={"status": "awaiting_terms"}).json()
-    assert [n["application_id"] for n in waiting] == [str(application)]
+    assert [n["application_id"] for n in waiting] == [str(ids["application_id"])]
+    assert waiting[0]["person_id"] == str(ids["person_id"])
 
-    employee = make_employee(tenant)
     body = {**terms(pay_items=[]), "employee_id": str(employee)}
     done = hr.post(f"{BASE}/hire-notices/{waiting[0]['id']}/engagement", json=body)
     assert done.status_code == 201
@@ -631,6 +646,36 @@ def test_hr_completes_a_hire_notice_with_the_employee_and_terms(tenant, slug):
     assert (notice["status"], notice["engagement_id"]) == ("converted", done.json()["id"])
     again = hr.post(f"{BASE}/hire-notices/{waiting[0]['id']}/engagement", json=body)
     assert again.status_code == 409
+
+
+def test_the_employee_is_found_from_the_hired_person_when_it_is_not_named(tenant, slug):
+    employee = make_employee(tenant)
+    publish_hire(tenant, person=person_of(tenant, employee))
+    hr = signed_in(slug, make_user(tenant, ("hr",)))
+    notice_id = hr.get(f"{BASE}/hire-notices").json()[0]["id"]
+    done = hr.post(f"{BASE}/hire-notices/{notice_id}/engagement", json=terms(pay_items=[]))
+    assert done.status_code == 201
+    assert done.json()["employee_id"] == str(employee)
+
+
+def test_a_hire_notice_without_an_employee_record_asks_for_one(tenant, slug):
+    publish_hire(tenant)
+    hr = signed_in(slug, make_user(tenant, ("hr",)))
+    notice_id = hr.get(f"{BASE}/hire-notices").json()[0]["id"]
+    response = hr.post(f"{BASE}/hire-notices/{notice_id}/engagement", json=terms(pay_items=[]))
+    assert response.status_code == 409
+    assert "no employee record" in response.json()["message"]
+    assert hr.get(f"{BASE}/hire-notices").json()[0]["status"] == "awaiting_terms"
+
+
+def test_a_notice_cannot_be_completed_with_a_different_person(tenant, slug):
+    publish_hire(tenant)
+    hr = signed_in(slug, make_user(tenant, ("hr",)))
+    notice_id = hr.get(f"{BASE}/hire-notices").json()[0]["id"]
+    body = {**terms(pay_items=[]), "employee_id": str(make_employee(tenant))}
+    response = hr.post(f"{BASE}/hire-notices/{notice_id}/engagement", json=body)
+    assert response.status_code == 409
+    assert "different person" in response.json()["message"]
 
 
 def test_a_hire_notice_that_does_not_exist_is_not_found(tenant, slug):
@@ -675,11 +720,8 @@ def test_an_amendment_can_be_proposed_over_http(tenant, slug):
     assert http.post(f"{BASE}/engagements/{engagement_id}/amendments", json=body).status_code == 202
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="K7: packs cannot register event consumers through the manifest yet, so the worker "
-    "must import the finance consumers by hand in apps/worker/main.py. Remove this marker "
-    "once the worker registers them.",
-)
 def test_the_worker_registers_the_finance_consumers():
-    assert "packs.finance.consumers" in (ROOT / "apps/worker/main.py").read_text(encoding="utf-8")
+    text = (ROOT / "apps/worker/main.py").read_text(encoding="utf-8")
+    assert "packs.finance import consumers" in text
+    names = {c.name for c in events.consumers_for("talent.candidate.hired.v1")}
+    assert "finance.record_hire" in names

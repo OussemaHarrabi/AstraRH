@@ -275,7 +275,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReasonBody"
+                "$ref": "#/components/schemas/kernel__web__ReasonBody"
               }
             }
           }
@@ -858,6 +858,1247 @@
         }
       }
     },
+    "/comms/digest": {
+      "get": {
+        "tags": [
+          "inbox"
+        ],
+        "summary": "Today's digest, grouped by type, most urgent first",
+        "operationId": "get_digest_comms_digest_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Digest Comms Digest Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "inbox"
+        ],
+        "summary": "Rebuild today's digest with the latest messages",
+        "operationId": "rebuild_digest_comms_digest_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Rebuild Digest Comms Digest Post"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comms/threads/{thread_id}": {
+      "get": {
+        "tags": [
+          "inbox"
+        ],
+        "summary": "One conversation, with any reply awaiting approval",
+        "operationId": "get_thread_comms_threads__thread_id__get",
+        "parameters": [
+          {
+            "name": "thread_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Thread Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Thread Comms Threads  Thread Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/knowledge/questions": {
+      "get": {
+        "tags": [
+          "employee questions"
+        ],
+        "summary": "Your recent questions",
+        "operationId": "my_questions_knowledge_questions_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response My Questions Knowledge Questions Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "employee questions"
+        ],
+        "summary": "Ask a question about company policy",
+        "operationId": "ask_knowledge_questions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Ask Knowledge Questions Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/knowledge/questions/{question_id}": {
+      "get": {
+        "tags": [
+          "employee questions"
+        ],
+        "summary": "One of your questions",
+        "operationId": "get_question_knowledge_questions__question_id__get",
+        "parameters": [
+          {
+            "name": "question_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Question Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Question Knowledge Questions  Question Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/knowledge/tickets": {
+      "get": {
+        "tags": [
+          "employee questions"
+        ],
+        "summary": "Questions passed to HR",
+        "operationId": "list_tickets_knowledge_tickets_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response List Tickets Knowledge Tickets Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/calculator/net": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Gross to net, line by line. Nothing is stored.",
+        "operationId": "calculate_net_packs_finance_calculator_net_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NetBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Calculate Net Packs Finance Calculator Net Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/calculator/compare": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Several gross-to-net scenarios side by side",
+        "operationId": "compare_packs_finance_calculator_compare_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompareBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Compare Packs Finance Calculator Compare Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/rule-sets": {
+      "get": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Rule sets, without their full definitions",
+        "operationId": "list_rule_sets_packs_finance_rule_sets_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response List Rule Sets Packs Finance Rule Sets Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Save a new rule set as a draft",
+        "operationId": "create_rule_set_packs_finance_rule_sets_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleSetBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Create Rule Set Packs Finance Rule Sets Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/rule-sets/{record_id}": {
+      "get": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "One rule set with its full definition",
+        "operationId": "get_rule_set_packs_finance_rule_sets__record_id__get",
+        "parameters": [
+          {
+            "name": "record_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Record Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Rule Set Packs Finance Rule Sets  Record Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/rule-sets/{record_id}/test": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Run the rule set's hand-checked examples",
+        "operationId": "test_rule_set_packs_finance_rule_sets__record_id__test_post",
+        "parameters": [
+          {
+            "name": "record_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Record Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Test Rule Set Packs Finance Rule Sets  Record Id  Test Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/rule-sets/{record_id}/activate": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Propose activating a rule set. A different person must approve it.",
+        "operationId": "activate_rule_set_packs_finance_rule_sets__record_id__activate_post",
+        "parameters": [
+          {
+            "name": "record_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Record Id"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Activate Rule Set Packs Finance Rule Sets  Record Id  Activate Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/employees/{employee_id}/engagements": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Create an engagement as a draft. The same request id returns the same engagement.",
+        "operationId": "create_engagement_packs_finance_employees__employee_id__engagements_post",
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Employee Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EngagementBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Create Engagement Packs Finance Employees  Employee Id  Engagements Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/engagements": {
+      "get": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Engagements. Pay amounts are shown only to finance roles.",
+        "operationId": "list_engagements_packs_finance_engagements_get",
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Employee Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response List Engagements Packs Finance Engagements Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/engagements/{engagement_id}": {
+      "get": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "One engagement with its documents checklist",
+        "operationId": "get_engagement_packs_finance_engagements__engagement_id__get",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Engagement Packs Finance Engagements  Engagement Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/engagements/{engagement_id}/pay-items": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Add a pay item",
+        "operationId": "add_pay_item_packs_finance_engagements__engagement_id__pay_items_post",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayItemBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Add Pay Item Packs Finance Engagements  Engagement Id  Pay Items Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/engagements/{engagement_id}/validate": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Run the checks again",
+        "operationId": "validate_engagement_packs_finance_engagements__engagement_id__validate_post",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Validate Engagement Packs Finance Engagements  Engagement Id  Validate Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/engagements/{engagement_id}/issues": {
+      "get": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Every issue raised for an engagement",
+        "operationId": "list_issues_packs_finance_engagements__engagement_id__issues_get",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response List Issues Packs Finance Engagements  Engagement Id  Issues Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/issues/{issue_id}/resolve": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Decide a review item, with a reason",
+        "operationId": "resolve_issue_packs_finance_issues__issue_id__resolve_post",
+        "parameters": [
+          {
+            "name": "issue_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Issue Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/packs__finance__api__ReasonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Resolve Issue Packs Finance Issues  Issue Id  Resolve Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/engagements/{engagement_id}/documents": {
+      "get": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Documents and the checklist",
+        "operationId": "list_documents_packs_finance_engagements__engagement_id__documents_get",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response List Documents Packs Finance Engagements  Engagement Id  Documents Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Record a document",
+        "operationId": "add_document_packs_finance_engagements__engagement_id__documents_post",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Add Document Packs Finance Engagements  Engagement Id  Documents Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/documents/{document_id}/review": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Verify or reject a document",
+        "operationId": "review_document_packs_finance_documents__document_id__review_post",
+        "parameters": [
+          {
+            "name": "document_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Document Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentReviewBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Review Document Packs Finance Documents  Document Id  Review Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/engagements/{engagement_id}/activate": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Propose activating a validated engagement. A person must approve it.",
+        "operationId": "activate_engagement_packs_finance_engagements__engagement_id__activate_post",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Activate Engagement Packs Finance Engagements  Engagement Id  Activate Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/engagements/{engagement_id}/amendments": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Propose a change from a date. A person must approve it.",
+        "operationId": "amend_engagement_packs_finance_engagements__engagement_id__amendments_post",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AmendBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Amend Engagement Packs Finance Engagements  Engagement Id  Amendments Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/hire-notices": {
+      "get": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Candidates who reached hired and still need their terms",
+        "operationId": "list_hire_notices_packs_finance_hire_notices_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response List Hire Notices Packs Finance Hire Notices Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/hire-notices/{notice_id}/engagement": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Complete a hire notice with the employee and the terms",
+        "operationId": "convert_hire_notice_packs_finance_hire_notices__notice_id__engagement_post",
+        "parameters": [
+          {
+            "name": "notice_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Notice Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConvertBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Convert Hire Notice Packs Finance Hire Notices  Notice Id  Engagement Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/packs/talent/jobs": {
       "get": {
         "tags": [
@@ -1432,6 +2673,248 @@
         }
       }
     },
+    "/packs/talent/applications/{application_id}/interviews": {
+      "post": {
+        "tags": [
+          "talent"
+        ],
+        "summary": "Find free times in the calendars and prepare the email",
+        "operationId": "request_interview_packs_talent_applications__application_id__interviews_post",
+        "parameters": [
+          {
+            "name": "application_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Application Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InterviewBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Request Interview Packs Talent Applications  Application Id  Interviews Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/talent/jobs/{job_id}/interviews": {
+      "get": {
+        "tags": [
+          "talent"
+        ],
+        "summary": "Interviews for this job",
+        "operationId": "list_interviews_packs_talent_jobs__job_id__interviews_get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response List Interviews Packs Talent Jobs  Job Id  Interviews Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/talent/interviews/{interview_id}/book": {
+      "post": {
+        "tags": [
+          "talent"
+        ],
+        "summary": "Propose booking one of the offered times. A person approves it.",
+        "operationId": "propose_booking_packs_talent_interviews__interview_id__book_post",
+        "parameters": [
+          {
+            "name": "interview_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Interview Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Propose Booking Packs Talent Interviews  Interview Id  Book Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/talent/followups/check": {
+      "post": {
+        "tags": [
+          "talent"
+        ],
+        "summary": "Check now for candidates who went quiet",
+        "operationId": "check_followups_packs_talent_followups_check_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "type": "object",
+                  "title": "Response Check Followups Packs Talent Followups Check Post"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/talent/applications/{application_id}/hire": {
+      "post": {
+        "tags": [
+          "talent"
+        ],
+        "summary": "Propose hiring a shortlisted or interviewed candidate. A different HR person decides.",
+        "operationId": "propose_hire_packs_talent_applications__application_id__hire_post",
+        "parameters": [
+          {
+            "name": "application_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Application Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HireBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Propose Hire Packs Talent Applications  Application Id  Hire Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "summary": "Healthz",
@@ -1480,6 +2963,61 @@
   },
   "components": {
     "schemas": {
+      "AmendBody": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "enum": [
+              "base_salary",
+              "weekly_hours",
+              "job_title",
+              "work_location",
+              "ends_on"
+            ],
+            "title": "Field"
+          },
+          "new_value": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "New Value"
+          },
+          "effective_from": {
+            "type": "string",
+            "format": "date",
+            "title": "Effective From"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "field",
+          "new_value",
+          "effective_from",
+          "reason"
+        ],
+        "title": "AmendBody"
+      },
+      "AskBody": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Question"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "title": "AskBody"
+      },
       "Body_upload_cvs_packs_talent_jobs__job_id__cvs_post": {
         "properties": {
           "files": {
@@ -1496,6 +3034,255 @@
           "files"
         ],
         "title": "Body_upload_cvs_packs_talent_jobs__job_id__cvs_post"
+      },
+      "BookBody": {
+        "properties": {
+          "starts_at": {
+            "type": "string",
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "type": "string",
+            "title": "Ends At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "starts_at",
+          "ends_at"
+        ],
+        "title": "BookBody"
+      },
+      "CompareBody": {
+        "properties": {
+          "on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "On"
+          },
+          "scenarios": {
+            "items": {
+              "$ref": "#/components/schemas/NetBody"
+            },
+            "type": "array",
+            "maxItems": 6,
+            "minItems": 1,
+            "title": "Scenarios"
+          }
+        },
+        "type": "object",
+        "required": [
+          "scenarios"
+        ],
+        "title": "CompareBody"
+      },
+      "ConvertBody": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CDI",
+              "CDD",
+              "CIVP"
+            ],
+            "title": "Type"
+          },
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends On"
+          },
+          "job_title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Job Title"
+          },
+          "work_location": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Work Location"
+          },
+          "weekly_hours": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 168.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekly Hours"
+          },
+          "cdd_reason_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cdd Reason Code"
+          },
+          "head_of_family": {
+            "type": "boolean",
+            "title": "Head Of Family",
+            "default": false
+          },
+          "children": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "child",
+                "student",
+                "disabled"
+              ]
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Children"
+          },
+          "external_request_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Request Id"
+          },
+          "pay_items": {
+            "items": {
+              "$ref": "#/components/schemas/PayItemBody"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Pay Items"
+          },
+          "employee_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Employee Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "starts_on",
+          "job_title"
+        ],
+        "title": "ConvertBody"
+      },
+      "DocumentBody": {
+        "properties": {
+          "doc_type": {
+            "type": "string",
+            "maxLength": 48,
+            "minLength": 1,
+            "title": "Doc Type"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "file_key": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "doc_type"
+        ],
+        "title": "DocumentBody"
+      },
+      "DocumentReviewBody": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "verified",
+              "rejected"
+            ],
+            "title": "Decision"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision"
+        ],
+        "title": "DocumentReviewBody"
       },
       "EditBody": {
         "properties": {
@@ -1522,6 +3309,127 @@
         ],
         "title": "EditBody"
       },
+      "EngagementBody": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CDI",
+              "CDD",
+              "CIVP"
+            ],
+            "title": "Type"
+          },
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends On"
+          },
+          "job_title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Job Title"
+          },
+          "work_location": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Work Location"
+          },
+          "weekly_hours": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 168.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekly Hours"
+          },
+          "cdd_reason_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cdd Reason Code"
+          },
+          "head_of_family": {
+            "type": "boolean",
+            "title": "Head Of Family",
+            "default": false
+          },
+          "children": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "child",
+                "student",
+                "disabled"
+              ]
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Children"
+          },
+          "external_request_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Request Id"
+          },
+          "pay_items": {
+            "items": {
+              "$ref": "#/components/schemas/PayItemBody"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Pay Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "starts_on",
+          "job_title"
+        ],
+        "title": "EngagementBody"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1534,6 +3442,37 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HireBody": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "HireBody"
+      },
+      "InterviewBody": {
+        "properties": {
+          "interviewer_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interviewer Email"
+          }
+        },
+        "type": "object",
+        "title": "InterviewBody"
       },
       "JobBody": {
         "properties": {
@@ -1591,6 +3530,57 @@
         ],
         "title": "LoginBody"
       },
+      "NetBody": {
+        "properties": {
+          "gross": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Gross"
+          },
+          "head_of_family": {
+            "type": "boolean",
+            "title": "Head Of Family",
+            "default": false
+          },
+          "children": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "child",
+                "student",
+                "disabled"
+              ]
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Children"
+          },
+          "on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "On"
+          }
+        },
+        "type": "object",
+        "required": [
+          "gross"
+        ],
+        "title": "NetBody"
+      },
       "OverrideBody": {
         "properties": {
           "criterion_id": {
@@ -1637,22 +3627,57 @@
         ],
         "title": "PasswordBody"
       },
-      "ReasonBody": {
+      "PayItemBody": {
         "properties": {
-          "reason": {
+          "code": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "amount": {
             "anyOf": [
               {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
                 "type": "string"
+              }
+            ],
+            "title": "Amount"
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date",
+            "title": "Valid From"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Reason"
+            "title": "Valid To"
+          },
+          "frequency": {
+            "type": "string",
+            "const": "monthly",
+            "title": "Frequency",
+            "default": "monthly"
           }
         },
         "type": "object",
-        "title": "ReasonBody"
+        "required": [
+          "code",
+          "amount",
+          "valid_from"
+        ],
+        "title": "PayItemBody"
       },
       "RubricBody": {
         "properties": {
@@ -1670,6 +3695,20 @@
           "criteria"
         ],
         "title": "RubricBody"
+      },
+      "RuleSetBody": {
+        "properties": {
+          "definition": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Definition"
+          }
+        },
+        "type": "object",
+        "required": [
+          "definition"
+        ],
+        "title": "RuleSetBody"
       },
       "ValidationError": {
         "properties": {
@@ -1711,6 +3750,23 @@
         ],
         "title": "ValidationError"
       },
+      "kernel__web__ReasonBody": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "title": "ReasonBody"
+      },
       "kernel__web__RejectBody": {
         "properties": {
           "reason": {
@@ -1723,6 +3779,21 @@
           "reason"
         ],
         "title": "RejectBody"
+      },
+      "packs__finance__api__ReasonBody": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "ReasonBody"
       },
       "packs__talent__api__RejectBody": {
         "properties": {

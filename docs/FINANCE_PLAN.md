@@ -168,7 +168,7 @@ Naming follows the repo convention `<pack>.<entity>.<verb>.v1`, with versioned m
 
 | Spec name | AstraRH source | Status |
 |---|---|---|
-| `engagement.approved` | `talent.candidate.hired.v1` (**C1**) | Needs contract change |
+| `engagement.approved` | `talent.candidate.hired.v1` | Built (2026-11-01): talent emits it, finance records a hire notice |
 | `employee.created` / `.updated` | core people events | Confirm they exist in the catalogue |
 | `document.verification.updated` | none yet. Fed by our own `document_ref` UI and the AI-confirm action | Internal until a documents module exists |
 | `time.approved`, `leave.approved` | `workforce.leave.approved.v1`, time via import | Workforce pack not built, so use an **import adapter** that writes `payroll_input` with the same unique `source_event_id` |

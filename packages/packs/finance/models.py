@@ -426,6 +426,8 @@ class HireNotice(TenantMixin, Base):
 
     application_id: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)
     job_id: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)
+    candidate_id: Mapped[UUID | None] = mapped_column(UUID_TYPE)
+    person_id: Mapped[UUID | None] = mapped_column(UUID_TYPE)
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="awaiting_terms")
     engagement_id: Mapped[UUID | None] = mapped_column(
         UUID_TYPE, ForeignKey("finance.engagement.id")

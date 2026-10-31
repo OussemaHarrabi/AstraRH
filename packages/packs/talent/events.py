@@ -45,6 +45,16 @@ class StageChanged(BaseModel):
     to_stage: str
 
 
+@event_type("talent.candidate.hired.v1")
+class CandidateHired(BaseModel):
+    """IDs only. The person is how HR links the hire to an employee record."""
+
+    application_id: UUID
+    job_id: UUID
+    candidate_id: UUID
+    person_id: UUID
+
+
 @event_type("talent.followup.due.v1")
 class FollowupDue(BaseModel):
     application_id: UUID

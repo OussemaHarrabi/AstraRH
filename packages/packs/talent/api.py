@@ -16,8 +16,10 @@ from kernel.authz import require_role
 from kernel.errors import Conflict, KernelError, NotFound, ValidationFailed
 from kernel.explain import DecisionDraft
 from kernel.explain.models import DecisionRecord
+from kernel.trust.models import Proposal
 from kernel.web import request_context
 from packs.talent import communications, scoring, service
+from packs.talent.handlers import HIREABLE_STAGES
 from packs.talent.models import (
     Application,
     CandidateIdentity,
@@ -31,6 +33,7 @@ from packs.talent.models import (
     Score,
 )
 
+OPEN_PROPOSAL_STATUSES = {"pending_approval", "approved", "executing", "unknown", "blocked"}
 READ_ROLES = {"admin", "hr", "recruiter", "auditor"}
 WRITE_ROLES = {"admin", "hr", "recruiter"}
 MAX_FILES_PER_UPLOAD = 200
@@ -64,6 +67,10 @@ class BookBody(BaseModel):
 
 
 class RejectBody(BaseModel):
+    reason: str = Field(min_length=3)
+
+
+class HireBody(BaseModel):
     reason: str = Field(min_length=3)
 
 
@@ -518,3 +525,61 @@ def check_followups(request: Request) -> dict[str, int]:
         return {
             "prepared": communications.sweep_followups(ctx.session, ctx.actor.tenant_id),
         }
+
+
+@router.post(
+    "/applications/{application_id}/hire",
+    status_code=202,
+    summary="Propose hiring a shortlisted or interviewed candidate. A different HR person decides.",
+)
+def propose_hire(application_id: UUID, body: HireBody, request: Request) -> dict[str, str]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, WRITE_ROLES)
+        session = ctx.session
+        application = _application_or_404(session, application_id)
+        if application.stage not in HIREABLE_STAGES:
+            raise Conflict(f"A candidate at the {application.stage} stage cannot be hired")
+        prefix = f"hire:{application_id}:"
+        earlier = session.scalars(
+            select(Proposal).where(Proposal.idempotency_key.startswith(prefix, autoescape=True))
+        ).all()
+        if any(p.status in OPEN_PROPOSAL_STATUSES for p in earlier):
+            raise Conflict("This candidate already has a hiring request waiting for a decision")
+        score = session.scalar(
+            select(Score)
+            .where(Score.application_id == application_id)
+            .order_by(Score.created_at.desc())
+            .limit(1)
+        )
+        ranking = (
+            f" Latest ranking: rank {score.rank}, score {score.score}."
+            if score is not None and score.rank is not None
+            else " This candidate has not been ranked."
+        )
+        decision = explain.record(
+            session,
+            ctx.actor.tenant_id,
+            DecisionDraft(
+                kind="talent.application.hire",
+                question="Should this candidate be hired?",
+                outcome={"stage": application.stage},
+                rationale=f"Stage: {application.stage}. Requested reason: {body.reason}.{ranking}",
+                limits=[
+                    "Hiring is a human decision. The ranking looks at job-related criteria only "
+                    "and is one input among others."
+                ],
+                view_roles=["admin", "hr", "recruiter", "auditor"],
+            ),
+        )
+        proposal = trust.propose(
+            session,
+            ctx.actor.tenant_id,
+            "talent.application.hire",
+            {"application_id": str(application_id), "reason": body.reason},
+            "Hire this candidate",
+            decision.id,
+            f"{prefix}{len(earlier) + 1}",
+            target={"job_id": str(application.job_id)},
+            requested_by=ctx.actor.user_id,
+        )
+        return {"proposal_id": str(proposal.id), "status": proposal.status}

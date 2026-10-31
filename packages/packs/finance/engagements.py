@@ -591,7 +591,13 @@ def apply_amendment(
 
 
 def record_hire(
-    session: Session, tenant_id: UUID, application_id: UUID, job_id: UUID, event_id: str
+    session: Session,
+    tenant_id: UUID,
+    application_id: UUID,
+    job_id: UUID,
+    candidate_id: UUID,
+    person_id: UUID,
+    event_id: str,
 ) -> HireNotice | None:
     """One notice per application, however many times the event arrives."""
     if session.scalar(select(HireNotice.id).where(HireNotice.application_id == application_id)):
@@ -600,6 +606,8 @@ def record_hire(
         tenant_id=tenant_id,
         application_id=application_id,
         job_id=job_id,
+        candidate_id=candidate_id,
+        person_id=person_id,
         source_event_id=event_id,
     )
     session.add(notice)
@@ -607,14 +615,35 @@ def record_hire(
     return notice
 
 
+def employee_of_person(session: Session, person_id: UUID) -> Employee | None:
+    return session.scalar(select(Employee).where(Employee.person_id == person_id))
+
+
 def convert_hire_notice(
-    session: Session, tenant_id: UUID, notice_id: UUID, employee_id: UUID, data: NewEngagement
+    session: Session,
+    tenant_id: UUID,
+    notice_id: UUID,
+    employee_id: UUID | None,
+    data: NewEngagement,
 ) -> Engagement:
+    """The employee is named by HR, or found from the hired person when one already exists."""
     notice = session.get(HireNotice, notice_id, with_for_update=True)
     if notice is None:
         raise NotFound("Hire notice not found")
     if notice.status != "awaiting_terms":
         raise Conflict("This hire notice already has an engagement")
+    if employee_id is None:
+        employee = notice.person_id and employee_of_person(session, notice.person_id)
+        if not employee:
+            raise Conflict(
+                "There is no employee record for the hired person yet. Create it first, "
+                "or give the employee id"
+            )
+        employee_id = employee.id
+    else:
+        known = session.get(Employee, employee_id)
+        if known is not None and notice.person_id and known.person_id != notice.person_id:
+            raise Conflict("That employee is a different person from the one who was hired")
     data.source_event_id = data.source_event_id or f"hire_notice:{notice.id}"
     engagement, _ = create_engagement(session, tenant_id, employee_id, data)
     notice.status = "converted"

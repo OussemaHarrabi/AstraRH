@@ -336,7 +336,7 @@ Models live in `events.py`, named `<pack>.<entity>.<verb>.v1`. **Payloads carry 
 | `finance.payroll.closed.v1` | run_id | reporting |
 | `finance.forecast.published.v1` | org_unit_id, month, delta | dashboard |
 
-**Consumed:** `talent.candidate.hired.v1` **[kernel: not emitted yet; fallback is `talent.application.stage_changed.v1` with `to_stage` = hired]**, `trust.action.executed.v1`, `workforce.leave.approved.v1`, `journey.skill_gap.confirmed.v1`, `journey.training.completed.v1`.
+**Consumed:** `talent.candidate.hired.v1` (built: it becomes a hire notice), `trust.action.executed.v1`, `workforce.leave.approved.v1`, `journey.skill_gap.confirmed.v1`, `journey.training.completed.v1`.
 
 **Handling rules for every consumer:** write keyed by the event id under a unique constraint, so a duplicate changes nothing. A write that depends on a missing parent raises so the bus retries with backoff and finally dead-letters with a finance task. Payload hashes are compared on replay.
 
@@ -408,7 +408,7 @@ Test data is fictional and uses the shared Carthage Demo Systems world. Worked e
 
 | Item | Note |
 |---|---|
-| **[kernel]** Hire event not emitted | Fallback consumer on `stage_changed` |
+| Hire event | Built on `finance-v2` (talent action and event, finance hire notice), for the kernel owner to review |
 | **[kernel]** Bank adapter and status feed live outside the pack | Sandbox adapter proposed with the pack, owner decides placement |
 | **[kernel]** Executor cannot write finance tables | Worker consumer updates lines from execution results |
 | **[kernel]** `WORKER_QUEUES` needs a finance queue | Run calculation inline for demo size otherwise |

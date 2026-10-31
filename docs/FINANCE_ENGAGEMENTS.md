@@ -12,6 +12,7 @@ Reference for how an engagement is created, checked, documented, activated and a
 | `packages/packs/finance/engagements.py` | Create, validate, issues, documents, activation and amendment requests, hire notices |
 | `packages/packs/finance/handlers.py` | The effects of approved actions: `activate_engagement`, `amend_engagement` |
 | `packages/packs/finance/consumers.py` | The hire event consumer |
+| `packages/packs/talent/handlers.py`, `events.py`, `api.py`, `manifest.yaml` | The hire action, its event and its endpoint (section 7). Changed in the kernel owner's pack at the owner's request |
 | `packages/packs/finance/api.py` | The routes |
 | `packages/packs/finance/proposals.py` | Shared rule for asking again after a rejection or expiry |
 | `packages/packs/finance/migrations/versions/finance_0004_engagement_guards.py` | Row-level security for hire notices and the engagement and pay guards |
@@ -96,15 +97,33 @@ Both are **R2** actions: a person proposes, a person approves, the worker applie
 
 **Asking again.** A rejected, failed or expired request can be made again. An expired one is marked superseded. While one is open, a second request gets 409.
 
-## 7. Hire notices
+## 7. The hire flow, from talent to an engagement
 
-- The consumer `finance.record_hire` listens to `talent.application.stage_changed.v1` and, when `to_stage` is `hired`, records **one hire notice per application**, however many times the event arrives.
-- A notice is needed because the event carries only the application and job IDs. It has no employee, salary or start date, so finance cannot build an engagement from it.
-- `GET /hire-notices` lists notices (filter by `status`). `POST /hire-notices/{id}/engagement` completes one with the employee and the terms, creates the engagement linked to it and marks the notice `converted`. A second completion gives 409.
+```
+recruiter proposes ──▶ HR approves (R3) ──▶ talent moves the candidate to `hired`
+      ──▶ event talent.candidate.hired.v1 (IDs only) ──▶ finance records a hire notice
+      ──▶ HR completes the notice with the terms ──▶ a draft engagement
+```
 
-**Two limits, both kernel requests ([FINANCE_PAYMENT_DESIGN.md](FINANCE_PAYMENT_DESIGN.md) section 8):**
-- **K1:** nothing in `talent` moves a candidate to `hired` today, so no notice is created in practice. The notice flow is tested with a synthetic event.
-- **K7:** the worker must import `packs.finance.consumers` (a one-line change in `apps/worker/main.py`, as `talent` does) for the consumer to be registered. Until then the consumer is not active in a running system. A strict expected-failure test marks this and flips when it is done.
+**In talent** (added 2026-11-01 at the owner's request, in the kernel owner's pack, to be reviewed):
+- There was no way to hire. The stages were applied, shortlisted, interview and rejected, so nothing ever reached `hired`.
+- New action **`talent.application.hire`**, risk **R3** like rejecting: a second person must approve it, with a fresh password confirmation, and the requester cannot approve it. Approvers are `admin` and `hr`, so a recruiter can propose but not decide.
+- Only a **shortlisted or interviewed** candidate can be hired, checked when it is proposed and again when it runs. Any other stage makes the action fail and changes nothing. Hiring someone already hired does nothing and announces nothing twice.
+- On success the handler moves the application to `hired`, records the stage change, and publishes **`talent.candidate.hired.v1`** with the application, job, candidate and person IDs and nothing else (no name, e-mail or pay).
+- `POST /packs/talent/applications/{id}/hire` (reason of at least 3 characters) proposes it. It has its own decision record, so it does not depend on a ranking existing. A rejected or expired request can be asked again, and while one is open a second gets 409.
+
+**In finance:**
+- The consumer `finance.record_hire` listens to `talent.candidate.hired.v1` and records **one hire notice per application**, however many times the event arrives. A bare stage change to `hired` creates nothing.
+- The notice keeps the candidate and person IDs. It is needed because the event has no employee, salary or start date.
+- `GET /hire-notices` lists notices (filter by `status`). `POST /hire-notices/{id}/engagement` completes one: HR gives the terms and either names the employee or **leaves the employee out, and finance finds the one that belongs to the hired person**. It refuses with 409 when no employee record exists for that person yet, or when the named employee is a different person. A second completion gives 409.
+- The worker imports `packs.finance.consumers` (one line in `apps/worker/main.py`, the pattern `talent` uses), so the consumer is registered in a running system. A test checks both the import and the registration.
+
+**What is still missing:**
+- **Creating the employee.** Nothing in the platform creates an employee record from a hired person (the people routes are read-only). Until something does, the employee must already exist for a notice to be completed.
+- **Proposing over HTTP (K9).** The hire endpoint exists, but the API role cannot insert proposals yet, so a person cannot propose over HTTP. A strict expected-failure test covers it, and the tests propose through the worker.
+- **No offer stage.** Candidates go from interview straight to hired. An offer step and its terms are not modelled.
+
+**A separate bug found and fixed on the way (K13).** The API process has no agent libraries by design, but `talent/api.py` imported `communications`, which imported `langgraph` at module level. So **on the kernel owner's current `main`, the whole talent pack failed to load in the running API**: jobs, CVs, rankings and the hire endpoint were all missing, with only a log line to show for it. The tests did not notice because they run in an image that has `langgraph`. The import now happens inside the three functions that need it, and a new test loads every pack's API module with those libraries blocked (it fails without the fix, with the original error).
 
 ## 8. What the database enforces
 
@@ -130,4 +149,4 @@ These hold even if application code has a bug (migration `finance_0004`, tested 
 | Minimum-wage check on pay changes | The value is not decided (open question in the use cases) |
 | AI extraction of contract fields (A7) | AI is paused (decision D14). A person enters and verifies documents by hand |
 | CIVP placement records | Phase 6 |
-| Proposing over HTTP (`POST .../activate`, `POST .../amendments`) | Blocked by kernel request K9. The routes exist and are covered by strict expected-failure tests. The service functions work, and the tests propose through the worker |
+| Proposing over HTTP (`POST .../activate`, `POST .../amendments`, and talent's `POST .../hire`) | Blocked by kernel request K9. The routes exist and are covered by strict expected-failure tests. The service functions work, and the tests propose through the worker |

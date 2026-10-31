@@ -39,6 +39,13 @@ actions:
     approver_roles: [admin, hr]
     view_roles: [admin, hr, recruiter, auditor]
     description: Reject a candidate. Needs a second person and password confirmation.
+  - id: talent.application.hire
+    risk: R3
+    channel: internal
+    handler: packs.talent.handlers:hire_candidate
+    approver_roles: [admin, hr]
+    view_roles: [admin, hr, recruiter, auditor]
+    description: Hire a shortlisted or interviewed candidate. Needs a second person and password confirmation.
 
 agents:
   - id: rubric_builder
@@ -79,3 +86,4 @@ publishes:
   - talent.ranking.requested.v1
   - talent.ranking.completed.v1
   - talent.application.stage_changed.v1
+  - talent.candidate.hired.v1
