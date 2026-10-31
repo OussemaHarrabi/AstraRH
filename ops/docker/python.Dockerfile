@@ -36,6 +36,7 @@ TextEmbedding(model_name='sentence-transformers/paraphrase-multilingual-MiniLM-L
 COPY apps ./apps
 COPY packages ./packages
 COPY data ./data
+COPY seed ./seed
 
 RUN useradd --uid 10001 --no-create-home --shell /usr/sbin/nologin astra
 USER astra
