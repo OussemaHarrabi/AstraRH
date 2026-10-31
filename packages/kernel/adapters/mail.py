@@ -8,10 +8,12 @@ from typing import Any
 import httpx
 
 from kernel.canonical import sha256_hex
+from kernel.schedule import ics
 from kernel.trust import AdapterRejected
 
 DEFAULT_ALLOWED_DOMAINS = "example.test,mail.example.test,cds.example.test"
-SENDER = "AstraRH <no-reply@cds.example.test>"
+SENDER_ADDRESS = "no-reply@cds.example.test"
+SENDER = f"AstraRH <{SENDER_ADDRESS}>"
 SMTP_TIMEOUT_SECONDS = 10
 
 
@@ -23,7 +25,8 @@ def _allowed_domains() -> set[str]:
     return set(os.environ.get("MAIL_ALLOWED_DOMAINS", DEFAULT_ALLOWED_DOMAINS).split(","))
 
 
-def send(payload: dict[str, Any], key: str) -> str:
+def build(payload: dict[str, Any], key: str) -> EmailMessage:
+    """Check the payload and build the message. No network, so it can be tested on its own."""
     recipient = str(payload.get("to", ""))
     domain = recipient.rsplit("@", 1)[-1].lower()
     if "@" not in recipient or domain not in _allowed_domains():
@@ -37,6 +40,24 @@ def send(payload: dict[str, Any], key: str) -> str:
     message["Subject"] = payload["subject"]
     message["Message-ID"] = message_id(key)
     message.set_content(payload["body"])
+    if payload.get("invite"):
+        try:
+            calendar = ics.render(payload["invite"], SENDER_ADDRESS)
+        except ValueError as exc:  # pydantic's ValidationError is a ValueError
+            raise AdapterRejected(f"The calendar invite is invalid: {exc}") from exc
+        if recipient not in payload["invite"]["attendees"]:
+            raise AdapterRejected("The invite must list the person it is sent to")
+        message.add_attachment(
+            calendar,
+            subtype="calendar",
+            filename="invite.ics",
+            params={"method": payload["invite"]["method"]},
+        )
+    return message
+
+
+def send(payload: dict[str, Any], key: str) -> str:
+    message = build(payload, key)
     with smtplib.SMTP(
         os.environ["SMTP_HOST"], int(os.environ["SMTP_PORT"]), timeout=SMTP_TIMEOUT_SECONDS
     ) as client:

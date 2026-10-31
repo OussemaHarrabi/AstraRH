@@ -24,7 +24,12 @@ from kernel.explain import DecisionDraft, Evidence
 from kernel.identity.models import UserAccount
 from kernel.trust.models import Proposal
 from packs.talent.blind import BLIND_TOKEN
-from packs.talent.events import FollowupDue, InterviewBooked, InterviewRequested
+from packs.talent.events import (
+    FollowupDue,
+    InterviewBooked,
+    InterviewCancelled,
+    InterviewRequested,
+)
 from packs.talent.models import (
     Application,
     CandidateIdentity,
@@ -481,7 +486,7 @@ def book_interview(session: Session, tenant_id: UUID, payload: dict[str, Any], k
     if application.stage != "interview":
         application.stage = "interview"
     publish(session, tenant_id, InterviewBooked(interview_id=interview.id, booking_id=booking.id))
-    _propose_confirmation(session, tenant_id, interview, application, job, starts_at, key)
+    _propose_confirmation(session, tenant_id, interview, application, job, starts_at, ends_at)
     return f"booking:{booking.id}"
 
 
@@ -492,7 +497,7 @@ def _propose_confirmation(
     application: Application,
     job: Job,
     starts_at: datetime,
-    key: str,
+    ends_at: datetime,
 ) -> None:
     identity = session.scalar(
         select(CandidateIdentity).where(CandidateIdentity.candidate_id == application.candidate_id)
@@ -521,7 +526,10 @@ def _propose_confirmation(
             "subject": f"Interview confirmed: {job.title}",
             "body": (
                 f"Hello {first},\n\nYour interview for {job.title} is confirmed for {when} "
-                "(Tunis time).\n\nThe recruitment team"
+                "(Tunis time). The calendar invite is attached.\n\nThe recruitment team"
+            ),
+            "invite": invite_fields(
+                interview, job, identity.email, starts_at, ends_at, "REQUEST", sequence=0
             ),
         },
         f"Confirm the interview with {identity.name or 'the candidate'}",
@@ -537,3 +545,116 @@ def sweep_all_tenants(tenant_ids: list[UUID]) -> int:
         with tenant_session(tenant_id) as session:
             total += sweep_followups(session, tenant_id)
     return total
+
+
+def invite_uid(interview_id: UUID) -> str:
+    """One UID per interview, so a cancellation replaces the event in the candidate's calendar."""
+    return f"interview-{interview_id}@astrarh.example.test"
+
+
+def invite_fields(
+    interview: Interview,
+    job: Job,
+    candidate_email: str,
+    starts_at: datetime,
+    ends_at: datetime,
+    method: str,
+    sequence: int,
+) -> dict[str, Any]:
+    return {
+        "uid": invite_uid(interview.id),
+        "title": f"Interview: {job.title}",
+        "starts_at": starts_at.isoformat(),
+        "ends_at": ends_at.isoformat(),
+        "attendees": [candidate_email, *interview.participants],
+        "method": method,
+        "sequence": sequence,
+    }
+
+
+CANCELLABLE = {"requested", "slots_proposed", "no_slots", "slots_declined", "booked"}
+
+
+def cancel_interview(session: Session, tenant_id: UUID, payload: dict[str, Any], key: str) -> str:
+    """Effect of an approved cancellation. Frees the calendars and, if booked, tells the candidate.
+
+    With `reschedule`, a new interview request follows, so fresh times get offered.
+    """
+    interview = session.get(Interview, UUID(payload["interview_id"]), with_for_update=True)
+    if interview.status == "cancelled":
+        return f"interview:{interview.id}:already_cancelled"
+    if interview.status not in CANCELLABLE:
+        raise trust.AdapterRejected(f"An interview that is {interview.status} can't be cancelled")
+    application = session.get(Application, interview.application_id)
+    job = session.get(Job, application.job_id)
+    was_booked = interview.status == "booked" and interview.booking_id is not None
+    schedule.release(session, hold_owner(interview.id))
+    if was_booked:
+        schedule.cancel(session, interview.booking_id)
+    interview.status = "cancelled"
+    reason = str(payload.get("reason") or "").strip()
+    publish(session, tenant_id, InterviewCancelled(interview_id=interview.id, reason=reason))
+    if was_booked:
+        _propose_cancellation(session, tenant_id, interview, application, job, reason)
+    if payload.get("reschedule"):
+        replacement = request_interview(
+            session, tenant_id, application.id, list(interview.participants)
+        )
+        return f"interview:{interview.id}:rescheduled:{replacement.id}"
+    return f"interview:{interview.id}:cancelled"
+
+
+def _propose_cancellation(
+    session: Session,
+    tenant_id: UUID,
+    interview: Interview,
+    application: Application,
+    job: Job,
+    reason: str,
+) -> None:
+    identity = session.scalar(
+        select(CandidateIdentity).where(CandidateIdentity.candidate_id == application.candidate_id)
+    )
+    if not identity or not identity.email:
+        return
+    first = (identity.name or "").split(" ")[0] or "there"
+    when = interview.starts_at.astimezone(schedule.TIMEZONE).strftime("%A %d %B at %H:%M")
+    decision = explain.record(
+        session,
+        tenant_id,
+        DecisionDraft(
+            kind="talent.interview_cancellation",
+            question="Should this cancellation go out?",
+            subject={"interview_id": str(interview.id)},
+            outcome={"action": "cancel_interview"},
+            rationale="A person approved cancelling this interview.",
+            limits=[f"Reason given: {reason}"] if reason else [],
+        ),
+    )
+    trust.propose(
+        session,
+        tenant_id,
+        "kernel.email.send",
+        {
+            "to": identity.email,
+            "subject": f"Interview cancelled: {job.title}",
+            "body": (
+                f"Hello {first},\n\nWe have to cancel your interview for {job.title} on {when} "
+                "(Tunis time). We are sorry for the change and will be in touch about next "
+                "steps.\n\nThe recruitment team"
+            ),
+            "invite": invite_fields(
+                interview,
+                job,
+                identity.email,
+                interview.starts_at,
+                interview.ends_at,
+                "CANCEL",
+                sequence=1,
+            ),
+        },
+        f"Tell {identity.name or 'the candidate'} the interview is cancelled",
+        decision.id,
+        f"interview_cancel:{interview.id}",
+        target={"application_id": str(application.id), "job_id": str(job.id)},
+    )

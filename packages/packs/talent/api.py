@@ -63,6 +63,11 @@ class BookBody(BaseModel):
     ends_at: str
 
 
+class CancelBody(BaseModel):
+    reason: str = Field(min_length=1, max_length=500)
+    reschedule: bool = False
+
+
 class RejectBody(BaseModel):
     reason: str = Field(min_length=3)
 
@@ -434,6 +439,9 @@ def _interview_json(interview: Interview) -> dict[str, Any]:
         "slots": interview.slots,
         "participants": interview.participants,
         "starts_at": interview.starts_at.isoformat() if interview.starts_at else None,
+        "ends_at": interview.ends_at.isoformat() if interview.ends_at else None,
+        "booking_id": str(interview.booking_id) if interview.booking_id else None,
+        "created_at": interview.created_at.isoformat(),
     }
 
 
@@ -505,6 +513,61 @@ def propose_booking(interview_id: UUID, body: BookBody, request: Request) -> dic
             "Book the interview at the chosen time",
             decision.id,
             f"book:{interview_id}:{body.starts_at}",
+            requested_by=ctx.actor.user_id,
+            target={"application_id": str(interview.application_id)},
+        )
+        return {"proposal_id": str(proposal.id), "status": proposal.status}
+
+
+@router.get("/interviews/{interview_id}", summary="One interview, with its offered times")
+def get_interview(interview_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, READ_ROLES)
+        interview = ctx.session.get(Interview, interview_id)
+        if interview is None:
+            raise NotFound("Interview not found")
+        return _interview_json(interview)
+
+
+@router.post(
+    "/interviews/{interview_id}/cancel",
+    status_code=202,
+    summary="Propose cancelling, or rescheduling, an interview. A person approves it.",
+)
+def propose_cancel(interview_id: UUID, body: CancelBody, request: Request) -> dict[str, str]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, WRITE_ROLES)
+        session = ctx.session
+        interview = session.get(Interview, interview_id)
+        if interview is None:
+            raise NotFound("Interview not found")
+        if interview.status not in communications.CANCELLABLE:
+            raise Conflict(f"An interview that is {interview.status} can't be cancelled")
+        verb = "reschedule" if body.reschedule else "cancel"
+        decision = explain.record(
+            session,
+            ctx.actor.tenant_id,
+            DecisionDraft(
+                kind="talent.interview_cancel",
+                question=f"Should this interview be {verb}d?",
+                subject={"interview_id": str(interview_id)},
+                outcome={"action": verb},
+                rationale=body.reason,
+                limits=["If it was booked, the candidate gets a cancellation to approve too."],
+            ),
+        )
+        proposal = trust.propose(
+            session,
+            ctx.actor.tenant_id,
+            "talent.interview.cancel",
+            {
+                "interview_id": str(interview_id),
+                "reason": body.reason,
+                "reschedule": body.reschedule,
+            },
+            f"{verb.capitalize()} the interview",
+            decision.id,
+            f"cancel:{interview_id}",
             requested_by=ctx.actor.user_id,
             target={"application_id": str(interview.application_id)},
         )

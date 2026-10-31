@@ -32,7 +32,7 @@
 | P2 Kernel | **Done** |
 | P3 `platform-v0` | Web shell and seed **done**. Team tooling (`_example`, CI, prompts) moved to the end |
 | P4 Screening | **Done** |
-| P5 Communication | **In progress**: inbox, replies, follow-ups, booking built and tested. Slot holds, ICS and UI pass left |
+| P5 Communication | **In progress**: inbox, replies, follow-ups, booking, slot holds, invites and cancel/reschedule built and tested. Inbox listing API and UI pass left |
 | P6 Knowledge | **In progress**: cited answers, refusal and tickets built and tested. Ticket handling API and UI pass left |
 | P7 AstraGraph | Not started |
 | P8 Integration and proof | Not started |
@@ -121,6 +121,13 @@ Committed in small steps. Each step below is one commit.
    - Booking releases the interview's other held slots. If a person rejects the slots email, `talent.release_rejected_slots` (on `trust.proposal.rejected.v1`) frees the holds and sets the interview to `slots_declined`. Expired holds simply stop counting.
    - The slots proposal target now includes `interview_id`, and its explanation states when the hold expires.
    - **Verified:** ruff clean, `tests/test_communications.py` **46 passed**. New tests: held slots aren't offered to a second candidate, booking frees the other two, and rejecting the offer frees all three.
+6. **Calendar invites, cancelling and rescheduling** (2026-11-01).
+   - `kernel/schedule/ics.py` renders RFC 5545 invites (REQUEST or CANCEL). The proposal stores the invite as plain fields (uid, title, times, attendees, method, sequence), so the approval hash covers exactly what is sent; the `.ics` file is only rendered at send time. Strict patterns stop an address or UID from adding lines to the file.
+   - The mail adapter now has `build()` (checks plus message, no network) and `send()`. It attaches `invite.ics` as `text/calendar; method=...` and refuses an invite that doesn't list the recipient.
+   - The booking confirmation carries a REQUEST invite. One UID per interview (`interview-{id}@astrarh.example.test`), so a cancellation replaces the event in the candidate's calendar.
+   - New action `talent.interview.cancel` (R2, internal, approved by admin/hr/recruiter). It frees the holds and the booked seats, sets `calendar.booking.status` to cancelled (migration `656f9f6580d8`), and publishes `talent.interview.cancelled.v1`. If the interview was booked, it proposes a cancellation email with a CANCEL invite (sequence 1). With `reschedule: true` it opens a new interview request, so the scheduler offers fresh times.
+   - API: `GET /packs/talent/interviews/{id}`, and `POST /packs/talent/interviews/{id}/cancel` with `{reason, reschedule}`, which proposes the cancellation. Interview JSON now includes `ends_at`, `booking_id` and `created_at`.
+   - **Verified:** ruff clean, `tests/test_communications.py` **55 passed**. New tests: the invite is valid and folded, injection attempts are refused, the attachment goes only to listed attendees, cancelling frees the calendar and prepares a CANCEL invite, a repeat cancel does nothing, rescheduling opens a new request, and cancelling an unbooked interview sends nothing.
 
 ### Screening, web shell and two-layer ranking: 2026-10-31
 

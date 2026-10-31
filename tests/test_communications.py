@@ -595,6 +595,133 @@ def test_approved_booking_books_and_prepares_a_confirmation(tenant):
         )
     assert confirmation.status == "pending_approval"
     assert "confirmed" in confirmation.payload["body"]
+    invite = confirmation.payload["invite"]
+    assert invite["method"] == "REQUEST"
+    assert invite["attendees"] == [CANDIDATE, "nadia@x.test"]
+    assert invite["starts_at"] == start.isoformat()
+
+
+# ----- Calendar invites and cancelling -----
+
+INVITE = {
+    "uid": "interview-1@astrarh.example.test",
+    "title": "Interview: Backend Engineer, Tunis; on site",
+    "starts_at": "2026-11-10T09:00:00+00:00",
+    "ends_at": "2026-11-10T09:45:00+00:00",
+    "attendees": [CANDIDATE],
+    "method": "REQUEST",
+    "sequence": 0,
+}
+
+
+def test_invite_is_valid_icalendar():
+    from kernel.schedule import ics
+
+    text = ics.render(INVITE, "no-reply@cds.example.test", now=datetime(2026, 11, 1, tzinfo=UTC))
+    assert text.endswith("\r\n") and "\n" not in text.replace("\r\n", "")
+    lines = text.split("\r\n")
+    assert "METHOD:REQUEST" in lines and "DTSTART:20261110T090000Z" in lines
+    assert "SUMMARY:Interview: Backend Engineer\\, Tunis\\; on site" in lines
+    assert all(len(line.encode()) <= 75 for line in lines)
+    cancel = ics.render({**INVITE, "method": "CANCEL", "sequence": 1}, "x@cds.example.test")
+    assert "STATUS:CANCELLED" in cancel and "SEQUENCE:1" in cancel
+
+
+@pytest.mark.parametrize(
+    "bad",
+    [
+        {"attendees": ["ana@mail.example.test\r\nATTENDEE:mailto:evil@x.test"]},
+        {"uid": "x\r\nMETHOD:PUBLISH"},
+        {"method": "PUBLISH"},
+        {"ends_at": "2026-11-10T08:00:00+00:00"},
+    ],
+)
+def test_an_invite_cannot_smuggle_lines_or_be_inconsistent(bad):
+    from kernel.schedule import ics
+
+    with pytest.raises(ValueError):
+        ics.render({**INVITE, **bad}, "no-reply@cds.example.test")
+
+
+def test_mail_attaches_the_invite_only_for_its_attendees():
+    from kernel.adapters import mail
+
+    payload = {"to": CANDIDATE, "subject": "Interview", "body": "See you", "invite": INVITE}
+    message = mail.build(payload, "key")
+    attachment = next(message.iter_attachments())
+    assert attachment.get_content_type() == "text/calendar"
+    assert attachment.get_param("method") == "REQUEST"
+    assert "UID:interview-1@astrarh.example.test" in attachment.get_content()
+    with pytest.raises(trust.AdapterRejected, match="list the person"):
+        mail.build({**payload, "to": OTHER}, "key")
+    with pytest.raises(trust.AdapterRejected, match="invite is invalid"):
+        mail.build({**payload, "invite": {**INVITE, "method": "PUBLISH"}}, "key")
+
+
+def booked(tenant):
+    interview = offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
+    with tenant_session(tenant) as session:
+        talent_comms.book_interview(
+            session, tenant, {"interview_id": str(interview.id), **interview.slots[0]}, "key"
+        )
+        return session.get(Interview, interview.id)
+
+
+def test_cancelling_frees_the_calendar_and_prepares_a_cancel_invite(tenant):
+    interview = booked(tenant)
+    with tenant_session(tenant) as session:
+        reference = talent_comms.cancel_interview(
+            session, tenant, {"interview_id": str(interview.id), "reason": "Panel ill"}, "key"
+        )
+    assert reference.endswith(":cancelled")
+    with tenant_session(tenant) as session:
+        assert session.get(Interview, interview.id).status == "cancelled"
+        booking = session.get(Booking, interview.booking_id)
+        assert booking.status == "cancelled" and booking.cancelled_at is not None
+        assert session.scalars(select(BookingSeat)).all() == []
+        notice = session.scalar(
+            select(Proposal).where(Proposal.idempotency_key == f"interview_cancel:{interview.id}")
+        )
+    assert notice.payload["invite"]["method"] == "CANCEL"
+    assert notice.payload["invite"]["uid"] == talent_comms.invite_uid(interview.id)
+    assert notice.payload["invite"]["sequence"] == 1
+    with tenant_session(tenant) as session:
+        again = talent_comms.cancel_interview(
+            session, tenant, {"interview_id": str(interview.id), "reason": "x"}, "key"
+        )
+    assert again.endswith("already_cancelled")
+
+
+def test_rescheduling_opens_a_new_request_and_frees_the_old_time(tenant):
+    interview = booked(tenant)
+    with tenant_session(tenant) as session:
+        reference = talent_comms.cancel_interview(
+            session,
+            tenant,
+            {"interview_id": str(interview.id), "reason": "Clash", "reschedule": True},
+            "key",
+        )
+    assert ":rescheduled:" in reference
+    with tenant_session(tenant) as session:
+        interviews = session.scalars(
+            select(Interview).where(Interview.application_id == interview.application_id)
+        ).all()
+    assert sorted(i.status for i in interviews) == ["cancelled", "requested"]
+
+
+def test_an_unbooked_interview_cancels_without_telling_the_candidate(tenant):
+    interview = offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
+    with tenant_session(tenant) as session:
+        talent_comms.cancel_interview(
+            session, tenant, {"interview_id": str(interview.id), "reason": "Role closed"}, "key"
+        )
+        assert session.scalars(select(Hold)).all() == []
+        assert (
+            session.scalar(
+                select(Proposal).where(Proposal.idempotency_key.like("interview_cancel:%"))
+            )
+            is None
+        )
 
 
 # ----- Employee questions -----
