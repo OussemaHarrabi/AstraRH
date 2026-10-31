@@ -16,7 +16,9 @@ What the finance pack will do, grouped as features, with the use cases each one 
 
 Status of every feature is `planned` unless noted below. Update this table as work lands.
 
-**Progress:** FT-10 and FT-42 are partly done (calculation core and demo rule set, tested, see [FINANCE_RULES.md](FINANCE_RULES.md)). The calculator API, rule storage and rule tests through the API are still to do. FT-43 is done for the calculation (hand-checked cases). Everything else is planned.
+**Progress (tables):** the data model for S1 to S3 is built, with security rules and 16 database tests (FT-58 and the integrity parts of FT-57, FT-59, FT-61 and FT-62 are partly in place at the database level). See [FINANCE_SYSTEM_DESIGN.md](FINANCE_SYSTEM_DESIGN.md) section 4.1.
+
+**Progress (calculation):** FT-10 and FT-42 are partly done (calculation core and demo rule set, tested, see [FINANCE_RULES.md](FINANCE_RULES.md)). The calculator API, rule storage and rule tests through the API are still to do. FT-43 is done for the calculation (hand-checked cases). Everything else is planned.
 
 ### Engagements
 
