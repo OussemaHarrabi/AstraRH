@@ -1,0 +1,41 @@
+{
+  "id": "tn-private-2026-demo-v1",
+  "version": 1,
+  "jurisdiction": "TN",
+  "valid_from": "2026-01-01",
+  "valid_to": null,
+  "is_demo": true,
+  "source_ref": "UNVERIFIED demo values from secondary sources, see docs/FINANCE_PLAN.md section 8.1. Check against the official CNSS, Finance Law 2026 and ANETI texts before real use.",
+  "rounding_places": 3,
+  "contributions": {
+    "cnss_employee_rate": "0.0968",
+    "cnss_employer_rate": "0.1707",
+    "cnss_monthly_ceiling": null
+  },
+  "professional_expenses": {
+    "rate": "0.10",
+    "cap_annual": "2000"
+  },
+  "family": {
+    "head_of_family": "300",
+    "child": "100",
+    "student_child": "1000",
+    "disabled_child": "1200",
+    "max_children": 4
+  },
+  "irpp_brackets": [
+    { "up_to": "5000", "rate": "0" },
+    { "up_to": "10000", "rate": "0.15" },
+    { "up_to": "20000", "rate": "0.25" },
+    { "up_to": "30000", "rate": "0.30" },
+    { "up_to": "40000", "rate": "0.33" },
+    { "up_to": "50000", "rate": "0.36" },
+    { "up_to": "70000", "rate": "0.38" },
+    { "up_to": null, "rate": "0.40" }
+  ],
+  "css": {
+    "rate": "0.005",
+    "exempt_up_to": "5000"
+  },
+  "employer_charges": []
+}
