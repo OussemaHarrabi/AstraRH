@@ -6,9 +6,9 @@
 
 **If you are resuming after a context reset, read in this order:** this section → `docs/PLAN.md` (the approved plan, full detail) → `docs/ARCHITECTURE.md` → `docs/SETUP.md`.
 
-- **Current phase:** Screening (P3 lean + P4) complete, committed and pushed. Next is **P5: the rest of the brief**.
+- **Current phase:** P5 Communication and P6 Knowledge, backend first. Built, tested and committed in small steps (see the P5/P6 log). **Next: fill the remaining backend APIs the UI needs** (slot holds, ICS invites, ticket handling, inbox listing), then one browser pass.
 - **Priority, set by Oussema on 2026-10-31:** ship the hackathon brief's six axes deep and solid first. Teammates' services and team tooling wait until that is done. Ship fast, and test in one final pass rather than retesting at each step.
-- **Exact next action: build `comms` and `calendar`, then the talent flows on them:**
+- **Original P5/P6 plan.** Steps 1 to 3 and 5 are built (see the log); step 4 still lacks slot holds and ICS:
   1. **Inbox and digest** (`packages/kernel/comms/`, schema `comms`): thread, message, classification, digest, digest_item, template. Fictional email seed (about 40) in `data/demo/emails.json` covering applications, reschedules, salary, visa, legal threats and spam, linked to demo candidates. LangGraph agent: classify each message through `ctx.read_untrusted` (type, urgency, needs-human with reason), then a daily digest grouped by type and urgency. Web page `/inbox`.
   2. **Replies** (`packs/talent`): a LangGraph drafter that receives only that candidate's file and validated facts, never another candidate's. Proposes `kernel.email.send` (R2) with a DecisionRecord. Web: edit and approve in `/approvals`, with a proper email form instead of JSON. Test cross-candidate leakage.
   3. **Follow-ups:** durable timers on the `default` queue (`kernel/jobs.py`), cadence limits, stop on reply, reject or hire. Proposes reminders (R2).
@@ -32,8 +32,8 @@
 | P2 Kernel | **Done** |
 | P3 `platform-v0` | Web shell and seed **done**. Team tooling (`_example`, CI, prompts) moved to the end |
 | P4 Screening | **Done** |
-| P5 Communication | **Next** |
-| P6 Knowledge | Not started |
+| P5 Communication | **In progress**: inbox, replies, follow-ups, booking built and tested. Slot holds, ICS and UI pass left |
+| P6 Knowledge | **In progress**: cited answers, refusal and tickets built and tested. Ticket handling API and UI pass left |
 | P7 AstraGraph | Not started |
 | P8 Integration and proof | Not started |
 
@@ -112,6 +112,10 @@ Committed in small steps. Each step below is one commit.
    - API: `POST /packs/talent/applications/{id}/interviews` (request slots), `GET /packs/talent/jobs/{id}/interviews`, `POST /packs/talent/interviews/{id}/book`, `POST /packs/talent/followups/check`.
    - `astra.py seed` now also loads policies and emails. `astra.py evals` runs both evals.
    - **Verified:** `astra.py check tests/test_communications.py` ruff clean, **43 passed**. Real Haiku evals (`docs/evals/communications.json`): inbox type 18/20, needs-a-person caught 8/8 with 0/12 false alarms; policy answers 8/8 from the right document, 6/6 correctly passed to a person, 0 restricted-document leaks. Screening re-run unchanged: NDCG@10 1.0, hard set 0.9994, 42/42 replayed, 170/170 quotes found in source, $0.017 a run.
+4. **First-pass web pages for inbox, policy questions, interview slots and email approval** (written in the lost session).
+   - `/inbox` (digest and thread view), `/ask` (policy questions with citations), interview slot request and booking on the job page, and an email form (subject and body) in `/approvals` instead of raw JSON. Editing creates a new version, so the old approval no longer applies.
+   - **Verified:** `tsc --noEmit` clean for `src/`. ESLint flags one `set-state-in-effect` on the job page, already present in the P4 commit.
+   - **Not verified yet:** a browser run. Backend APIs come first (Oussema, 2026-10-31); the UI gets a full pass later.
 
 ### Screening, web shell and two-layer ranking: 2026-10-31
 

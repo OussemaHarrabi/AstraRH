@@ -103,6 +103,7 @@ export function Shell({ children }: { children: ReactNode }) {
               badge={pending}
               active={pathname.startsWith("/approvals")}
             />
+            <NavLink href="/ask" label="Ask HR" active={pathname.startsWith("/ask")} />
             {canSeeAudit ? (
               <NavLink href="/audit" label="History" active={pathname.startsWith("/audit")} />
             ) : null}

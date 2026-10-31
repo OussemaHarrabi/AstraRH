@@ -188,3 +188,63 @@ export interface AuditRow {
   proposal_id: string | null;
   hash: string;
 }
+
+export interface DigestItem {
+  message_id: string;
+  thread_id: string;
+  sender: string;
+  subject: string;
+  summary: string;
+  urgency: string;
+  needs_human: boolean;
+  human_reason: string | null;
+  flagged: boolean;
+  sent_at: string;
+}
+
+export interface Digest {
+  day: string;
+  totals: { messages: number; needs_human: number; high_urgency: number; flagged: number };
+  groups: Record<string, DigestItem[]>;
+}
+
+export interface ThreadView {
+  id: string;
+  subject: string;
+  party_email: string;
+  pending_reply_ids: string[];
+  messages: {
+    id: string;
+    direction: string;
+    sender: string;
+    body: string;
+    sent_at: string;
+    needs_human: boolean | null;
+    human_reason: string | null;
+    flagged: boolean;
+  }[];
+}
+
+export interface AskedQuestion {
+  id: string;
+  text: string;
+  status: string;
+  answer: string | null;
+  refusal_reason: string | null;
+  citations: { ref: string; document: string; section: string; quote: string }[];
+}
+
+export interface HrTicket {
+  id: string;
+  reason: string;
+  question: string;
+  asked_at: string;
+}
+
+export interface Interview {
+  id: string;
+  application_id: string;
+  status: string;
+  slots: { starts_at: string; ends_at: string }[];
+  starts_at: string | null;
+}

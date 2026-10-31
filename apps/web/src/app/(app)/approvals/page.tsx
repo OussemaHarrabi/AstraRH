@@ -29,6 +29,89 @@ function useCandidateNames(proposal: Proposal): string[] | null {
   return names;
 }
 
+interface EmailPayload {
+  to: string;
+  subject: string;
+  body: string;
+}
+
+function isEmail(payload: Record<string, unknown>): boolean {
+  return typeof payload.to === "string" && typeof payload.body === "string";
+}
+
+function EmailReview({
+  proposal,
+  onSaved,
+  disabled,
+}: {
+  proposal: Proposal;
+  onSaved: () => void;
+  disabled: boolean;
+}) {
+  const payload = proposal.payload as unknown as EmailPayload;
+  const [editing, setEditing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function save(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    try {
+      await post(`/trust/proposals/${proposal.id}/edit`, {
+        payload: { ...proposal.payload, subject: form.get("subject"), body: form.get("body") },
+        reason: "Edited by a person before approval",
+      });
+      setEditing(false);
+      onSaved();
+    } catch (e) {
+      setError((e as ApiError).message);
+    }
+  }
+
+  if (editing) {
+    return (
+      <form onSubmit={save} className="mt-3 max-w-2xl space-y-2">
+        <ErrorNote message={error} />
+        <label className="block font-medium">
+          Subject
+          <input
+            name="subject"
+            required
+            defaultValue={payload.subject}
+            className="mt-1 block w-full rounded-md border border-line bg-surface px-3 py-2"
+          />
+        </label>
+        <label className="block font-medium">
+          Message
+          <textarea
+            name="body"
+            required
+            rows={8}
+            defaultValue={payload.body}
+            className="mt-1 block w-full rounded-md border border-line bg-surface px-3 py-2"
+          />
+        </label>
+        <div className="flex gap-2">
+          <Button type="submit">Save changes</Button>
+          <Button variant="secondary" onClick={() => setEditing(false)}>
+            Cancel
+          </Button>
+        </div>
+      </form>
+    );
+  }
+  return (
+    <div className="mt-3 max-w-2xl rounded-[var(--radius)] border border-line bg-surface p-4">
+      <p className="text-sm text-ink-soft">To {payload.to}</p>
+      <p className="font-semibold">{payload.subject}</p>
+      <p className="mt-2 whitespace-pre-wrap">{payload.body}</p>
+      {proposal.revision > 1 ? <p className="mt-2 text-sm text-ink-soft">Edited by a person.</p> : null}
+      <Button variant="quiet" className="mt-2 !px-0" onClick={() => setEditing(true)} disabled={disabled}>
+        Edit before sending
+      </Button>
+    </div>
+  );
+}
+
 function ProposalItem({ proposal, onChanged }: { proposal: Proposal; onChanged: () => void }) {
   const names = useCandidateNames(proposal);
   const [error, setError] = useState<string | null>(null);
@@ -90,6 +173,10 @@ function ProposalItem({ proposal, onChanged }: { proposal: Proposal; onChanged: 
         </div>
         <RiskTag risk={proposal.risk} />
       </div>
+
+      {isEmail(proposal.payload) ? (
+        <EmailReview proposal={proposal} onSaved={onChanged} disabled={busy} />
+      ) : null}
 
       {names ? (
         <ol className="mt-3 list-decimal pl-5">

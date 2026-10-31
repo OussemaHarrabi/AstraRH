@@ -6,6 +6,7 @@ import {
   type ApiError,
   type CvStatus,
   get,
+  type Interview,
   type JobDetail,
   post,
   type RankedCandidate,
@@ -43,13 +44,58 @@ function flagText(flags: string[]): string[] {
   return [...new Set(flags.map((flag) => FLAG_TEXT[flag]).filter(Boolean))];
 }
 
+function InterviewNote({ interview, onBooked }: { interview: Interview; onBooked: () => void }) {
+  const [message, setMessage] = useState<string | null>(null);
+  async function book(slot: { starts_at: string; ends_at: string }) {
+    try {
+      await post(`/packs/talent/interviews/${interview.id}/book`, slot);
+      setMessage("Booking sent to Approvals.");
+      onBooked();
+    } catch (e) {
+      setMessage((e as ApiError).message);
+    }
+  }
+  const format = (value: string) =>
+    new Date(value).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  if (interview.status === "booked" && interview.starts_at) {
+    return <p className="mt-2 font-medium text-olive">Interview booked: {format(interview.starts_at)}</p>;
+  }
+  if (interview.status === "no_slots") {
+    return <p className="mt-2 text-ochre">No shared free time in the next two weeks.</p>;
+  }
+  if (interview.status !== "slots_proposed") {
+    return <p className="mt-2 text-ink-soft">Looking for free times…</p>;
+  }
+  return (
+    <div className="mt-2">
+      <p className="text-ink-soft">Times offered. When the candidate replies, book their choice:</p>
+      <div className="mt-1 flex flex-wrap gap-2">
+        {interview.slots.map((slot) => (
+          <Button key={slot.starts_at} variant="secondary" onClick={() => book(slot)}>
+            {format(slot.starts_at)}
+          </Button>
+        ))}
+      </div>
+      {message ? <p role="status" className="mt-1">{message}</p> : null}
+    </div>
+  );
+}
+
 function CandidateRow({
   candidate,
+  interview,
   onWhy,
+  onChanged,
 }: {
   candidate: RankedCandidate;
+  interview?: Interview;
   onWhy: (candidate: RankedCandidate) => void;
+  onChanged: () => void;
 }) {
+  async function requestInterview() {
+    await post(`/packs/talent/applications/${candidate.application_id}/interviews`).catch(() => undefined);
+    onChanged();
+  }
   const warnings = flagText(candidate.flags);
   return (
     <li className="grid grid-cols-[2.5rem_1fr] gap-x-3 py-5 md:grid-cols-[3rem_1fr_7rem]">
@@ -69,6 +115,13 @@ function CandidateRow({
           <p className="mt-1 text-ochre">
             Must-have without proof: {candidate.missing_must_haves.join(", ")}
           </p>
+        ) : null}
+        {interview ? (
+          <InterviewNote interview={interview} onBooked={onChanged} />
+        ) : candidate.stage === "shortlisted" ? (
+          <Button variant="secondary" className="mt-2" onClick={requestInterview}>
+            Propose interview times
+          </Button>
         ) : null}
         {warnings.map((warning) => (
           <p key={warning} className="mt-1 font-medium text-brick">
@@ -100,13 +153,16 @@ export default function JobPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [why, setWhy] = useState<RankedCandidate | null>(null);
+  const [interviews, setInterviews] = useState<Interview[]>([]);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const refresh = useCallback(async () => {
-    const [nextCvs, nextList] = await Promise.all([
+    const [nextCvs, nextList, nextInterviews] = await Promise.all([
       get<CvStatus[]>(`/packs/talent/jobs/${id}/cvs`),
       get<Shortlist>(`/packs/talent/jobs/${id}/shortlist`),
+      get<Interview[]>(`/packs/talent/jobs/${id}/interviews`),
     ]);
+    setInterviews(nextInterviews);
     setCvs(nextCvs);
     setList(nextList);
   }, [id]);
@@ -123,11 +179,12 @@ export default function JobPage() {
   const quarantined = cvs.filter((cv) => cv.status === "quarantined");
   const rankingActive = list?.ranking?.status === "requested" || list?.ranking?.status === "running";
 
+  const interviewPending = interviews.some((i) => i.status === "requested");
   useEffect(() => {
-    if (!reading && !rankingActive) return;
+    if (!reading && !rankingActive && !interviewPending) return;
     const timer = setInterval(() => refresh().catch(() => undefined), POLL_MS);
     return () => clearInterval(timer);
-  }, [reading, rankingActive, refresh]);
+  }, [reading, rankingActive, interviewPending, refresh]);
 
   async function onFiles(event: ChangeEvent<HTMLInputElement>) {
     const files = event.target.files;
@@ -255,7 +312,13 @@ export default function JobPage() {
 
         <ul className={`mt-2 divide-y divide-line ${candidates.length ? "border-y border-line" : ""}`}>
           {candidates.map((candidate) => (
-            <CandidateRow key={candidate.application_id} candidate={candidate} onWhy={setWhy} />
+            <CandidateRow
+              key={candidate.application_id}
+              candidate={candidate}
+              interview={interviews.find((i) => i.application_id === candidate.application_id)}
+              onWhy={setWhy}
+              onChanged={() => refresh().catch(() => undefined)}
+            />
           ))}
         </ul>
 
