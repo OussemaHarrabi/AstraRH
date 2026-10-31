@@ -5,19 +5,29 @@ from decimal import Decimal
 from typing import Any, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
-from kernel.authz import require_role
+from kernel.authz import has_role, require_role
 from kernel.web import request_context
-from packs.finance import service
-from packs.finance.models import RuleSetRecord
+from packs.finance import engagements, service
+from packs.finance.models import (
+    DocumentRef,
+    Engagement,
+    HireNotice,
+    RuleSetRecord,
+    ValidationIssue,
+)
 from packs.finance.payroll import calc
 
 READ_ROLES = {"admin", "finance", "hr", "auditor"}
 WRITE_ROLES = {"admin", "finance"}
 MAX_SCENARIOS = 6
+ENGAGEMENT_READ = {"admin", "finance", "hr", "auditor"}
+ENGAGEMENT_WRITE = {"admin", "finance", "hr"}
+PAY_READ = {"admin", "finance", "auditor"}
+PAY_WRITE = {"admin", "finance"}
 
 router = APIRouter()
 
@@ -126,3 +136,334 @@ def activate_rule_set(record_id: UUID, request: Request) -> dict[str, str]:
             ctx.session, ctx.actor.tenant_id, ctx.actor, record_id
         )
         return {"proposal_id": str(proposal.id), "status": proposal.status}
+
+
+class PayItemBody(BaseModel):
+    code: str = Field(min_length=1, max_length=32)
+    amount: Decimal = Field(gt=0, max_digits=15, decimal_places=3)
+    valid_from: date
+    valid_to: date | None = None
+    frequency: Literal["monthly"] = "monthly"
+
+
+class EngagementBody(BaseModel):
+    type: Literal["CDI", "CDD", "CIVP"]
+    starts_on: date
+    ends_on: date | None = None
+    job_title: str = Field(min_length=1, max_length=200)
+    work_location: str | None = Field(default=None, max_length=128)
+    weekly_hours: Decimal | None = Field(default=None, gt=0, le=168, max_digits=5, decimal_places=2)
+    cdd_reason_code: str | None = Field(default=None, max_length=64)
+    head_of_family: bool = False
+    children: list[Literal["child", "student", "disabled"]] = Field(
+        default_factory=list, max_length=20
+    )
+    external_request_id: str | None = Field(default=None, max_length=128)
+    pay_items: list[PayItemBody] = Field(default_factory=list, max_length=20)
+
+
+class ConvertBody(EngagementBody):
+    employee_id: UUID
+
+
+class DocumentBody(BaseModel):
+    doc_type: str = Field(min_length=1, max_length=48)
+    note: str | None = Field(default=None, max_length=500)
+    file_key: str | None = Field(default=None, max_length=500)
+
+
+class DocumentReviewBody(BaseModel):
+    decision: Literal["verified", "rejected"]
+    note: str | None = Field(default=None, max_length=500)
+
+
+class ReasonBody(BaseModel):
+    reason: str = Field(min_length=3, max_length=1000)
+
+
+class AmendBody(BaseModel):
+    field: Literal["base_salary", "weekly_hours", "job_title", "work_location", "ends_on"]
+    new_value: str = Field(min_length=1, max_length=200)
+    effective_from: date
+    reason: str = Field(min_length=3, max_length=1000)
+
+
+def _new_engagement(body: EngagementBody) -> engagements.NewEngagement:
+    return engagements.NewEngagement(
+        type=body.type,
+        starts_on=body.starts_on,
+        ends_on=body.ends_on,
+        job_title=body.job_title.strip(),
+        work_location=body.work_location,
+        weekly_hours=body.weekly_hours,
+        cdd_reason_code=body.cdd_reason_code,
+        head_of_family=body.head_of_family,
+        children=list(body.children),
+        external_request_id=body.external_request_id,
+        pay_items=[
+            engagements.PayItemInput(i.code, i.amount, i.valid_from, i.valid_to, i.frequency)
+            for i in body.pay_items
+        ],
+    )
+
+
+def _engagement_json(session, row: Engagement, show_pay: bool) -> dict[str, Any]:
+    items = None
+    if show_pay:
+        items = [
+            {
+                "code": i.code,
+                "amount": format(i.amount, "f"),
+                "frequency": i.frequency,
+                "valid_from": i.valid_from.isoformat(),
+                "valid_to": i.valid_to.isoformat() if i.valid_to else None,
+            }
+            for i in engagements.pay_items_of(session, row.id)
+        ]
+    issues = engagements.open_issues(session, row.id)
+    return {
+        "id": str(row.id),
+        "employee_id": str(row.employee_id),
+        "type": row.type,
+        "status": row.status,
+        "starts_on": row.starts_on.isoformat(),
+        "ends_on": row.ends_on.isoformat() if row.ends_on else None,
+        "job_title": row.job_title,
+        "work_location": row.work_location,
+        "weekly_hours": None if row.weekly_hours is None else format(row.weekly_hours, "f"),
+        "cdd_reason_code": row.cdd_reason_code,
+        "head_of_family": row.head_of_family,
+        "children": row.children,
+        "open_issues": {
+            "blocking": sum(1 for i in issues if i.severity == "blocking"),
+            "review": sum(1 for i in issues if i.severity == "review"),
+        },
+        "pay_items": items,
+    }
+
+
+def _issue_json(row: ValidationIssue) -> dict[str, Any]:
+    return {
+        "id": str(row.id),
+        "code": row.code,
+        "severity": row.severity,
+        "field": row.field,
+        "message": row.message,
+        "next_action": row.next_action,
+        "owner_role": row.owner_role,
+        "status": row.status,
+        "resolution_reason": row.resolution_reason,
+    }
+
+
+def _document_json(row: DocumentRef) -> dict[str, Any]:
+    return {
+        "id": str(row.id),
+        "doc_type": row.doc_type,
+        "verification_status": row.verification_status,
+        "verified_at": row.verified_at.isoformat() if row.verified_at else None,
+        "note": row.note,
+    }
+
+
+@router.post(
+    "/employees/{employee_id}/engagements",
+    status_code=201,
+    summary="Create an engagement as a draft. The same request id returns the same engagement.",
+)
+def create_engagement(
+    employee_id: UUID, body: EngagementBody, request: Request, response: Response
+) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        if body.pay_items:
+            require_role(ctx.actor, PAY_WRITE)
+        row, created = engagements.create_engagement(
+            ctx.session, ctx.actor.tenant_id, employee_id, _new_engagement(body)
+        )
+        if not created:
+            response.status_code = 200
+        return _engagement_json(ctx.session, row, has_role(ctx.actor, PAY_READ))
+
+
+@router.get("/engagements", summary="Engagements. Pay amounts are shown only to finance roles.")
+def list_engagements(request: Request, employee_id: UUID | None = None) -> list[dict[str, Any]]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_READ)
+        query = select(Engagement).order_by(Engagement.created_at)
+        if employee_id:
+            query = query.where(Engagement.employee_id == employee_id)
+        show_pay = has_role(ctx.actor, PAY_READ)
+        return [_engagement_json(ctx.session, row, show_pay) for row in ctx.session.scalars(query)]
+
+
+@router.get("/engagements/{engagement_id}", summary="One engagement with its documents checklist")
+def get_engagement(engagement_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_READ)
+        row = engagements.get_engagement(ctx.session, engagement_id)
+        body = _engagement_json(ctx.session, row, has_role(ctx.actor, PAY_READ))
+        body["checklist"] = engagements.checklist(ctx.session, row)
+        return body
+
+
+@router.post("/engagements/{engagement_id}/pay-items", status_code=201, summary="Add a pay item")
+def add_pay_item(engagement_id: UUID, body: PayItemBody, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, PAY_WRITE)
+        row = engagements.get_engagement(ctx.session, engagement_id)
+        engagements.add_pay_item(
+            ctx.session,
+            ctx.actor.tenant_id,
+            row,
+            engagements.PayItemInput(
+                body.code, body.amount, body.valid_from, body.valid_to, body.frequency
+            ),
+        )
+        return _engagement_json(ctx.session, row, True)
+
+
+@router.post("/engagements/{engagement_id}/validate", summary="Run the checks again")
+def validate_engagement(engagement_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        row = engagements.get_engagement(ctx.session, engagement_id)
+        engagements.validate_engagement(ctx.session, ctx.actor.tenant_id, row)
+        return {
+            "status": row.status,
+            "issues": [_issue_json(i) for i in engagements.open_issues(ctx.session, row.id)],
+        }
+
+
+@router.get("/engagements/{engagement_id}/issues", summary="Every issue raised for an engagement")
+def list_issues(engagement_id: UUID, request: Request) -> list[dict[str, Any]]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_READ)
+        engagements.get_engagement(ctx.session, engagement_id)
+        rows = ctx.session.scalars(
+            select(ValidationIssue)
+            .where(
+                ValidationIssue.entity_type == "engagement",
+                ValidationIssue.entity_id == engagement_id,
+            )
+            .order_by(ValidationIssue.created_at)
+        )
+        return [_issue_json(row) for row in rows]
+
+
+@router.post("/issues/{issue_id}/resolve", summary="Decide a review item, with a reason")
+def resolve_issue(issue_id: UUID, body: ReasonBody, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        return _issue_json(engagements.resolve_issue(ctx.session, ctx.actor, issue_id, body.reason))
+
+
+@router.get("/engagements/{engagement_id}/documents", summary="Documents and the checklist")
+def list_documents(engagement_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_READ)
+        row = engagements.get_engagement(ctx.session, engagement_id)
+        documents = ctx.session.scalars(
+            select(DocumentRef)
+            .where(DocumentRef.engagement_id == engagement_id)
+            .order_by(DocumentRef.created_at)
+        )
+        return {
+            "checklist": engagements.checklist(ctx.session, row),
+            "documents": [_document_json(d) for d in documents],
+        }
+
+
+@router.post("/engagements/{engagement_id}/documents", status_code=201, summary="Record a document")
+def add_document(engagement_id: UUID, body: DocumentBody, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        row = engagements.get_engagement(ctx.session, engagement_id)
+        document = engagements.add_document(
+            ctx.session, ctx.actor.tenant_id, row, body.doc_type, body.note, body.file_key
+        )
+        return _document_json(document)
+
+
+@router.post("/documents/{document_id}/review", summary="Verify or reject a document")
+def review_document(
+    document_id: UUID, body: DocumentReviewBody, request: Request
+) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        document = engagements.review_document(
+            ctx.session, ctx.actor, document_id, body.decision, body.note
+        )
+        return _document_json(document)
+
+
+@router.post(
+    "/engagements/{engagement_id}/activate",
+    status_code=202,
+    summary="Propose activating a validated engagement. A person must approve it.",
+)
+def activate_engagement(engagement_id: UUID, request: Request) -> dict[str, str]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        proposal = engagements.request_activation(
+            ctx.session, ctx.actor.tenant_id, ctx.actor, engagement_id
+        )
+        return {"proposal_id": str(proposal.id), "status": proposal.status}
+
+
+@router.post(
+    "/engagements/{engagement_id}/amendments",
+    status_code=202,
+    summary="Propose a change from a date. A person must approve it.",
+)
+def amend_engagement(engagement_id: UUID, body: AmendBody, request: Request) -> dict[str, str]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        if body.field == "base_salary":
+            require_role(ctx.actor, PAY_WRITE)
+        proposal = engagements.request_amendment(
+            ctx.session,
+            ctx.actor.tenant_id,
+            ctx.actor,
+            engagement_id,
+            body.field,
+            body.new_value,
+            body.effective_from,
+            body.reason,
+        )
+        return {"proposal_id": str(proposal.id), "status": proposal.status}
+
+
+@router.get("/hire-notices", summary="Candidates who reached hired and still need their terms")
+def list_hire_notices(request: Request, status: str | None = None) -> list[dict[str, Any]]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_READ)
+        query = select(HireNotice).order_by(HireNotice.created_at)
+        if status:
+            query = query.where(HireNotice.status == status)
+        return [
+            {
+                "id": str(n.id),
+                "application_id": str(n.application_id),
+                "job_id": str(n.job_id),
+                "status": n.status,
+                "engagement_id": str(n.engagement_id) if n.engagement_id else None,
+            }
+            for n in ctx.session.scalars(query)
+        ]
+
+
+@router.post(
+    "/hire-notices/{notice_id}/engagement",
+    status_code=201,
+    summary="Complete a hire notice with the employee and the terms",
+)
+def convert_hire_notice(notice_id: UUID, body: ConvertBody, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        if body.pay_items:
+            require_role(ctx.actor, PAY_WRITE)
+        row = engagements.convert_hire_notice(
+            ctx.session, ctx.actor.tenant_id, notice_id, body.employee_id, _new_engagement(body)
+        )
+        return _engagement_json(ctx.session, row, has_role(ctx.actor, PAY_READ))

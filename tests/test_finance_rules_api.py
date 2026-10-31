@@ -429,7 +429,7 @@ def test_a_rejected_activation_can_be_requested_again(tenant):
     record_id = stored(tenant, definition(), status="draft")
     first = propose(tenant, requester, record_id)
     with as_role("worker"), tenant_session(tenant) as session:
-        with pytest.raises(Conflict, match="already has an activation request"):
+        with pytest.raises(Conflict, match="already has a request"):
             service.request_activation(session, tenant, requester.actor, record_id)
     with as_role("api"), tenant_session(tenant) as session:
         trust.reject(session, reviewer.actor, first.id, "Wrong start date")

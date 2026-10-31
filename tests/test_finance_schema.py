@@ -13,12 +13,12 @@ from uuid import UUID, uuid4
 
 import pytest
 from conftest import as_role
+from finance_helpers import make_employee
 from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from kernel.db import Base, tenant_session
 from kernel.events import catalogue
-from kernel.people.models import Employee, OrgUnit, Person, Position
 from kernel.registry import load_manifests
 from packs.finance import events as finance_events  # noqa: F401 - registers the events
 from packs.finance import models as m
@@ -27,29 +27,6 @@ ROOT = Path(__file__).resolve().parents[1]
 PACK = ROOT / "packages" / "packs" / "finance"
 SENSITIVE = {"gross", "net", "net_pay", "salary", "amount", "iban", "account", "name", "email"}
 MONTH = date(2026, 11, 1)
-
-
-def make_employee(tenant_id: UUID) -> UUID:
-    suffix = uuid4().hex[:8]
-    with as_role("owner"), tenant_session(tenant_id) as session:
-        person = Person(tenant_id=tenant_id, external_id=f"P-{suffix}", lifecycle="employee")
-        org = OrgUnit(tenant_id=tenant_id, external_id=f"O-{suffix}", name="Engineering")
-        position = Position(tenant_id=tenant_id, external_id=f"R-{suffix}", title="Engineer")
-        session.add_all([person, org, position])
-        session.flush()
-        employee = Employee(
-            tenant_id=tenant_id,
-            external_id=f"E-{suffix}",
-            person_id=person.id,
-            display_name="Test Employee",
-            email=f"{suffix}@example.test",
-            org_unit_id=org.id,
-            position_id=position.id,
-            start_date=date(2026, 1, 1),
-        )
-        session.add(employee)
-        session.flush()
-        return employee.id
 
 
 def make_engagement(tenant_id: UUID, employee_id: UUID) -> UUID:
@@ -468,7 +445,7 @@ def test_finance_foreign_keys_point_only_into_core_or_finance():
 
 def test_every_finance_table_has_a_tenant_and_row_level_security():
     names = {t.name for t in Base.metadata.tables.values() if t.schema == "finance"}
-    assert len(names) == 20
+    assert len(names) == 21
     with as_role("owner"), tenant_session(uuid4()) as session:
         enabled = {
             row[0]
@@ -584,3 +561,144 @@ def test_a_run_follows_the_allowed_path_and_only_the_worker_approves(tenant):
                 )
             )
             session.flush()
+
+
+def seed_engagement(tenant_id: UUID, employee_id: UUID, status: str) -> UUID:
+    """Only the owner role (seed and migrations) may create an engagement that is not a draft."""
+    with as_role("owner"), tenant_session(tenant_id) as session:
+        row = m.Engagement(
+            tenant_id=tenant_id,
+            employee_id=employee_id,
+            type="CDI",
+            status=status,
+            starts_on=MONTH,
+            job_title="Engineer",
+        )
+        session.add(row)
+        session.flush()
+        return row.id
+
+
+def set_engagement_status(tenant_id: UUID, role: str, engagement_id: UUID, status: str) -> None:
+    with as_role(role), tenant_session(tenant_id) as session:
+        session.execute(
+            text("UPDATE finance.engagement SET status = :s WHERE id = :i"),
+            {"s": status, "i": engagement_id},
+        )
+
+
+def test_a_new_engagement_must_be_a_draft_unless_the_owner_seeds_it(tenant):
+    employee = make_employee(tenant)
+    for role in ("api", "worker"):
+        with pytest.raises(DBAPIError, match="must be a draft"):
+            with as_role(role), tenant_session(tenant) as session:
+                session.add(
+                    m.Engagement(
+                        tenant_id=tenant,
+                        employee_id=employee,
+                        type="CDI",
+                        status="active",
+                        starts_on=MONTH,
+                        job_title="Engineer",
+                    )
+                )
+                session.flush()
+    seed_engagement(tenant, employee, "active")
+
+
+def test_only_an_approved_action_can_make_an_engagement_active(tenant):
+    employee = make_employee(tenant)
+    engagement = make_engagement(tenant, employee)
+    set_engagement_status(tenant, "api", engagement, "pending_review")
+    set_engagement_status(tenant, "api", engagement, "approved")
+    with pytest.raises(DBAPIError, match="Only an approved action"):
+        set_engagement_status(tenant, "api", engagement, "active")
+    set_engagement_status(tenant, "worker", engagement, "active")
+
+
+def test_an_engagement_follows_the_allowed_status_path(tenant):
+    employee = make_employee(tenant)
+    engagement = make_engagement(tenant, employee)
+    with pytest.raises(DBAPIError, match="cannot go from draft to active"):
+        set_engagement_status(tenant, "worker", engagement, "active")
+    with pytest.raises(DBAPIError, match="cannot go from draft to completed"):
+        set_engagement_status(tenant, "worker", engagement, "completed")
+    active = seed_engagement(tenant, employee, "active")
+    with pytest.raises(DBAPIError, match="cannot go from active to draft"):
+        set_engagement_status(tenant, "worker", active, "draft")
+    set_engagement_status(tenant, "worker", active, "terminated")
+
+
+def test_an_active_engagement_changes_only_through_the_worker(tenant):
+    active = seed_engagement(tenant, make_employee(tenant), "active")
+    with pytest.raises(DBAPIError, match="changes only through an approved action"):
+        with as_role("api"), tenant_session(tenant) as session:
+            session.execute(
+                text("UPDATE finance.engagement SET job_title = 'CEO' WHERE id = :i"), {"i": active}
+            )
+    with as_role("worker"), tenant_session(tenant) as session:
+        session.execute(
+            text("UPDATE finance.engagement SET job_title = 'Lead' WHERE id = :i"), {"i": active}
+        )
+
+
+def test_only_a_draft_engagement_can_be_deleted(tenant):
+    employee = make_employee(tenant)
+    active = seed_engagement(tenant, employee, "active")
+    with pytest.raises(DBAPIError, match="Only a draft engagement can be deleted"):
+        with as_role("worker"), tenant_session(tenant) as session:
+            session.execute(text("DELETE FROM finance.engagement WHERE id = :i"), {"i": active})
+    draft = make_engagement(tenant, employee)
+    with as_role("worker"), tenant_session(tenant) as session:
+        session.execute(text("DELETE FROM finance.engagement WHERE id = :i"), {"i": draft})
+
+
+def pay_item(tenant_id: UUID, engagement_id: UUID, code: str = "BASE_SALARY") -> m.PayItem:
+    return m.PayItem(
+        tenant_id=tenant_id,
+        engagement_id=engagement_id,
+        code=code,
+        amount=Decimal("2000.000"),
+        valid_from=MONTH,
+    )
+
+
+def test_pay_of_an_active_engagement_changes_only_through_the_worker(tenant):
+    employee = make_employee(tenant)
+    draft = make_engagement(tenant, employee)
+    with as_role("api"), tenant_session(tenant) as session:
+        session.add(pay_item(tenant, draft))
+
+    active = seed_engagement(tenant, employee, "active")
+    with as_role("owner"), tenant_session(tenant) as session:
+        session.add(pay_item(tenant, active))
+    for statement in (
+        "UPDATE finance.pay_item SET amount = 9999 WHERE engagement_id = :i",
+        "DELETE FROM finance.pay_item WHERE engagement_id = :i",
+    ):
+        with pytest.raises(DBAPIError, match="changes only through an approved action"):
+            with as_role("api"), tenant_session(tenant) as session:
+                session.execute(text(statement), {"i": active})
+    with pytest.raises(DBAPIError, match="changes only through an approved action"):
+        with as_role("api"), tenant_session(tenant) as session:
+            session.add(pay_item(tenant, active, "BONUS"))
+            session.flush()
+    with as_role("worker"), tenant_session(tenant) as session:
+        session.add(pay_item(tenant, active, "BONUS"))
+
+
+def test_a_pay_item_cannot_be_moved_onto_an_active_engagement(tenant):
+    employee = make_employee(tenant)
+    draft = make_engagement(tenant, employee)
+    active = seed_engagement(tenant, employee, "active")
+    with as_role("api"), tenant_session(tenant) as session:
+        item = pay_item(tenant, draft)
+        session.add(item)
+        session.flush()
+        item_id = item.id
+    with pytest.raises(DBAPIError, match="changes only through an approved action"):
+        with as_role("api"), tenant_session(tenant) as session:
+            session.execute(
+                text("UPDATE finance.pay_item SET engagement_id = :a WHERE id = :i"),
+                {"a": active, "i": item_id},
+            )

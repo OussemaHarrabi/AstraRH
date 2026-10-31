@@ -11,9 +11,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from kernel import explain, trust
-from kernel.db import utcnow
 from kernel.errors import Conflict, NotFound, ValidationFailed
 from kernel.identity import Actor
+from packs.finance import proposals
 from packs.finance.models import RuleSetRecord
 from packs.finance.payroll import calc, examples, rules
 
@@ -25,7 +25,6 @@ DEMO_NOTICE = (
 )
 UNCHANGED_KEYS = {"id", "version", "valid_from", "source_ref", "examples"}
 MAX_CHANGES = 40
-OPEN_PROPOSAL_STATUSES = {"pending_approval", "approved", "executing", "unknown", "blocked"}
 # Tunisia keeps UTC+1 all year (no daylight saving since 2009), so a fixed offset is exact.
 TUNIS = timezone(timedelta(hours=1), "Africa/Tunis")
 
@@ -202,32 +201,15 @@ def check_activatable(session: Session, record: RuleSetRecord) -> rules.RuleSet:
     return parsed
 
 
-def _next_attempt(session: Session, actor: Actor, record: RuleSetRecord) -> int:
-    """A rejected, failed or expired request can be made again. An open one cannot be doubled."""
-    prefix = f"{ACTIVATE_ACTION}:{record.id}:"
-    earlier = session.scalars(
-        select(trust.Proposal)
-        .where(trust.Proposal.idempotency_key.startswith(prefix, autoescape=True))
-        .order_by(trust.Proposal.created_at)
-    ).all()
-    for proposal in earlier:
-        if proposal.status == "pending_approval" and proposal.expires_at <= utcnow():
-            trust.supersede(session, proposal, str(actor.user_id), "Expired before approval")
-        elif proposal.status in OPEN_PROPOSAL_STATUSES:
-            raise Conflict(
-                f"Rule set {record.rule_id} already has an activation request "
-                f"that is {proposal.status.replace('_', ' ')}"
-            )
-    return len(earlier) + 1
-
-
 def request_activation(
     session: Session, tenant_id: UUID, actor: Actor, record_id: UUID
 ) -> trust.Proposal:
     """Propose activation (R3). Nothing changes until a different person approves it."""
     record = get_rule_set(session, record_id)
     parsed = check_activatable(session, record)
-    attempt = _next_attempt(session, actor, record)
+    attempt = proposals.next_attempt(
+        session, actor, f"{ACTIVATE_ACTION}:{record.id}:", f"Rule set {record.rule_id}"
+    )
     earlier = [r for r in active_rule_sets(session) if r.valid_from <= parsed.valid_from]
     previous_id, previous = None, None
     if earlier:

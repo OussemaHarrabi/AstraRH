@@ -416,3 +416,18 @@ class PaymentStatusEvent(TenantMixin, Base):
     amount_matches: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     reason_code: Mapped[str | None] = mapped_column(String(64))
     observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class HireNotice(TenantMixin, Base):
+    """A candidate reached 'hired'. HR completes it with the employee and the terms."""
+
+    __tablename__ = "hire_notice"
+    __table_args__ = (UniqueConstraint("tenant_id", "application_id"), SCHEMA)
+
+    application_id: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)
+    job_id: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="awaiting_terms")
+    engagement_id: Mapped[UUID | None] = mapped_column(
+        UUID_TYPE, ForeignKey("finance.engagement.id")
+    )
+    source_event_id: Mapped[str | None] = mapped_column(String(128))

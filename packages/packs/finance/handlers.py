@@ -8,9 +8,11 @@ from sqlalchemy.orm import Session
 
 from kernel.db import utcnow
 from kernel.errors import KernelError
+from kernel.events import publish
 from kernel.trust import AdapterRejected, Approval, Proposal
-from packs.finance import service
-from packs.finance.models import RuleSetRecord
+from packs.finance import engagements, service
+from packs.finance.events import EngagementActivated
+from packs.finance.models import Engagement, RuleSetRecord
 
 
 def _approver(session: Session, key: str) -> UUID | None:
@@ -47,3 +49,51 @@ def activate_rule_set(session: Session, tenant_id: UUID, payload: dict[str, Any]
     record.approved_by = _approver(session, key)
     record.approved_at = utcnow()
     return f"rule_set:{record.rule_id}:active"
+
+
+def _proposal(session: Session, key: str) -> Proposal:
+    proposal = session.scalar(select(Proposal).where(Proposal.idempotency_key == key))
+    if proposal is None:
+        raise AdapterRejected("The proposal behind this action cannot be found")
+    return proposal
+
+
+def activate_engagement(
+    session: Session, tenant_id: UUID, payload: dict[str, Any], key: str
+) -> str:
+    """Re-validates and re-hashes the terms when it runs, so an edit after approval is refused."""
+    row = session.get(Engagement, UUID(payload["engagement_id"]), with_for_update=True)
+    if row is None:
+        raise AdapterRejected("The engagement no longer exists")
+    if row.status != "approved":
+        raise AdapterRejected(f"The engagement is {row.status}, not approved")
+    if engagements.terms_hash(session, row) != payload["terms_hash"]:
+        raise AdapterRejected("The terms changed after they were approved")
+    engagements.validate_engagement(session, tenant_id, row)
+    if row.status != "approved":
+        raise AdapterRejected("The engagement no longer passes validation")
+    row.status = "active"
+    row.activated_by = _approver(session, key)
+    row.activated_at = utcnow()
+    publish(
+        session,
+        tenant_id,
+        EngagementActivated(
+            engagement_id=row.id,
+            employee_id=row.employee_id,
+            type=row.type,
+            starts_on=row.starts_on,
+        ),
+    )
+    return f"engagement:{row.id}:active"
+
+
+def amend_engagement(session: Session, tenant_id: UUID, payload: dict[str, Any], key: str) -> str:
+    proposal = _proposal(session, key)
+    try:
+        amendment = engagements.apply_amendment(
+            session, tenant_id, payload, proposal.requested_by, proposal.id
+        )
+    except KernelError as exc:
+        raise AdapterRejected(exc.message) from exc
+    return f"amendment:{amendment.id}"

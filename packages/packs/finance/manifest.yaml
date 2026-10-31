@@ -14,6 +14,20 @@ actions:
     approver_roles: [admin, finance]
     view_roles: [admin, finance, hr, auditor]
     description: Make a rule set the active payroll rules. Needs a second person and password confirmation.
+  - id: finance.engagement.activate
+    risk: R2
+    channel: internal
+    handler: packs.finance.handlers:activate_engagement
+    approver_roles: [admin, finance, hr]
+    view_roles: [admin, finance, hr, auditor]
+    description: Make a validated engagement active so it can be paid.
+  - id: finance.engagement.amend
+    risk: R2
+    channel: internal
+    handler: packs.finance.handlers:amend_engagement
+    approver_roles: [admin, finance, hr]
+    view_roles: [admin, finance, hr, auditor]
+    description: Change pay, hours, title, place or a fixed-term end date from a date, keeping the history.
 
 publishes:
   - finance.engagement.validated.v1

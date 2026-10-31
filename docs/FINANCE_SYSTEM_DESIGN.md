@@ -129,8 +129,8 @@ Migrations on the `finance` branch: `3e65e32a7d91` (20 tables) and `finance_0002
 
 | Built | Detail |
 |---|---|
-| 20 tables | `employer_profile`, `engagement`, `engagement_amendment`, `pay_item`, `document_ref`, `validation_issue`, `civp_placement`, `civp_ledger_entry`, `civp_training`, `civp_extension_request`, `rule_set`, `payroll_input_batch`, `payroll_input`, `payroll_run`, `payslip`, `payslip_line`, `adjustment`, `payment_batch`, `payment_line`, `payment_status_event` |
-| Row-level security | On all 20, enforced by the shared `enable_rls` policy. A test compares the database's own list with the models |
+| 21 tables | `employer_profile`, `engagement`, `engagement_amendment`, `pay_item`, `document_ref`, `validation_issue`, `civp_placement`, `civp_ledger_entry`, `civp_training`, `civp_extension_request`, `rule_set`, `payroll_input_batch`, `payroll_input`, `payroll_run`, `payslip`, `payslip_line`, `adjustment`, `payment_batch`, `payment_line`, `payment_status_event`, and `hire_notice` (added 2026-11-01, migration `d99850d16682`) |
+| Row-level security | On all 21, enforced by the shared `enable_rls` policy. A test compares the database's own list with the models |
 | Role permissions | The executor has no access to the schema. The API can only read payslips, payment batches, lines and bank statuses. Only the worker writes bank statuses, insert and read only |
 | Rule sets (`finance_0003`) | A new rule set must be a draft, except when inserted by the owner role (migrations and seed). Once active, its content never changes, for any role, owner included. Status moves only `draft → active → superseded`. Only drafts can be deleted. The service also refuses an active rule set whose content no longer matches its approved hash, so calculation stops instead of using tampered rules |
 | Runs (`finance_0003`) | A new run must be a draft (owner excepted). Status follows `draft ⇄ calculated → approval_pending → approved → payment_pending → paid → closed`, with `approval_pending → draft` for a rejection. Moving to `approved`, `payment_pending`, `paid` or `closed` is reserved to the worker, which applies approved actions |
@@ -312,6 +312,8 @@ Router `packs.finance.api` is mounted under `/packs/finance` through the manifes
 | `POST /rule-sets/{id}/activate` | admin, finance | Built, but **blocked over HTTP by kernel request K9** (the API role cannot create the proposal). Works when the proposal is created by the worker, which the tests do |
 
 Action `finance.rules.activate` (R3, internal) is declared in the manifest and registered in the action catalogue. Its handler re-checks everything when it runs.
+
+**Engagement routes (2026-11-01)**, details in [FINANCE_ENGAGEMENTS.md](FINANCE_ENGAGEMENTS.md): `POST /employees/{id}/engagements`, `GET /engagements`, `GET /engagements/{id}`, `POST /engagements/{id}/pay-items`, `POST /engagements/{id}/validate`, `GET /engagements/{id}/issues`, `POST /issues/{id}/resolve`, `GET` and `POST /engagements/{id}/documents`, `POST /documents/{id}/review`, `POST /engagements/{id}/activate` and `/amendments` (both blocked over HTTP by K9), `GET /hire-notices` and `POST /hire-notices/{id}/engagement`. Actions `finance.engagement.activate` and `finance.engagement.amend` (both R2, internal) are registered. The engagement and pay guards are in migration `finance_0004`.
 
 ## 9. Event catalogue (planned)
 
