@@ -33,7 +33,7 @@
 | P3 `platform-v0` | Web shell and seed **done**. Team tooling (`_example`, CI, prompts) moved to the end |
 | P4 Screening | **Done** |
 | P5 Communication | **In progress**: inbox, replies, follow-ups, booking, slot holds, invites and cancel/reschedule built and tested. Inbox listing API and UI pass left |
-| P6 Knowledge | **In progress**: cited answers, refusal and tickets built and tested. Ticket handling API and UI pass left |
+| P6 Knowledge | **In progress**: cited answers, refusal, ticket handling, answer feedback and policy versions built and tested. UI pass left |
 | P7 AstraGraph | Not started |
 | P8 Integration and proof | Not started |
 
@@ -128,6 +128,13 @@ Committed in small steps. Each step below is one commit.
    - New action `talent.interview.cancel` (R2, internal, approved by admin/hr/recruiter). It frees the holds and the booked seats, sets `calendar.booking.status` to cancelled (migration `656f9f6580d8`), and publishes `talent.interview.cancelled.v1`. If the interview was booked, it proposes a cancellation email with a CANCEL invite (sequence 1). With `reschedule: true` it opens a new interview request, so the scheduler offers fresh times.
    - API: `GET /packs/talent/interviews/{id}`, and `POST /packs/talent/interviews/{id}/cancel` with `{reason, reschedule}`, which proposes the cancellation. Interview JSON now includes `ends_at`, `booking_id` and `created_at`.
    - **Verified:** ruff clean, `tests/test_communications.py` **55 passed**. New tests: the invite is valid and folded, injection attempts are refused, the attachment goes only to listed attendees, cancelling frees the calendar and prepares a CANCEL invite, a repeat cancel does nothing, rescheduling opens a new request, and cancelling an unbooked interview sends nothing.
+7. **HR ticket handling, answer feedback and policy versions** (2026-11-01).
+   - Tickets now have a lifecycle: open → claimed (assignee) → answered or closed. Only the assignee can answer a claimed ticket. An HR answer goes back to the employee's question (`answered_by: hr`, no citations, since a person wrote it). Closing sets the question to closed. Each resolution publishes `knowledge.ticket.resolved.v1` and writes an audit entry (`kernel.ticket.answer`, `kernel.ticket.close`, both R1).
+   - Employees rate an answer (`kernel.question.feedback`, R0). Not helpful opens one ticket carrying their comment and the assistant's answer, so HR sees what went wrong.
+   - Policy versions: a document is `processing`, `active`, `superseded` or `failed`. Publishing a new version supersedes the old one and deactivates its passages, so search only ranks current text. A unique partial index (`one_active_version`) means the database allows one active version per policy. HR publishes markdown through the API; the worker indexes it on `knowledge.document.submitted.v1`, so the API still never calls a model or embedder.
+   - Migration `4d6882bacaaa`. Manifest adds `kernel.document.publish` (R1).
+   - API: `GET /knowledge/tickets?status=active|open|claimed|answered|closed|all&mine=`, `GET /knowledge/tickets/{id}`, `POST /knowledge/tickets/{id}/claim|release|answer|close`, `POST /knowledge/questions/{id}/feedback`, `GET /knowledge/stats` (HR), `GET /knowledge/documents` (readable to the caller only), `GET /knowledge/documents/{id}` (sections), `POST /knowledge/documents` (HR, 202).
+   - **Verified:** ruff clean. New `tests/test_knowledge_api.py` over real HTTP plus `tests/test_communications.py`: **63 passed**. Covers claim conflicts, HR-only queue, closing, one ticket per unhelpful answer, feedback only after an answer, new version replacing the old in search, the database refusing two active versions, and HR publishing with the worker indexing and role filtering the listing.
 
 ### Screening, web shell and two-layer ranking: 2026-10-31
 

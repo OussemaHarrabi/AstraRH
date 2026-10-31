@@ -32,6 +32,8 @@ def main() -> None:
                 item["title"],
                 (POLICIES / item["file"]).read_text(encoding="utf-8"),
                 item.get("audience_roles"),
+                str(item.get("version", "1")),
+                item.get("effective_date"),
             )
             added += 1
     print(f"Loaded {added} policy documents.")

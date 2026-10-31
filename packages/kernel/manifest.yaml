@@ -20,6 +20,18 @@ actions:
   - id: kernel.question.answer
     risk: R0
     description: Answer an employee's question from company documents, with citations.
+  - id: kernel.question.feedback
+    risk: R0
+    description: Record whether an answer helped, and pass it to HR if it didn't.
+  - id: kernel.ticket.answer
+    risk: R1
+    description: A person in HR answers a question the assistant passed on.
+  - id: kernel.ticket.close
+    risk: R1
+    description: A person in HR closes a passed-on question that needs no answer.
+  - id: kernel.document.publish
+    risk: R1
+    description: A person in HR publishes a policy document or a new version of one.
   - id: kernel.email.send
     risk: R2
     channel: external
