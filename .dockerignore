@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 docs
+.venv
 **/node_modules
 **/.next
 **/__pycache__

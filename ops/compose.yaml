@@ -28,6 +28,7 @@ services:
     command: ["python", "-m", "kernel.migrate", "up"]
     environment:
       DATABASE_URL: postgresql://astra_owner:${ASTRA_OWNER_PASSWORD}@postgres:5432/astra
+      DEMO_PASSWORD: ${DEMO_PASSWORD}
     networks: [data]
     depends_on:
       postgres: { condition: service_healthy }
@@ -75,6 +76,7 @@ services:
     environment:
       <<: *otel-env
       OTEL_SERVICE_NAME: astra-api
+      API_ROOT_PATH: /api
       DATABASE_URL: postgresql://astra_api:${ASTRA_API_PASSWORD}@postgres:5432/astra
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USER: neo4j

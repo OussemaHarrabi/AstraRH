@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """AstraRH task runner. Standard library only, same commands on Windows, macOS and Linux.
 
-    python astra.py init             create .env with generated secrets
-    python astra.py up [--secure]    build and start (--secure: no dev ports or live reload)
-    python astra.py down [--wipe]    stop (--wipe: also delete all local data)
-    python astra.py ps               show service status
-    python astra.py logs [service]   follow logs
-    python astra.py check [args]     lint and all tests (args pass to pytest)
-    python astra.py live             one real model call, to test your LLM key
-    python astra.py makemigration <kernel|pack> "message"
-    python astra.py graph-rebuild    rebuild Neo4j from the event log
-    python astra.py smoke            verify health, isolation, permissions and telemetry
+python astra.py init             create .env with generated secrets
+python astra.py up [--secure]    build and start (--secure: no dev ports or live reload)
+python astra.py down [--wipe]    stop (--wipe: also delete all local data)
+python astra.py ps               show service status
+python astra.py logs [service]   follow logs
+python astra.py check [args]     lint and all tests (args pass to pytest)
+python astra.py seed [--no-cvs]  load the demo company and CVs
+python astra.py evals            measure ranking quality with real models
+python astra.py export-api       write contracts/openapi.json
+python astra.py live             one real model call, to test your LLM key
+python astra.py makemigration <kernel|pack> "message"
+python astra.py graph-rebuild    rebuild Neo4j from the event log
+python astra.py smoke            verify health, isolation, permissions and telemetry
 """
 
 import argparse
@@ -101,11 +104,15 @@ def cmd_init(_: argparse.Namespace) -> int:
 
 def cmd_up(args: argparse.Namespace) -> int:
     require_env()
-    result = compose("up", "--build", "--detach", "--wait", "--wait-timeout", "420", secure=args.secure)
+    result = compose(
+        "up", "--build", "--detach", "--wait", "--wait-timeout", "420", secure=args.secure
+    )
     if result.returncode == 0:
         print(f"\nAstraRH: {EDGE_URL}\nGrafana: {GRAFANA_URL}")
         if not args.secure:
-            print("Mail:    http://127.0.0.1:8025\nNeo4j:   http://127.0.0.1:7474\nMinIO:   http://127.0.0.1:9001")
+            print(
+                "Mail:    http://127.0.0.1:8025\nNeo4j:   http://127.0.0.1:7474\nMinIO:   http://127.0.0.1:9001"
+            )
     return result.returncode
 
 
@@ -130,17 +137,81 @@ def cmd_logs(args: argparse.Namespace) -> int:
 def cmd_check(args: argparse.Namespace) -> int:
     require_env()
     run_tool = ("run", "--rm", "--build", "--no-deps", "tests")
-    failed = compose(*run_tool, "ruff", "check", "--no-cache", "apps", "packages", "tests").returncode
-    failed |= compose(*run_tool, "pytest", "-q", "-p", "no:cacheprovider", *args.pytest_args).returncode
+    failed = compose(
+        *run_tool, "ruff", "check", "--no-cache", "apps", "packages", "tests"
+    ).returncode
+    failed |= compose(
+        *run_tool, "pytest", "-q", "-p", "no:cacheprovider", *args.pytest_args
+    ).returncode
     return failed
+
+
+def cmd_seed(args: argparse.Namespace) -> int:
+    """Load the fictional company, then send the demo CVs through the real pipeline."""
+    require_env()
+    code = compose("run", "--rm", "--no-deps", "migrate", "python", "-m", "kernel.seed").returncode
+    if code or args.no_cvs:
+        return code
+    return compose("exec", "-T", "worker", "python", "-m", "packs.talent.load_demo").returncode
+
+
+def cmd_export_api(_: argparse.Namespace) -> int:
+    """Write the OpenAPI document that docs/API.md points to."""
+    require_env()
+    code = "import json; from apps.api.main import app; print(json.dumps(app.openapi(), indent=2))"
+    result = compose("exec", "-T", "api", "python", "-c", code, capture=True)
+    if result.returncode:
+        print(result.stderr)
+        return result.returncode
+    target = ROOT / "contracts" / "openapi.json"
+    target.parent.mkdir(exist_ok=True)
+    start = result.stdout.index("{")
+    target.write_text(result.stdout[start:], encoding="utf-8", newline="\n")
+    print(f"Wrote {target}")
+    return 0
+
+
+def cmd_evals(_: argparse.Namespace) -> int:
+    """Measure ranking quality on the labelled CVs, with the real model. Costs about a cent."""
+    require_env()
+    result = compose(
+        "run",
+        "--rm",
+        "--no-deps",
+        "tests",
+        "python",
+        "-m",
+        "packs.talent.evals.screening",
+        capture=True,
+    )
+    print(result.stdout)
+    if result.returncode:
+        print(result.stderr[-3000:])
+        return result.returncode
+    marker = "EVAL_RESULT_JSON:"
+    line = next(x for x in result.stdout.splitlines() if x.startswith(marker))
+    target = ROOT / "docs" / "evals" / "screening.json"
+    target.parent.mkdir(exist_ok=True)
+    report = json.dumps(json.loads(line[len(marker) :]), indent=2)
+    target.write_text(f"{report}\n", encoding="utf-8", newline="\n")
+    print(f"Saved {target}")
+    return 0
 
 
 def cmd_live(_: argparse.Namespace) -> int:
     """One real model call. Spends a fraction of a cent."""
     require_env()
     return compose(
-        "run", "--rm", "--no-deps", "-e", "RUN_LIVE=1", "tests",
-        "pytest", "-q", "-p", "no:cacheprovider",
+        "run",
+        "--rm",
+        "--no-deps",
+        "-e",
+        "RUN_LIVE=1",
+        "tests",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
         "tests/test_ai.py::test_live_haiku_returns_valid_structured_output",
     ).returncode
 
@@ -148,8 +219,16 @@ def cmd_live(_: argparse.Namespace) -> int:
 def cmd_makemigration(args: argparse.Namespace) -> int:
     require_env()
     return compose(
-        "run", "--rm", "--build", "migrate",
-        "python", "-m", "kernel.migrate", "new", args.scope, args.message,
+        "run",
+        "--rm",
+        "--build",
+        "migrate",
+        "python",
+        "-m",
+        "kernel.migrate",
+        "new",
+        args.scope,
+        args.message,
     ).returncode
 
 
@@ -203,8 +282,20 @@ def http_json(url: str, headers: dict | None = None) -> tuple[int, dict]:
 
 def postgres_allows(role: str, password: str, sql: str) -> bool:
     result = compose(
-        "exec", "-T", "-e", f"PGPASSWORD={password}", "postgres",
-        "psql", "-h", "127.0.0.1", "-U", role, "-d", "astra", "-tAc", sql,
+        "exec",
+        "-T",
+        "-e",
+        f"PGPASSWORD={password}",
+        "postgres",
+        "psql",
+        "-h",
+        "127.0.0.1",
+        "-U",
+        role,
+        "-d",
+        "astra",
+        "-tAc",
+        sql,
         capture=True,
     )
     return result.returncode == 0
@@ -262,7 +353,9 @@ def smoke_isolation(s: Smoke) -> None:
         s.check(f"{service} image has no LLM library", no_sdk.returncode != 0)
     has_sdk = service_python("worker", "import anthropic, langgraph")
     s.check("worker image has the LLM libraries", has_sdk.returncode == 0)
-    env_exposed = service_python("api", "import os,sys; sys.exit(0 if os.path.exists('/app/.env') else 1)")
+    env_exposed = service_python(
+        "api", "import os,sys; sys.exit(0 if os.path.exists('/app/.env') else 1)"
+    )
     s.check(".env is not inside containers", env_exposed.returncode != 0)
 
 
@@ -276,12 +369,17 @@ def smoke_database(s: Smoke) -> None:
     s.check("api cannot create tables", not postgres_allows("astra_api", api_pw, create))
     usage = "SELECT 1/has_schema_privilege('talent','USAGE')::int;"
     s.check("api can use the talent schema", postgres_allows("astra_api", api_pw, usage))
-    s.check("executor cannot use the talent schema", not postgres_allows("astra_executor", exec_pw, usage))
+    s.check(
+        "executor cannot use the talent schema",
+        not postgres_allows("astra_executor", exec_pw, usage),
+    )
     flags = (
         "SELECT 1/(count(*)=0)::int FROM pg_roles "
         "WHERE rolname LIKE 'astra_%' AND (rolsuper OR rolbypassrls);"
     )
-    s.check("no app role can bypass row-level security", postgres_allows("astra_owner", owner_pw, flags))
+    s.check(
+        "no app role can bypass row-level security", postgres_allows("astra_owner", owner_pw, flags)
+    )
     vector = "SELECT 1/count(*)::int FROM pg_extension WHERE extname='vector';"
     s.check("pgvector installed", postgres_allows("astra_owner", owner_pw, vector))
 
@@ -304,8 +402,18 @@ def smoke_telemetry(s: Smoke) -> None:
 def smoke_end_to_end(s: Smoke) -> None:
     print("\nEnd to end (real worker, executor, mailbox and graph)")
     result = compose(
-        "run", "--rm", "--no-deps", "--quiet-pull", "-e", "RUN_LIVE_STACK=1", "tests",
-        "pytest", "-q", "-p", "no:cacheprovider", "tests/test_live_stack.py",
+        "run",
+        "--rm",
+        "--no-deps",
+        "--quiet-pull",
+        "-e",
+        "RUN_LIVE_STACK=1",
+        "tests",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "tests/test_live_stack.py",
         capture=True,
     )
     s.check("approve, execute, send, audit and project", result.returncode == 0)
@@ -345,6 +453,11 @@ def main() -> int:
     check.add_argument("pytest_args", nargs="*")
     check.set_defaults(run=cmd_check)
     commands.add_parser("live").set_defaults(run=cmd_live)
+    seed = commands.add_parser("seed")
+    seed.add_argument("--no-cvs", action="store_true", help="skip uploading the demo CVs")
+    seed.set_defaults(run=cmd_seed)
+    commands.add_parser("export-api").set_defaults(run=cmd_export_api)
+    commands.add_parser("evals").set_defaults(run=cmd_evals)
     migration = commands.add_parser("makemigration")
     migration.add_argument("scope", help="kernel or a pack id")
     migration.add_argument("message")

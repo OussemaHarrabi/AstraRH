@@ -55,7 +55,7 @@ class ActionSpec(BaseModel):
 
 class AgentSpec(BaseModel):
     id: str
-    on: list[str]
+    events: list[str]
     entry: str
     description: str = ""
 
@@ -165,12 +165,12 @@ def install_graph_projections() -> None:
 
 def wire_agents() -> None:
     """Worker only. A broken pack's agents are skipped and reported."""
-    from kernel.ai import register_agent
+    from kernel.ai.runner import register_agent
 
     for manifest in active_packs():
         for agent in manifest.agents:
             try:
-                register_agent(agent.id, manifest.id, agent.entry, agent.on)
+                register_agent(agent.id, manifest.id, agent.entry, agent.events)
             except Exception as exc:  # noqa: BLE001 - one pack must not stop the platform
                 _load_errors[manifest.id] = f"{type(exc).__name__}: {exc}"
                 log.exception("Agent %s.%s failed to load", manifest.id, agent.id)

@@ -58,21 +58,20 @@ def _normalize(text: str) -> str:
 
 
 def _drop_fake_spans(value: object, source: str, removed: list[str]) -> object:
+    """Spans alone in a list are dropped. Spans inside another object are blanked, and the owner
+    (a skill claim, say) must then discard itself: it has lost its proof."""
+    if isinstance(value, EvidenceSpan):
+        if _normalize(value.quote) in source and value.quote.strip():
+            return value
+        removed.append(value.quote[:200])
+        return EvidenceSpan(quote="")
     if isinstance(value, BaseModel):
         for name in type(value).model_fields:
             setattr(value, name, _drop_fake_spans(getattr(value, name), source, removed))
         return value
     if isinstance(value, list):
-        kept = []
-        for item in value:
-            if isinstance(item, EvidenceSpan) and _normalize(item.quote) not in source:
-                removed.append(item.quote[:200])
-                continue
-            kept.append(_drop_fake_spans(item, source, removed))
-        return kept
-    if isinstance(value, EvidenceSpan) and _normalize(value.quote) not in source:
-        removed.append(value.quote[:200])
-        return EvidenceSpan(quote="")
+        kept = [_drop_fake_spans(item, source, removed) for item in value]
+        return [item for item in kept if not (isinstance(item, EvidenceSpan) and not item.quote)]
     return value
 
 
