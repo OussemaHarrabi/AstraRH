@@ -1,0 +1,9 @@
+.git
+.env
+.env.*
+!.env.example
+docs
+**/node_modules
+**/.next
+**/__pycache__
+**/.venv

@@ -1,0 +1,133 @@
+# Development overlay: live code reload, loopback tool ports and the test runner.
+# Mounts specific folders only, never the repo root, so .env stays out of containers.
+x-python-mounts: &python-mounts
+  - ./apps:/app/apps:ro
+  - ./packages:/app/packages:ro
+  - ./tests:/app/tests:ro
+  - ./pyproject.toml:/app/pyproject.toml:ro
+  - ./ops/compose.yaml:/app/ops/compose.yaml:ro
+
+services:
+  migrate:
+    image: astrarh-python:dev
+    build:
+      context: .
+      dockerfile: ops/docker/python.Dockerfile
+      args:
+        INSTALL_DEV: "1"
+    volumes:
+      # Writable: `astra.py makemigration` generates revision files here.
+      - ./packages:/app/packages
+      - ./apps:/app/apps:ro
+
+  # Runs as the API role by default. Tests switch roles to prove the database rules.
+  tests:
+    image: astrarh-worker:dev
+    profiles: [tools]
+    build:
+      context: .
+      dockerfile: ops/docker/python.Dockerfile
+      args:
+        EXTRA: worker
+        INSTALL_DEV: "1"
+    read_only: true
+    tmpfs: [/tmp]
+    command: ["pytest", "-q", "-p", "no:cacheprovider"]
+    environment:
+      DATABASE_URL: postgresql://astra_api:${ASTRA_API_PASSWORD}@postgres:5432/astra
+      TEST_API_URL: postgresql://astra_api:${ASTRA_API_PASSWORD}@postgres:5432/astra
+      TEST_WORKER_URL: postgresql://astra_worker:${ASTRA_WORKER_PASSWORD}@postgres:5432/astra
+      TEST_EXECUTOR_URL: postgresql://astra_executor:${ASTRA_EXECUTOR_PASSWORD}@postgres:5432/astra
+      TEST_OWNER_URL: postgresql://astra_owner:${ASTRA_OWNER_PASSWORD}@postgres:5432/astra
+      TEST_SUPERUSER_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/astra
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      SESSION_SECRET: test-session-secret-not-used-outside-tests
+      LLM_FAST_MODEL: ${LLM_FAST_MODEL}
+      LLM_STANDARD_MODEL: ${LLM_STANDARD_MODEL}
+      LLM_FALLBACK_MODEL: ${LLM_FALLBACK_MODEL}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ASTRA_ENV: dev
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+    volumes: *python-mounts
+    networks: [data, graph, mail, llm_egress]
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  caddy:
+    environment:
+      CSP_SCRIPT_EXTRA: "'unsafe-eval'"
+      CSP_CONNECT_EXTRA: "ws:"
+
+  web:
+    build:
+      target: development
+    image: astrarh-web:dev
+    read_only: false
+    environment:
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ./apps/web/src:/app/src:ro
+      - ./apps/web/public:/app/public:ro
+
+  api:
+    image: astrarh-python:dev
+    build:
+      context: .
+      dockerfile: ops/docker/python.Dockerfile
+      args:
+        INSTALL_DEV: "1"
+    volumes: *python-mounts
+    command: ["uvicorn", "apps.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*", "--reload", "--reload-dir", "apps", "--reload-dir", "packages"]
+    environment:
+      WATCHFILES_FORCE_POLLING: "true"
+
+  worker:
+    image: astrarh-worker:dev
+    build:
+      context: .
+      dockerfile: ops/docker/python.Dockerfile
+      args:
+        EXTRA: worker
+        INSTALL_DEV: "1"
+    volumes: *python-mounts
+
+  executor:
+    image: astrarh-python:dev
+    build:
+      context: .
+      dockerfile: ops/docker/python.Dockerfile
+      args:
+        INSTALL_DEV: "1"
+    volumes: *python-mounts
+
+  ml:
+    image: astrarh-ml:dev
+    build:
+      context: .
+      dockerfile: ops/docker/python.Dockerfile
+      args:
+        EXTRA: ml
+        INSTALL_DEV: "1"
+    volumes: *python-mounts
+
+  postgres:
+    ports: ["127.0.0.1:55432:5432"]
+    networks: [data, dev_tools]
+
+  neo4j:
+    ports: ["127.0.0.1:7474:7474", "127.0.0.1:7687:7687"]
+    networks: [graph, dev_tools]
+
+  minio:
+    ports: ["127.0.0.1:9001:9001"]
+    networks: [files, dev_tools]
+
+  mailpit:
+    ports: ["127.0.0.1:8025:8025"]
+    networks: [mail, dev_tools]
+
+networks:
+  dev_tools: {}

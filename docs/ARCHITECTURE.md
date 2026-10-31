@@ -29,9 +29,13 @@ flowchart TB
 | Process | May | May never |
 |---|---|---|
 | `api` | Serve requests, record approvals | Hold mail or calendar credentials, call LLMs |
-| `worker` | Run agents, create proposals | Send anything, approve anything |
-| `executor` | Run approved proposals after re-checking them | Read CVs, call LLMs |
+| `worker` | Run agents, create proposals, apply approved **internal** actions through the same gate | Send anything, approve anything |
+| `executor` | Run approved **external** proposals after re-checking them | Read CVs, call LLMs |
 | `ml` | Parse and embed untrusted files | Reach any network |
+
+**External or internal.** An action that leaves the system (email, calendar) runs in `executor`, which can't read pack data. An action that only changes our own records (advance a stage, assign training) runs in `worker`, which can. Both pass the same approval gate.
+
+**Database roles enforce this too.** Only `astra_api` can insert an approval. Only `astra_worker` and `astra_executor` can record an execution. `astra_executor` sees a proposal only after it reaches approval, and can't read decision records or pack data. A bug in application code can't get around these rules.
 
 ## Data stores
 
@@ -85,5 +89,6 @@ Applies to every pack, for legal and ethical reasons (EU AI Act Art. 5(1)(f) and
 
 ## Technology
 
-Python 3.12, FastAPI, SQLAlchemy 2, Alembic, Pydantic 2, Procrastinate, LangGraph, Docling, fastembed, Next.js, TypeScript, Cytoscape.js, PostgreSQL 17, pgvector, Neo4j Community, MinIO, OpenTelemetry, Grafana (`otel-lgtm`), Caddy, Docker Compose.
+Python 3.12, FastAPI, SQLAlchemy 2, Alembic, Pydantic 2, Procrastinate, LangGraph, Docling, fastembed, Next.js 16, TypeScript, Cytoscape.js, PostgreSQL 17, pgvector, Neo4j Community, MinIO (Chainguard build), OpenTelemetry, Grafana (`otel-lgtm`), Caddy, Docker Compose.
+Models: Claude Haiku first (`claude-haiku-5-5`), Groq (`openai/gpt-oss-20b`) as fallback, Groq prompt guard as one injection layer.
 Tasks run through `python astra.py <command>`, which works the same on Windows, macOS and Linux. Exact versions are pinned in the lock files and compose file.
