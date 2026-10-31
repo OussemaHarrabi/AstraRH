@@ -35,14 +35,17 @@ actions:
 
 agents:
   - id: rubric_builder
+    title: Draft job criteria
     events: [talent.job.created.v1]
     entry: packs.talent.agents.rubric_builder:build
     description: Drafts job-related criteria from the offer.
   - id: cv_reader
+    title: Read CVs
     events: [talent.cv.uploaded.v1]
     entry: packs.talent.agents.cv_reader:build
     description: Reads a CV with no identity and no tools, and checks every quote against the file.
   - id: ranking
+    title: Rank candidates
     events: [talent.ranking.requested.v1]
     entry: packs.talent.agents.ranking:build
     description: Scores by formula, explains each result, and proposes a shortlist.

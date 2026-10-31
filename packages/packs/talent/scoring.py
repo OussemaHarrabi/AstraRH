@@ -1,7 +1,13 @@
 """The ranking formula. Pure arithmetic: no database, no model, no identity, no randomness.
 
-    score = sum(weight x value) over the job's criteria, with weights summing to 1
+Two layers:
+    Layer 1, hybrid search: how close the whole CV is to the job, combining vector
+             similarity (meaning) and BM25 (exact terms). Worth 30 of 100 points.
+    Layer 2, evidence: proof for each approved criterion. Worth 70 of 100 points.
+
+    score = 0.70 x sum(weight x value) + 0.30 x job_match
     value = the strongest evidence signal for that criterion, from 0 to 1
+    job_match = 0.50 x vector similarity + 0.50 x BM25
 
 Direct evidence      0.60 + 0.40 x min(1, stated years / required years)
                      Found in the CV's visible text. Years are stated in a verified quote,
@@ -27,7 +33,7 @@ from typing import Any
 from kernel.explain import Factor, ScoreResult, register_scorer
 
 SCORER = "talent.rubric"
-SCORER_VERSION = "1"
+SCORER_VERSION = "2"
 
 DIRECT_BASE = Decimal("0.60")
 LISTED_VALUE = Decimal("0.30")
@@ -39,6 +45,12 @@ SEMANTIC_HIGH = Decimal("0.85")
 MUST_HAVE_RELATED_STRENGTH = Decimal("0.80")
 MUST_HAVE_OVERRIDE_VALUE = Decimal("0.60")
 FOUR_PLACES = Decimal("0.0001")
+EVIDENCE_SHARE = Decimal("0.70")
+MATCH_SHARE = Decimal("0.30")
+MATCH_DENSE_SHARE = Decimal("0.50")
+MATCH_LEXICAL_SHARE = Decimal("0.50")
+MATCH_KEY = "job_match"
+MATCH_LABEL = "Overall match with the job"
 
 
 def _round(value: Decimal) -> Decimal:
@@ -73,6 +85,12 @@ def criterion_value(criterion: dict[str, Any], signal: dict[str, Any]) -> Decima
     return _round(max(candidates))
 
 
+def job_match_value(match: dict[str, Any]) -> Decimal:
+    dense = max(Decimal(0), min(Decimal(1), Decimal(str(match.get("dense", 0)))))
+    lexical = max(Decimal(0), min(Decimal(1), Decimal(str(match.get("lexical", 0)))))
+    return _round(MATCH_DENSE_SHARE * dense + MATCH_LEXICAL_SHARE * lexical)
+
+
 def meets_must_have(criterion: dict[str, Any], signal: dict[str, Any]) -> bool:
     if not criterion.get("must_have"):
         return True
@@ -87,8 +105,10 @@ def meets_must_have(criterion: dict[str, Any], signal: dict[str, Any]) -> bool:
 @register_scorer(SCORER, SCORER_VERSION)
 def score(inputs: dict[str, Any]) -> ScoreResult:
     factors = []
+    match = inputs.get("match")
+    share = EVIDENCE_SHARE if match is not None else Decimal(1)
     for criterion in inputs["criteria"]:
-        weight = Decimal(str(criterion["weight"]))
+        weight = Decimal(str(criterion["weight"])) * share
         value = criterion_value(criterion, inputs["signals"].get(criterion["id"], {}))
         factors.append(
             Factor(
@@ -97,6 +117,17 @@ def score(inputs: dict[str, Any]) -> ScoreResult:
                 weight=weight,
                 value=value,
                 contribution=weight * value,
+            )
+        )
+    if match is not None:
+        value = job_match_value(match)
+        factors.append(
+            Factor(
+                key=MATCH_KEY,
+                label=MATCH_LABEL,
+                weight=MATCH_SHARE,
+                value=value,
+                contribution=MATCH_SHARE * value,
             )
         )
     return ScoreResult(score=sum((f.contribution for f in factors), Decimal(0)), factors=factors)

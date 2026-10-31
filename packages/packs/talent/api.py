@@ -276,6 +276,16 @@ def shortlist(job_id: UUID, request: Request) -> dict[str, Any]:
                     "score": str(row.score) if row.score is not None else None,
                     "meets_must_haves": row.meets_must_haves,
                     "missing_must_haves": scoring.missing_must_haves(row.inputs),
+                    "factors": [
+                        {
+                            "key": factor.key,
+                            "label": factor.label,
+                            "weight": str(factor.weight),
+                            "value": str(factor.value),
+                            "contribution": str(factor.contribution),
+                        }
+                        for factor in scoring.score(row.inputs).factors
+                    ],
                     "stage": application.stage,
                     "decision_record_id": str(row.decision_record_id)
                     if row.decision_record_id

@@ -53,6 +53,7 @@ __all__ = [
     "propose",
     "reconcile_stale",
     "reject",
+    "supersede",
 ]
 
 PROPOSAL_TTL = timedelta(days=7)
@@ -203,6 +204,20 @@ def propose(
         ),
     )
     return proposal
+
+
+def supersede(session: Session, proposal: Proposal, actor_id: str, reason: str) -> None:
+    """Newer work replaced this suggestion, so nobody should approve the stale one."""
+    proposal.status = "superseded"
+    audit.append(
+        session,
+        proposal.tenant_id,
+        "agent",
+        actor_id,
+        "proposal.superseded",
+        proposal_id=proposal.id,
+        reason=reason,
+    )
 
 
 def _locked_proposal(session: Session, proposal_id: UUID) -> Proposal:

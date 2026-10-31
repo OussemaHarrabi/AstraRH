@@ -18,6 +18,10 @@
 		max_size 25MB
 	}
 
+	# The interactive API docs (dev only) load Swagger UI from its CDN, and hold no data themselves.
+	@api_docs path /api/docs
+	header @api_docs Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https://fastapi.tiangolo.com; connect-src 'self'; frame-ancestors 'none'"
+
 	handle_path /api/* {
 		reverse_proxy api:8000
 	}

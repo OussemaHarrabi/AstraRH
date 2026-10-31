@@ -1,26 +1,120 @@
 @import "tailwindcss";
 
+/* AstraRH tokens. Blue doors on white plaster, with ochre kept for warnings only. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --plaster: #f4f6fa;
+  --surface: #ffffff;
+  --ink: #12233f;
+  --ink-soft: #4f5f78;
+  --line: #d8dfea;
+  --door: #0f5fc2;
+  --door-deep: #0a3f85;
+  --door-wash: #e3edfb;
+  --ochre: #9a6200;
+  --ochre-wash: #fbf1dc;
+  --olive: #26704f;
+  --olive-wash: #e0f1e9;
+  --brick: #a92f24;
+  --brick-wash: #fae6e3;
+  --rail: #12233f;
+  --rail-text: #d4dff0;
+  --radius: 10px;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --plaster: #0e1727;
+    --surface: #16233a;
+    --ink: #e9eff9;
+    --ink-soft: #a5b4cc;
+    --line: #2b3b57;
+    --door: #6aa7f2;
+    --door-deep: #a6ccf8;
+    --door-wash: #1b3355;
+    --ochre: #e5b45d;
+    --ochre-wash: #3a2c10;
+    --olive: #74cda6;
+    --olive-wash: #15352a;
+    --brick: #f19a90;
+    --brick-wash: #3f1c18;
+    --rail: #0a1120;
+    --rail-text: #c3d0e5;
   }
 }
 
+:root[data-theme="dark"] {
+  --plaster: #0e1727;
+  --surface: #16233a;
+  --ink: #e9eff9;
+  --ink-soft: #a5b4cc;
+  --line: #2b3b57;
+  --door: #6aa7f2;
+  --door-deep: #a6ccf8;
+  --door-wash: #1b3355;
+  --ochre: #e5b45d;
+  --ochre-wash: #3a2c10;
+  --olive: #74cda6;
+  --olive-wash: #15352a;
+  --brick: #f19a90;
+  --brick-wash: #3f1c18;
+  --rail: #0a1120;
+  --rail-text: #c3d0e5;
+}
+
+@theme inline {
+  --color-plaster: var(--plaster);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-door: var(--door);
+  --color-door-deep: var(--door-deep);
+  --color-door-wash: var(--door-wash);
+  --color-ochre: var(--ochre);
+  --color-ochre-wash: var(--ochre-wash);
+  --color-olive: var(--olive);
+  --color-olive-wash: var(--olive-wash);
+  --color-brick: var(--brick);
+  --color-brick-wash: var(--brick-wash);
+  --font-display: "Bricolage Grotesque Variable", "Segoe UI", sans-serif;
+  --font-body: "Source Sans 3 Variable", "Segoe UI", sans-serif;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--plaster);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+:focus-visible {
+  outline: 3px solid var(--door);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .drawer-enter {
+    animation: drawer-in 180ms ease-out;
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
 }

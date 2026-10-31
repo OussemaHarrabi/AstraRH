@@ -6,14 +6,17 @@
 
 **If you are resuming after a context reset, read in this order:** this section → `docs/PLAN.md` (the approved plan, full detail) → `docs/ARCHITECTURE.md` → `docs/SETUP.md`.
 
-- **Current phase:** P2 complete, committed and pushed. Waiting for Oussema's go for P3.
-- **Exact next action:** on Oussema's go, start **P3 `platform-v0`**:
-  1. `packages/packs/_example/`: the copy-me pack with a full flow (manifest → agent → DecisionRecord → proposal → approve → execute → audit → event → graph), including its migration (`depends_on` kernel), `seed.py`, tests and an eval.
-  2. Stub packs `talent`, `journey`, `finance`, `workforce`: manifest, one table, one route, one page, one event, status `preview`.
-  3. `astra.py seed` loading the demo world from `docs/handoff/DEMO_WORLD.md` and teammates' `seed/` files, with a demo tenant and users for each role. Also `astra.py new-pack`.
-  4. Web shell: login, manifest-driven dashboard and nav, approval inbox with edit/approve/reject and step-up, audit timeline with verify, `<WhyPanel>`, typed client from OpenAPI, OTel for the web service. Read `apps/web/node_modules/next/dist/docs/` first.
-  5. CI (GitHub Actions) with `import-linter` pack boundaries, plus `CODEOWNERS`, PR template, `AGENTS.md`/`CLAUDE.md`, `docs/PACK_GUIDE.md`, `docs/THREAT_MODEL.md`, `contracts/events/` export, agent prompts in `docs/handoff/`.
-  6. Run the foundation gate in `docs/PLAN.md` §15 (fresh clone, `_example` in a browser, `new-pack` passes CI, a boundary violation fails CI), then tag `platform-v0` and push. Replace the worker and executor heartbeats' noise if traces get crowded.
+- **Current phase:** Screening (P3 lean + P4) complete, committed and pushed. Next is **P5: the rest of the brief**.
+- **Priority, set by Oussema on 2026-10-31:** ship the hackathon brief's six axes deep and solid first. Teammates' services and team tooling wait until that is done. Ship fast, and test in one final pass rather than retesting at each step.
+- **Exact next action: build `comms` and `calendar`, then the talent flows on them:**
+  1. **Inbox and digest** (`packages/kernel/comms/`, schema `comms`): thread, message, classification, digest, digest_item, template. Fictional email seed (about 40) in `data/demo/emails.json` covering applications, reschedules, salary, visa, legal threats and spam, linked to demo candidates. LangGraph agent: classify each message through `ctx.read_untrusted` (type, urgency, needs-human with reason), then a daily digest grouped by type and urgency. Web page `/inbox`.
+  2. **Replies** (`packs/talent`): a LangGraph drafter that receives only that candidate's file and validated facts, never another candidate's. Proposes `kernel.email.send` (R2) with a DecisionRecord. Web: edit and approve in `/approvals`, with a proper email form instead of JSON. Test cross-candidate leakage.
+  3. **Follow-ups:** durable timers on the `default` queue (`kernel/jobs.py`), cadence limits, stop on reply, reject or hire. Proposes reminders (R2).
+  4. **Calendar** (`packages/kernel/calendar/`, schema `calendar`): availability from seed, slot holds, booking, ICS. Scheduler agent proposes 3 real slots from the recruiter's calendar (R2), re-checked at booking, no double booking. Adapter `calendar.book` runs in the executor. Web page for slots.
+  5. **Then P6 Knowledge** (Employee Questions): `knowledge` schema with pgvector, hybrid search reused from `packs/talent/signals.py`, ACL before search, cited answers, refusal plus escalation ticket. Policy docs in `data/demo/policies/`. Web chat page.
+  6. **Then** dashboards (Trust Center, Agent Run Explorer, Grafana), P7 AstraGraph UI, P8 proof (drills, load test, README, demo script), and after that team handoff: `_example` pack, CI, CODEOWNERS, agent prompts.
+- **Migration note for new kernel tables:** `python astra.py makemigration kernel "msg"` scopes to kernel schemas. Add `enable_rls` for each table in a follow-up revision. A test fails otherwise.
+- **Patching tip:** on this machine, multi-line Python through the Bash heredoc breaks on quotes. Write patch scripts to the scratchpad and run them with `.venv\Scripts\python.exe -I`.
 - **Working style Oussema asked for:**
   - One phase at a time. At the end of each, report what was verified and **exactly what to send the team**, then wait for go.
   - Keep this file detailed.
@@ -27,9 +30,9 @@
 | P0 Foundation docs | **Done** |
 | P1 Infra | **Done** |
 | P2 Kernel | **Done** |
-| P3 `platform-v0` | Next |
-| P4 Screening | Not started |
-| P5 Communication | Not started |
+| P3 `platform-v0` | Web shell and seed **done**. Team tooling (`_example`, CI, prompts) moved to the end |
+| P4 Screening | **Done** |
+| P5 Communication | **Next** |
 | P6 Knowledge | Not started |
 | P7 AstraGraph | Not started |
 | P8 Integration and proof | Not started |
@@ -73,7 +76,49 @@ Plan decisions are in `docs/PLAN.md` §2. Changes and additions since approval:
 | 2026-10-31 | **Test tenants are `active=false`; background processes skip them** | Tests run against the live database, proving real role permissions, without the running worker and executor racing them |
 | 2026-10-31 | **Worker serves named queues only (`kernel.jobs.WORKER_QUEUES`)** | A new queue must be added there. It also stops the live worker taking test jobs |
 
+| 2026-10-31 | **Hackathon requirements first; team services and handoff wait** | Oussema's instruction: a solid foundation even if teammates don't ship |
+| 2026-10-31 | **Two-layer ranking: 30 points hybrid search (vector + BM25), 70 points evidence** | Oussema's instruction. Full reasoning in `docs/RANKING.md` |
+| 2026-10-31 | **All agents are LangGraph graphs running as durable jobs**; every node commits on its own | Crash resumes without repeating paid calls. `kernel/ai/graphs.py`, `kernel/ai/runner.py` |
+| 2026-10-31 | **pdfplumber + Tesseract instead of Docling. NEEDS OUSSEMA'S CONFIRMATION** | pdfplumber exposes text colour and size, which is what catches hidden text. No torch, so the 7.8 GB host and speed are fine. Handles scanned PDFs through OCR. Docling would add table and layout quality if real CVs need it |
+| 2026-10-31 | **No cross-encoder reranker. NEEDS OUSSEMA'S CONFIRMATION** | The multilingual one is about 1 GB on CPU, and results on the labelled set don't call for it. The order comes from the formula, so a reranker would add latency and a less explainable step. Can be added to `ml` if real data shows a need |
+| 2026-10-31 | **Name removal is local heuristics plus regex, not Presidio. NEEDS OUSSEMA'S CONFIRMATION** | The model then never sees the name at all. Weakness: names elsewhere in a CV can survive unless they repeat the header name. Presidio stays a production upgrade |
+| 2026-10-31 | **Self-hosted fonts through npm** | `next/font/google` needs internet at runtime in dev, and the web container has none |
+
 ## Log
+
+### Screening, web shell and two-layer ranking: 2026-10-31
+
+**Built**
+- `packages/packs/talent/`: `scoring.py` (pure formula, `talent.rubric@2`), `signals.py` (evidence, verified years, dated roles, BM25, keyword-list detection), `blind.py` (identity separation), agents `cv_reader`, `ranking`, `rubric_builder` (LangGraph), `handlers.py`, `service.py`, `api.py`, `seed.py`, `load_demo.py`, `evals/screening.py`, migrations.
+- Kernel: `ai/graphs.py` (durable nodes), `ai/runner.py` (events to jobs), `files.py` (MinIO + upload gate), `ml_client.py`, `seed.py`, `trust.supersede`.
+- `apps/ml/`: parsing with hidden-text removal, OCR, embeddings. Model baked into the image, no network at runtime.
+- `tools/generate_demo_data.py` writes `data/world.json`, 42 CVs and `labels.json`.
+- `apps/web/`: login, Today dashboard, jobs, job page with **evidence strip**, `<WhyPanel>`, approvals with step-up, History with tamper check. Design tokens in `globals.css`, kit in `src/ui/`.
+- `astra.py`: `seed`, `evals`, `export-api`, `live`. Docs: `docs/RANKING.md`, `docs/API.md`, `contracts/openapi.json`, `docs/evals/screening.json`.
+
+**Verified**
+- `python astra.py check`: ruff clean, **253 passed, 2 skipped**.
+- `python astra.py evals` with real Haiku: see `docs/RANKING.md`. Results come from labelled CVs we wrote, and the doc says so.
+- In the browser on a clean database, as Nadia: signed in, ranked 42 CVs with the real worker, opened Why, recalculated to an exact match, approved the shortlist. 5 candidates moved to shortlisted through the real worker, with the execution recorded.
+- API docs route responds and OpenAPI exports with 32 paths.
+
+**Real bugs tests and real runs caught, all fixed**
+- Quotes nested inside a skill weren't checked against the CV.
+- The strict schema code deleted real fields named `title`.
+- Replacing a name inside an email address broke the email mask.
+- Candidate IDs collided in the same millisecond, breaking bulk upload.
+- Parallel agents collided recording prompt versions.
+- A login form with no `method` put the password in the URL when scripts failed. It's now POST, and that demo password was rotated.
+- Migration autogenerate tried to recreate other schemas' tables.
+
+**Not done or not verified**
+- History page and step-up in a browser (covered by API tests only). `--secure` mode wasn't rerun after these changes.
+- Mobile layout not checked, and light mode not checked (the browser ran in dark mode).
+- Hidden-text detection for DOCX has no test with a real DOCX file.
+- Interactive API docs page: route returns 200, but Swagger UI was not opened in a browser.
+- Rubric editing has an API but no web page yet. New jobs can't be created from the web yet.
+- Grafana has no custom dashboards yet.
+- Web service telemetry not added.
 
 ### P2 Kernel: 2026-10-31
 

@@ -55,6 +55,7 @@ class ActionSpec(BaseModel):
 
 class AgentSpec(BaseModel):
     id: str
+    title: str = ""
     events: list[str]
     entry: str
     description: str = ""
@@ -204,7 +205,10 @@ def pack_listing() -> list[dict[str, Any]]:
             "actions": [
                 {"id": a.id, "risk": a.risk, "description": a.description} for a in manifest.actions
             ],
-            "agents": [{"id": a.id, "description": a.description} for a in manifest.agents],
+            "agents": [
+                {"id": a.id, "title": a.title or a.id, "description": a.description}
+                for a in manifest.agents
+            ],
         }
         for manifest in active_packs()
     ]
