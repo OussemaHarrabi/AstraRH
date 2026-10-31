@@ -1,0 +1,51 @@
+# Leila Mansour
+**IT Support Officer**
+
+Paris, France · leila_mansour@example.com · +33 6 00 00 19 · portfolio.example.com/leila_mansour
+
+## Summary
+IT Support Officer with hands-on experience in Windows, Active Directory and Networking. Calm with users, precise with evidence, and disciplined about documentation.
+
+## Core skills
+
+- Windows
+- Active Directory
+- Networking
+- Hardware
+- Microsoft 365
+- Ticketing
+- Customer Service
+- ITIL
+
+## Experience
+
+- IT Support Officer March 2011 to August 2015 Orchid Byte System Administrator April 2010 to January 2011 Orchid Byte Lab Technician Technical Support April 2009 to March 2010 Orchid Byte Comprehensive knowledge of CISCO networking technologies and Protocols.
+- Handling the network infrastructure LAN/WAN, migration & configuration of network Devices (Routers, Switches, Firewalls etc.).
+- Skilled in planning and implementing LAN/WAN solutions.
+- OSPF, Static and Default Route) Assisting in the design & implementation of the network and troubleshooting.
+- Troubleshooting Extending high-end technical support on various Servers and ensuring high customer satisfaction levels through prompt redressal of their problems.
+- Configuring and troubleshooting IP Phones, Network Printers and Virtual Interface (VMWare) related issues.
+- Assigning user nodes to various devices installed and networked, handle allocation and protection of user rights, as per company's policies.
+- Configure windows server 2003 and 2008 with Active Directory ,Terminal Server Group Policy and manage Data server with security.
+- SAP Online Support System Backup and Recovery DR to HADR Data synchronization Monitoring.
+- User management Transaction Lock/Unlock User Authorization and Users Role Windows Servers Microsoft active directory services, Server +33 6 00 00 19, Configure Domain security policies, Local security policies Configure and manage File server and Share Folders.
+- Design: DNS and DHCP servers in +33 6 00 00 19 Server.
+- share folders and implementing group polices.
+
+## Education
+
+- **BSc Information Technology** — Lakeside University · 2018 – 2020
+
+## Certifications
+
+- Cisco Certified
+- Microsoft Certified Professional
+
+## Languages
+
+- Arabic (native)
+- French (native)
+- English (C1)
+
+---
+*Synthetic demo CV — fictional identity. Source text CC0-1.0.*

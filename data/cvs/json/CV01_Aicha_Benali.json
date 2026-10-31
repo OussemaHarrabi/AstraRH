@@ -1,0 +1,57 @@
+{
+  "id": "CV01",
+  "source_id": "36856210",
+  "name": "Aïcha Benali",
+  "slug": "Aicha_Benali",
+  "title": "Information Security Analyst",
+  "field": "security",
+  "layout": "classic",
+  "job": "J01",
+  "location": "Paris, France",
+  "email": "aicha_benali@example.com",
+  "phone": "+33 6 00 00 01",
+  "portfolio": "portfolio.example.com/aicha_benali",
+  "summary": "Information Security Analyst with hands-on experience in Vulnerability Management, SIEM and Incident Response. Focused on detection quality, incident response and clear documentation.",
+  "skills": [
+    "Vulnerability Management",
+    "SIEM",
+    "Incident Response",
+    "MITRE ATT&CK",
+    "EDR",
+    "Python",
+    "Splunk",
+    "ISO 27001"
+  ],
+  "experience": [
+    "Northwind Atlas Paris, France Information Technology 02/2011 to Current I was hired to manage accreditation efforts for a major department modernization project involving 3 accreditation packages each leading to successful Authorization To Operate decisions.",
+    "Responsibilities then increased to include all departmental accreditation efforts leading to another 3 successful ATOs.",
+    "Now, working on 4 new accreditation including re-authorization for an existing project.",
+    "Succeeded in writing and implementing vulnerability management for existing accredited systems.",
+    "Success of the accreditation hinged on coordination with ONI Enterprise in critical design decisions and to help the program integrate smoothly into the Enterprise thru many meetings, analyzing the Enterprise business model to understand the best fit for the program.",
+    "The different projects required careful management of specific STIG compliance and hardening for the different configurations and services required for the specific domain to be integrated.",
+    "Analyzed complex computer systems to assess vulnerability and risk.",
+    "Supervised 5 external computer consultants and vendors.",
+    "Managed application patches, data backup, security changes and network configuration.",
+    "Northwind Atlas Paris, France Systems Engineer 02/2006 to 02/2011 I was Hired to initiate processing strategies in fulfilling department analyst requirements.",
+    "Requirements were fulfilled thru i dentifying product problems and strengths and collected data on customer experience and review of Enterprise compliance to transition to new technology for supporting new processing needs thru proper processing power.",
+    "The next challenge came as storage requirements for better performance and more controlled uses."
+  ],
+  "education": [
+    [
+      "BSc Cybersecurity",
+      "Atlas Polytechnic",
+      "2016 – 2018"
+    ]
+  ],
+  "certifications": [
+    "CompTIA Security+",
+    "CISSP (in progress)"
+  ],
+  "languages": [
+    "French (native)",
+    "English (C1)",
+    "Arabic (conversational)"
+  ],
+  "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+  "license": "CC0-1.0"
+}

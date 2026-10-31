@@ -1,0 +1,55 @@
+{
+  "id": "CV06",
+  "source_id": "57706851",
+  "name": "Daniel Okafor",
+  "slug": "Daniel_Okafor",
+  "title": "NOC Engineer",
+  "field": "network",
+  "layout": "compact",
+  "job": "J02",
+  "location": "London, United Kingdom",
+  "email": "daniel_okafor@example.com",
+  "phone": "+33 6 00 00 06",
+  "portfolio": "portfolio.example.com/daniel_okafor",
+  "summary": "NOC Engineer with hands-on experience in Cisco, VPN and BGP. Strong on troubleshooting, documentation and keeping complex networks boring.",
+  "skills": [
+    "Cisco",
+    "VPN",
+    "BGP",
+    "OSPF",
+    "Firewalls",
+    "MPLS",
+    "Wireshark",
+    "Network Automation"
+  ],
+  "experience": [
+    "NOC Engineer Apr 2011 to Apr 2016 Glacier Cloud Northwind Atlas is one of the leading BPO in call centre industry with headquarters located in San Diego, USA.",
+    "They were originally a part of Midland credit management which deals in collection of credit card and house tax loan Payments & also have overseas operations in Costa Rica, Warren, ST Cloud, San Antonio, Dallas, Phoenix and so on.",
+    "Key Responsibilities and Technical Skill Set: Project:-EOS/NOC NOC is a part of Enterprise operations support that deals with the Infrastructure within USA, UK & India.",
+    "Key Responsibilities and Technical Skill Set: Event Management-interpret alerts received via monitoring tools troubleshoot and take necessary remedial actions.",
+    "Incident Management- Handling P1 Outage/Interruption.",
+    "Taking care of incident management L2 and L3 bridges and drive them to resolution using incident management techniques under ITIL guidelines.",
+    "Alert configuration of server and network devices according to their threshold value specified by the concern team.",
+    "Monitoring infrastructure devices with the help of various tools like Application Manager, Netflow Analyzer and Solarwinds Orion.",
+    "Performing day to day activity which is specific to MCM environment with the help of tools like AS/400, SQL server management Studio and Idera Updating Dashboard, maintaining inventory for all NOC activities.",
+    "Keep tracking of all Service Now tickets and their SLA's.",
+    "Working and updating all the existing and new process documents and NOC day to day activities in Service now Knowledge Management which help the new joiners to understand the job responsibilities of NOC team.",
+    "Working on Solarwinds Orion for configuring alarms, Nodes and other network devices."
+  ],
+  "education": [
+    [
+      "BSc Network Engineering",
+      "Meridia Institute of Technology",
+      "2014 – 2016"
+    ]
+  ],
+  "certifications": [
+    "*CCNA trained from NET-TECH Institute (Janakpuri)."
+  ],
+  "languages": [
+    "English (native)",
+    "Igbo (native)"
+  ],
+  "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+  "license": "CC0-1.0"
+}

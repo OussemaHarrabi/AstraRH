@@ -36,3 +36,8 @@ ops/volumes/
 Thumbs.db
 .idea/
 .vscode/
+
+# Large or regenerable source data
+data/source/
+data/tech_cv_corpus.zip
+data/cvs/*.zip

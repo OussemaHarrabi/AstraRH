@@ -1,0 +1,47 @@
+{
+  "id": "CV27",
+  "source_id": "10265057",
+  "name": "Laura García",
+  "slug": "Laura_Garcia",
+  "title": "RF Systems Engineer",
+  "field": "embedded",
+  "layout": "modern",
+  "job": "J10",
+  "location": "Madrid, Spain",
+  "email": "laura_garcia@example.com",
+  "phone": "+33 6 00 00 27",
+  "portfolio": "portfolio.example.com/laura_garcia",
+  "summary": "RF Systems Engineer with hands-on experience in C, C++ and RF. Strong on debugging, test rigs and documentation from prototype to production.",
+  "skills": [
+    "C",
+    "C++",
+    "RF",
+    "MATLAB",
+    "Testing",
+    "Embedded Systems",
+    "Electronics",
+    "Debugging"
+  ],
+  "experience": [
+    "Working RF Systems Engineer May 2014 to Current Lantern Retail Qualification · Multidisciplinary background: RF hardware designs, manufacturing operations and data analyst.",
+    "Delivered production work using C and C++, with tests, documentation and a clean handover.",
+    "Partnered with product, design and operations on scoping, delivery and post-release support.",
+    "Improved team standards through code review, runbooks and incident follow-ups."
+  ],
+  "education": [
+    [
+      "MSc Electrical Engineering",
+      "Meridia Institute of Technology",
+      "2012 – 2014"
+    ]
+  ],
+  "certifications": [
+    "Certified Electronics Technician"
+  ],
+  "languages": [
+    "Spanish (native)",
+    "English (C1)"
+  ],
+  "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+  "license": "CC0-1.0"
+}

@@ -1,0 +1,1917 @@
+{
+  "cvs": [
+    {
+      "id": "CV01",
+      "source_id": "36856210",
+      "name": "Aïcha Benali",
+      "slug": "Aicha_Benali",
+      "title": "Information Security Analyst",
+      "field": "security",
+      "layout": "classic",
+      "job": "J01",
+      "location": "Paris, France",
+      "email": "aicha_benali@example.com",
+      "phone": "+33 6 00 00 01",
+      "portfolio": "portfolio.example.com/aicha_benali",
+      "summary": "Information Security Analyst with hands-on experience in Vulnerability Management, SIEM and Incident Response. Focused on detection quality, incident response and clear documentation.",
+      "skills": [
+        "Vulnerability Management",
+        "SIEM",
+        "Incident Response",
+        "MITRE ATT&CK",
+        "EDR",
+        "Python",
+        "Splunk",
+        "ISO 27001"
+      ],
+      "experience": [
+        "Northwind Atlas Paris, France Information Technology 02/2011 to Current I was hired to manage accreditation efforts for a major department modernization project involving 3 accreditation packages each leading to successful Authorization To Operate decisions.",
+        "Responsibilities then increased to include all departmental accreditation efforts leading to another 3 successful ATOs.",
+        "Now, working on 4 new accreditation including re-authorization for an existing project.",
+        "Succeeded in writing and implementing vulnerability management for existing accredited systems.",
+        "Success of the accreditation hinged on coordination with ONI Enterprise in critical design decisions and to help the program integrate smoothly into the Enterprise thru many meetings, analyzing the Enterprise business model to understand the best fit for the program.",
+        "The different projects required careful management of specific STIG compliance and hardening for the different configurations and services required for the specific domain to be integrated.",
+        "Analyzed complex computer systems to assess vulnerability and risk.",
+        "Supervised 5 external computer consultants and vendors.",
+        "Managed application patches, data backup, security changes and network configuration.",
+        "Northwind Atlas Paris, France Systems Engineer 02/2006 to 02/2011 I was Hired to initiate processing strategies in fulfilling department analyst requirements.",
+        "Requirements were fulfilled thru i dentifying product problems and strengths and collected data on customer experience and review of Enterprise compliance to transition to new technology for supporting new processing needs thru proper processing power.",
+        "The next challenge came as storage requirements for better performance and more controlled uses."
+      ],
+      "education": [
+        [
+          "BSc Cybersecurity",
+          "Atlas Polytechnic",
+          "2016 – 2018"
+        ]
+      ],
+      "certifications": [
+        "CompTIA Security+",
+        "CISSP (in progress)"
+      ],
+      "languages": [
+        "French (native)",
+        "English (C1)",
+        "Arabic (conversational)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV02",
+      "source_id": "18187364",
+      "name": "Lucas Moreau",
+      "slug": "Lucas_Moreau",
+      "title": "Information Security Officer",
+      "field": "security",
+      "layout": "modern",
+      "job": "J01",
+      "location": "Lyon, France",
+      "email": "lucas_moreau@example.com",
+      "phone": "+33 6 00 00 02",
+      "portfolio": "portfolio.example.com/lucas_moreau",
+      "summary": "Information Security Officer with hands-on experience in SIEM, Incident Response and MITRE ATT&CK. Focused on detection quality, incident response and clear documentation.",
+      "skills": [
+        "SIEM",
+        "Incident Response",
+        "MITRE ATT&CK",
+        "EDR",
+        "Vulnerability Management",
+        "Python",
+        "Splunk",
+        "ISO 27001"
+      ],
+      "experience": [
+        "Information Technology Specialist Information Security Officer October 2010 to July 2015 Cobalt Harbor - Lyon, France Installing and configuring Oracle software versions 10g-12c.",
+        "Creating Risk Assessment template based on NIST 800-30R1 to facilitate and evaluate secure software development practice.",
+        "Building automated database risk/security models for quantifying degrees of database risk and enabling the standardization and prioritization of remediation efforts.",
+        "Managing/mentoring support staff and participating in 24X7 production support and security monitoring rotation for large scale, mission critical applications.",
+        "Developing, implementing and supporting enterprise backup and recovery, change control, security and audit procedures.",
+        "Performing database, server and application performance and security monitoring and tuning.",
+        "Implementing vendor and customized database auditing and analysis packages.",
+        "Develop pattern recognition triggers for Anti-Money laundering systems.",
+        "Working closely with Corporate Security to ensure that application and database server procedures and controls support all government regulations and corporate policies.",
+        "Designing and implementing least-privilege database administration model and application development templates.",
+        "Providing support and guidance for the modeling, development and testing of enterprise applications to ensure that applications are secure, highly available and fully meet the needs of our end user communities.",
+        "Develop ITS Enterprise Database installation, configuration, monitoring and security standards and procedures."
+      ],
+      "education": [
+        [
+          "BSc Cybersecurity",
+          "Atlas Polytechnic",
+          "2016 – 2018"
+        ]
+      ],
+      "certifications": [
+        "Oracle Certified Professional (OCP)"
+      ],
+      "languages": [
+        "French (native)",
+        "English (C1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV03",
+      "source_id": "19796840",
+      "name": "Sofia Rossi",
+      "slug": "Sofia_Rossi",
+      "title": "IT Auditor",
+      "field": "security",
+      "layout": "table",
+      "job": "J01",
+      "location": "Milan, Italy",
+      "email": "sofia_rossi@example.com",
+      "phone": "+33 6 00 00 03",
+      "portfolio": "portfolio.example.com/sofia_rossi",
+      "summary": "IT Auditor with hands-on experience in SIEM, Incident Response and MITRE ATT&CK. Focused on detection quality, incident response and clear documentation.",
+      "skills": [
+        "SIEM",
+        "Incident Response",
+        "MITRE ATT&CK",
+        "EDR",
+        "Vulnerability Management",
+        "Python",
+        "Splunk",
+        "ISO 27001"
+      ],
+      "experience": [
+        "10/2016 to Current Information Technology Auditor Juniper Lane - Milan, Italy Participate in the annual risk assessment and audit planning process covering IT, financial, operational, and contract areas.",
+        "Assist with IT audits and reviews including user access, database and service configurations, security, and policy and procedural compliance.",
+        "Perform IT project pre and post audit assessments.",
+        "Participate in external cyber related audits and assessments.",
+        "Assist with IT portion of annual assessment of internal controls over financial reporting (Sarbanes Oxley - SOX).",
+        "Includes risk assessment, control walkthroughs, control testing, remediation assistance, report of results to IT management and other management, and collaboration with our external financial IT auditors.",
+        "Consult on IT matters within non-IT focused audits and reviews performed internal audit.",
+        "Assist and consult with IT management on upgrades, implementations, and action plans resulting from various audits and assessments.",
+        "Assists and provides support to others auditing the Association as needed.",
+        "Train and educate members of the internal audit team and other personnel on IT audit methods and emerging IT risks.",
+        "Coordinates work of internal auditors when assigned to assist with special/complex audits.",
+        "04/2015 to 10/2016 PeopleSoft Security Administrator III Juniper Lane - Milan, Italy Work closely with the internal and external audit department to provide reports and documentation for compliance."
+      ],
+      "education": [
+        [
+          "BSc Cybersecurity",
+          "Atlas Polytechnic",
+          "2016 – 2018"
+        ]
+      ],
+      "certifications": [
+        "CompTIA Security+",
+        "CISSP (in progress)"
+      ],
+      "languages": [
+        "Italian (native)",
+        "English (B2)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV04",
+      "source_id": "27058381",
+      "name": "Youssef El Amrani",
+      "slug": "Youssef_El_Amrani",
+      "title": "Systems Administrator",
+      "field": "sysadmin",
+      "layout": "classic",
+      "job": "J02",
+      "location": "Paris, France",
+      "email": "youssef_el_amrani@example.com",
+      "phone": "+33 6 00 00 04",
+      "portfolio": "portfolio.example.com/youssef_el_amrani",
+      "summary": "Systems Administrator with hands-on experience in Windows Server, Active Directory and Backup. Strong on reliable operations, troubleshooting and tidy runbooks.",
+      "skills": [
+        "Windows Server",
+        "Active Directory",
+        "Backup",
+        "Networking",
+        "Microsoft 365",
+        "PowerShell",
+        "VMware",
+        "Linux"
+      ],
+      "experience": [
+        "I am a trainer for new employee's coming into the group on details and 4 new permanent employees into the CIS group.",
+        "I am required a basic working understanding of 7 projects and to be able to step in for other SA's at a moment's notice of well over 500 servers.",
+        "The work may involve developing and presenting training on the operation and maintenance of new systems to the IRS IT staff including IT specialists in other specialty areas, to insure that new systems are properly managed.",
+        "The employee may adapt and implement systems diagnostic and maintenance tools to ensure the availability and functionality of systems required to support organizational Objectives and evaluate and recommend selection of new systems diagnostic tools.",
+        "This work affects the availability of IRS IT systems needed to meets the mission requirements.",
+        "My main duties are to maintain server's operation, security, and analyze and diagnose system hardware and software components.",
+        "I also write up problem tickets with server's hardware and software and get clearance for vendors to have access to the servers for hardware repair as well as scheduling times with local I.R.S.",
+        "personal and vendor to accomplish the repairs.",
+        "I make sure when new server are to be put on the Domain I do all of the appropriate paper work which includes requesting UWR's, KISAM asset management to include all of the new servers information from serial numbers, bar code, make, model and location just to them.",
+        "I also file out the Server Compliance checklist, software license forms.",
+        "In addition, I image or re-image server with the proper Windows Operating System and software needed to run the server e.g.",
+        "Contact Recording, Contact Analytics, TOS, RTS among other servers."
+      ],
+      "education": [
+        [
+          "BSc Information Technology",
+          "Northvale University",
+          "2015 – 2017"
+        ]
+      ],
+      "certifications": [],
+      "languages": [
+        "Arabic (native)",
+        "French (C1)",
+        "English (C1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV05",
+      "source_id": "63158213",
+      "name": "Priya Nair",
+      "slug": "Priya_Nair",
+      "title": "Senior Network Engineer",
+      "field": "network",
+      "layout": "modern",
+      "job": "J02",
+      "location": "Berlin, Germany",
+      "email": "priya_nair@example.com",
+      "phone": "+33 6 00 00 05",
+      "portfolio": "portfolio.example.com/priya_nair",
+      "summary": "Senior Network Engineer with hands-on experience in BGP, OSPF and Cisco. Strong on troubleshooting, documentation and keeping complex networks boring.",
+      "skills": [
+        "BGP",
+        "OSPF",
+        "Cisco",
+        "Firewalls",
+        "MPLS",
+        "VPN",
+        "Wireshark",
+        "Network Automation"
+      ],
+      "experience": [
+        "Network Engineer Nov 2011 to Aug 2014 Quartz River - Berlin, Germany Responsible for maintaining network with over 5000 users.",
+        "Responsible for setup and install of switches and routers.",
+        "Includes Configuration and Hardening for both Cisco and Brocade.",
+        "Responsible for activating user, printer, VTC ports and troubleshooting link inactivity on a daily basis, as well as issues with 802.1x, MAB issues, port-channeling, link-aggregation, VTP issues, RSA Key issues.",
+        "Used Knowledge base to find solutions for issues that arose with customers networks using Pro-series network program running on Windows Server 2000 and Windows Server 2003 R2.",
+        "Communicated with team members to successfully keep customer downtime to a minimum.",
+        "Includes Configuration and Hardening for Cisco."
+      ],
+      "education": [
+        [
+          "BSc Network Engineering",
+          "Meridia Institute of Technology",
+          "2014 – 2016"
+        ]
+      ],
+      "certifications": [
+        "CCT Data Center",
+        "CCNP",
+        "CCNA",
+        "MCSE"
+      ],
+      "languages": [
+        "English (native)",
+        "German (B1)",
+        "Malayalam (native)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV06",
+      "source_id": "57706851",
+      "name": "Daniel Okafor",
+      "slug": "Daniel_Okafor",
+      "title": "NOC Engineer",
+      "field": "network",
+      "layout": "compact",
+      "job": "J02",
+      "location": "London, United Kingdom",
+      "email": "daniel_okafor@example.com",
+      "phone": "+33 6 00 00 06",
+      "portfolio": "portfolio.example.com/daniel_okafor",
+      "summary": "NOC Engineer with hands-on experience in Cisco, VPN and BGP. Strong on troubleshooting, documentation and keeping complex networks boring.",
+      "skills": [
+        "Cisco",
+        "VPN",
+        "BGP",
+        "OSPF",
+        "Firewalls",
+        "MPLS",
+        "Wireshark",
+        "Network Automation"
+      ],
+      "experience": [
+        "NOC Engineer Apr 2011 to Apr 2016 Glacier Cloud Northwind Atlas is one of the leading BPO in call centre industry with headquarters located in San Diego, USA.",
+        "They were originally a part of Midland credit management which deals in collection of credit card and house tax loan Payments & also have overseas operations in Costa Rica, Warren, ST Cloud, San Antonio, Dallas, Phoenix and so on.",
+        "Key Responsibilities and Technical Skill Set: Project:-EOS/NOC NOC is a part of Enterprise operations support that deals with the Infrastructure within USA, UK & India.",
+        "Key Responsibilities and Technical Skill Set: Event Management-interpret alerts received via monitoring tools troubleshoot and take necessary remedial actions.",
+        "Incident Management- Handling P1 Outage/Interruption.",
+        "Taking care of incident management L2 and L3 bridges and drive them to resolution using incident management techniques under ITIL guidelines.",
+        "Alert configuration of server and network devices according to their threshold value specified by the concern team.",
+        "Monitoring infrastructure devices with the help of various tools like Application Manager, Netflow Analyzer and Solarwinds Orion.",
+        "Performing day to day activity which is specific to MCM environment with the help of tools like AS/400, SQL server management Studio and Idera Updating Dashboard, maintaining inventory for all NOC activities.",
+        "Keep tracking of all Service Now tickets and their SLA's.",
+        "Working and updating all the existing and new process documents and NOC day to day activities in Service now Knowledge Management which help the new joiners to understand the job responsibilities of NOC team.",
+        "Working on Solarwinds Orion for configuring alarms, Nodes and other network devices."
+      ],
+      "education": [
+        [
+          "BSc Network Engineering",
+          "Meridia Institute of Technology",
+          "2014 – 2016"
+        ]
+      ],
+      "certifications": [
+        "*CCNA trained from NET-TECH Institute (Janakpuri)."
+      ],
+      "languages": [
+        "English (native)",
+        "Igbo (native)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV07",
+      "source_id": "20824105",
+      "name": "Mei Lin",
+      "slug": "Mei_Lin",
+      "title": "Cloud Administrator",
+      "field": "cloud",
+      "layout": "classic",
+      "job": "J02",
+      "location": "Singapore",
+      "email": "mei_lin@example.com",
+      "phone": "+33 6 00 00 07",
+      "portfolio": "portfolio.example.com/mei_lin",
+      "summary": "Cloud Administrator with hands-on experience in AWS, Linux and Azure. Focused on secure, reproducible infrastructure and cost-aware operations.",
+      "skills": [
+        "AWS",
+        "Linux",
+        "Azure",
+        "Terraform",
+        "Kubernetes",
+        "CI/CD",
+        "Monitoring",
+        "IAM"
+      ],
+      "experience": [
+        "Information Technology and AWS Admin Intern , 04/2019 Lantern Retail - Singapore Researched and implemented a secure cloud infrastructure for migrating the financial data into AWS with seamless integration for company's financial department.",
+        "Achieved an overall increment of 30% in efficiency by migrating the company's infrastructure to AWS cloud.",
+        "Reduced the company's infrastructure cost by 10 times.",
+        "Implemented secure off-site backups through scheduled weekly SSH dumps to remote server.",
+        "Configured and troubleshot switches, routers and firewalls using TCP/IP protocols.",
+        "Network Engineer Intern , 10/2015 Lantern Retail Built LAN and WAN for small-scale business enterprises using HTTP, DHCP, DNS, OSPF, VLAN.",
+        "AWS Certified Solutions Architect- Associate , 10/2018 Lantern Retail - Singapore ID-J007G7C1MFE41RSQ) Aug 2019 Cisco Certified Network Associate - CCNA 200-125 (ID-CSCO+33 6 00 00 07/2019 Lantern Retail Set up a VPC network on Amazon and created public and private subnets, security groups, elastic IP and NAT gateway.",
+        "Created an EC2 instance with Windows AMI to host an application on virtual machine WAN network deployment for a multinational organization using Cisco Packet Tracer Fall 2018.",
+        "Solved security threats by providing network security using ACL and port security Linux Based Integrated Ad-Hoc Network for IT infrastructure (Linux, Ubuntu) Fall 2018.",
+        "Designed and implemented a prototype illustrating a client-server model for hosting WebServer (Apache2), master and slave."
+      ],
+      "education": [
+        [
+          "BSc Cloud Computing",
+          "Lakeside University",
+          "2017 – 2019"
+        ]
+      ],
+      "certifications": [
+        "AWS Solutions Architect — Associate",
+        "Azure Administrator"
+      ],
+      "languages": [
+        "English (C2)",
+        "Mandarin (native)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV08",
+      "source_id": "16186411",
+      "name": "Karim Haddad",
+      "slug": "Karim_Haddad",
+      "title": ".NET Developer",
+      "field": "backend",
+      "layout": "classic",
+      "job": "J03",
+      "location": "Dubai, United Arab Emirates",
+      "email": "karim_haddad@example.com",
+      "phone": "+33 6 00 00 08",
+      "portfolio": "portfolio.example.com/karim_haddad",
+      "summary": ".NET Developer with hands-on experience in C#, ASP.NET and SQL Server. Builds maintainable services with strong review and testing habits.",
+      "skills": [
+        "C#",
+        "ASP.NET",
+        "SQL Server",
+        "JavaScript",
+        "Entity Framework",
+        "Git",
+        "REST APIs",
+        "Azure"
+      ],
+      "experience": [
+        "Projects: Atlas: Description: This project is all about requesting, scheduling the tutoring sessions.",
+        "There are three roles tied to application they are Tutee, Tutor, and Scheduler.",
+        "A tutee requests for tutoring for the classes that he/she enrolled and gives availability apart from the class timing through Availability Grid and Tutor submits availability.",
+        "A scheduler will go through those availabilities and schedule time and location for tutoring.",
+        "Also, there are some set of rules for dropping the tutoring sessions which are incorporated in this project.",
+        "The other piece of this project is automated emails through Scheduled task which runs every day.",
+        "Responsibilities: Created a Availability Calendar Grid.",
+        "In grid each cell represents time (1 hour span) and day of the week.",
+        "Clicking on the cell toggles the availability.",
+        "Automatically populated the course schedule which comes from different database(Worked with data warehouse team in order to get that data) Developed C# Console Application for Scheduled email task.",
+        "Got rid of data tables and table adapters in the main project as they are tightly coupled.",
+        "Created Class libraries out of the main project to access the database which can be used by both Console Application for Schedule task and web application."
+      ],
+      "education": [
+        [
+          "BSc Software Engineering",
+          "Northvale University",
+          "2015 – 2017"
+        ]
+      ],
+      "certifications": [
+        "Microsoft Certified: Azure Developer Associate"
+      ],
+      "languages": [
+        "Arabic (native)",
+        "English (C1)",
+        "French (B1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV09",
+      "source_id": "12763627",
+      "name": "Elena Petrova",
+      "slug": "Elena_Petrova",
+      "title": "ASP.NET Web Developer",
+      "field": "backend",
+      "layout": "modern",
+      "job": "J03",
+      "location": "Warsaw, Poland",
+      "email": "elena_petrova@example.com",
+      "phone": "+33 6 00 00 09",
+      "portfolio": "portfolio.example.com/elena_petrova",
+      "summary": "ASP.NET Web Developer with hands-on experience in Programming, C# and ASP.NET. Builds maintainable services with strong review and testing habits.",
+      "skills": [
+        "Programming",
+        "C#",
+        "ASP.NET",
+        "SQL Server",
+        "JavaScript",
+        "Git",
+        "REST APIs",
+        "Entity Framework",
+        "Azure"
+      ],
+      "experience": [
+        "April 2015 to Current Orchid Byte Warsaw, Poland ASP.Net Web Developer Responsibilities: Migration of IU Print website (print.iu.edu) from ColdFusion to ASP.Net using MVC Framework.",
+        "Create a prototype dashboard for IU Print Analytics module using High Charts.",
+        "July 2011 to July 2014 Orchid Byte Warsaw, Poland Software Engineer Responsibilities: Designed and developed an application to migrate legacy data to ASP.Net application by providing the ability to validate the data to meet the business rules for the new application.",
+        "Design the story board using HTML and CSS and design database for applications by analyzing the customer requirements.",
+        "Perform code reviews of the modules developed by other team members and participate in pair programming to improve the coding standards of the overall application.",
+        "Preparation of build packages and actively participate in integration and deployment phase of the applications."
+      ],
+      "education": [
+        [
+          "BSc Software Engineering",
+          "Northvale University",
+          "2015 – 2017"
+        ]
+      ],
+      "certifications": [
+        "Microsoft Certified: Azure Developer Associate"
+      ],
+      "languages": [
+        "Russian (native)",
+        "English (C1)",
+        "Polish (B1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV10",
+      "source_id": "20674668",
+      "name": "Tomás Silva",
+      "slug": "Tomas_Silva",
+      "title": "Drupal Developer",
+      "field": "backend",
+      "layout": "compact",
+      "job": "J03",
+      "location": "Lisbon, Portugal",
+      "email": "tomas_silva@example.com",
+      "phone": "+33 6 00 00 10",
+      "portfolio": "portfolio.example.com/tomas_silva",
+      "summary": "Drupal Developer with hands-on experience in JavaScript, C# and ASP.NET. Builds maintainable services with strong review and testing habits.",
+      "skills": [
+        "JavaScript",
+        "C#",
+        "ASP.NET",
+        "SQL Server",
+        "REST APIs",
+        "Entity Framework",
+        "Azure",
+        "Git"
+      ],
+      "experience": [
+        "Information Technology Specialist III (Drupal Dev) / Umbra Shield - Lisbon, Portugal 08/2015 - Current",
+        "Lead Drupal Developer for the NYSED.GOV redesign project.",
+        "Completely re-architecting the NYSED.GOV's website and content strategy.",
+        "Migrating all data, building and configuring the new site, and creating the custom Responsive Drupal theme.",
+        "Streamlining the authoring experience for content creators and auditors.",
+        "Designing, coding, architecting and testing various themes, modules and processes to extend Drupal to meet the Department needs.",
+        "Developing the NYSED's Drupal-based websites using HTML5 and CSS3.",
+        "Supervising the H-BITS Consultant and providing guidance according to the project plan.",
+        "Analyzing client request to develop, test, and deploy functional software requirements.",
+        "Providing support and assistance to webmasters to publish and update content to the NYSED's websites.",
+        "Coordinating activities with ITS infrastructure support units related to the configuration of the NYSED's websites, as well as the establishing and maintaining file access rights.",
+        "Executing tasks associated with generating website analytics."
+      ],
+      "education": [
+        [
+          "BSc Software Engineering",
+          "Northvale University",
+          "2015 – 2017"
+        ]
+      ],
+      "certifications": [
+        "Microsoft Certified: Azure Developer Associate"
+      ],
+      "languages": [
+        "Portuguese (native)",
+        "English (C1)",
+        "Spanish (B2)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV11",
+      "source_id": "43311839",
+      "name": "Hana Suzuki",
+      "slug": "Hana_Suzuki",
+      "title": "Software Engineer",
+      "field": "backend",
+      "layout": "table",
+      "job": "J12",
+      "location": "Tokyo, Japan",
+      "email": "hana_suzuki@example.com",
+      "phone": "+33 6 00 00 11",
+      "portfolio": "portfolio.example.com/hana_suzuki",
+      "summary": "Software Engineer with hands-on experience in C#, ASP.NET and SQL Server. Builds maintainable services with strong review and testing habits.",
+      "skills": [
+        "C#",
+        "ASP.NET",
+        "SQL Server",
+        "REST APIs",
+        "JavaScript",
+        "Entity Framework",
+        "Git",
+        "Azure"
+      ],
+      "experience": [
+        "SDLC) including requirements, logical and physical architecture modeling, design, development, implementation, and support.",
+        "Ability to work in a fast paced, collaborative environment and handle multiple concurrent projects.",
+        "Collaborate with partners to understand high-level conceptual flow and develop prototypes to review with business partners.",
+        "Functional Domain experience involves HealthCare, Life Sciences and Transportation.",
+        "Moved to Application Support team and leading an offshore team in Triaging production related issues since six months"
+      ],
+      "education": [
+        [
+          "BSc Software Engineering",
+          "Northvale University",
+          "2015 – 2017"
+        ]
+      ],
+      "certifications": [
+        "Microsoft Certified: Azure Developer Associate"
+      ],
+      "languages": [
+        "Japanese (native)",
+        "English (C1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV12",
+      "source_id": "51588273",
+      "name": "Omar Farouk",
+      "slug": "Omar_Farouk",
+      "title": "Engineering Manager",
+      "field": "management",
+      "layout": "modern",
+      "job": "J08",
+      "location": "Munich, Germany",
+      "email": "omar_farouk@example.com",
+      "phone": "+33 6 00 00 12",
+      "portfolio": "portfolio.example.com/omar_farouk",
+      "summary": "Engineering Manager with a track record of leading teams across Architecture, Team Leadership and Hiring. Focused on delivery predictability, hiring and healthy on-call.",
+      "skills": [
+        "Architecture",
+        "Team Leadership",
+        "Hiring",
+        "Delivery",
+        "Incident Management",
+        "OKRs",
+        "Coaching",
+        "Stakeholders"
+      ],
+      "experience": [
+        "Software Engineering Manager August 2011 to Current Cobalt Harbor - Munich, Germany Orchestrate key internal IT developments for large-scale enterprise solutions while managing budgets and capacity planning company-wide.",
+        "Cross-train a professional team of 10+ employees on software development using C#, ASP.NET and JavaScript, and SQL.",
+        "Foster relationships between competitive organizations in order to coordinate cross-functional software, oversee career guidance/progress, and monitor success ratios.",
+        "Senior Software Engineer April 2008 to August 2011 Cobalt Harbor - Munich, Germany Coordinated highly responsive web-based software development using C#, ASP.NET and JavaScript, SQL and Dojo.",
+        "Built loyalty and rapport as a result of strong written and verbal communication while overseeing, supporting, and enhancing existing systems and software.",
+        "Strategically maintained department and enterprise Cognos reporting systems, along with system architecture/ design.",
+        "Senior Software Engineer/Architect April 2003 to August 2008 Cobalt Harbor - Munich, Germany Led teams in full life cycle software development using C#, ASP.NET and JavaScript, SQL as a result of strong expertise in supporting and enhancing existing legacy systems and software.",
+        "Assigned to train others and maintain the department and enterprise Crystal reporting systems, along with system architecture and design.",
+        "Acquired further multi-department exposure as Development Manager at Matrix Bancorp, and Supervisor/ Developer at MCI WorldCom."
+      ],
+      "education": [
+        [
+          "MSc Software Engineering",
+          "Cedar Valley University",
+          "2010 – 2012"
+        ]
+      ],
+      "certifications": [
+        "Certified ScrumMaster"
+      ],
+      "languages": [
+        "Arabic (native)",
+        "English (C1)",
+        "German (B2)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV13",
+      "source_id": "22605864",
+      "name": "Camille Dubois",
+      "slug": "Camille_Dubois",
+      "title": "Software Engineering Team Lead",
+      "field": "management",
+      "layout": "classic",
+      "job": "J08",
+      "location": "Montreal, Canada",
+      "email": "camille_dubois@example.com",
+      "phone": "+33 6 00 00 13",
+      "portfolio": "portfolio.example.com/camille_dubois",
+      "summary": "Software Engineering Team Lead with a track record of leading teams across Architecture, Team Leadership and Hiring. Focused on delivery predictability, hiring and healthy on-call.",
+      "skills": [
+        "Architecture",
+        "Team Leadership",
+        "Hiring",
+        "Delivery",
+        "Incident Management",
+        "OKRs",
+        "Coaching",
+        "Stakeholders"
+      ],
+      "experience": [
+        "July 2008 to January 2015 Juniper Lane Software Engineering Team Lead Joined as part of the Helios Forge IO capability.",
+        "Helios Forge is a joint venture between Microsoft and Accenture and specializes on Microsoft product solutions.",
+        "Project 1: Stanford Hospital and Clinics Tenure: March 2012 Till date I am currently the onshore technical lead and subject matter expert for our monitoring solution called Microsoft System Center Operations Manager (SCOM 2012).",
+        "I was part of designing and implementing the SCOM solution for our client.",
+        "Some of the key activities that I have been leading here are: Designing, configuring and operating SCOM.",
+        "Expand monitoring to non-trusted domains and cross platform servers.",
+        "Building new management packs using VSAE, VMPD, Authoring Tools Migration/ upgrade of SCOM 2012 RTM to Release 2.",
+        "Working on SLA and other reports and dashboards.",
+        "Application monitoring/ Synthetic transactions Prior to joining the monitoring team, I was working for their core infrastructure.",
+        "My role in the team was to identify flaws and remediate core IO services such as AD, DNS, DHCP, WINS, File/ Print, etc.",
+        "I also provided escalation support for critical incidents.",
+        "We worked on decommissioning Windows 2003 domain controllers out of the environment."
+      ],
+      "education": [
+        [
+          "MSc Software Engineering",
+          "Cedar Valley University",
+          "2010 – 2012"
+        ]
+      ],
+      "certifications": [
+        "ITIL v3 Foundations certified.",
+        "MCSE",
+        "SCCM certified."
+      ],
+      "languages": [
+        "French (native)",
+        "English (C1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV14",
+      "source_id": "12472574",
+      "name": "Arjun Mehta",
+      "slug": "Arjun_Mehta",
+      "title": "QA Engineering Team Lead",
+      "field": "qa",
+      "layout": "modern",
+      "job": "J05",
+      "location": "Bangalore, India",
+      "email": "arjun_mehta@example.com",
+      "phone": "+33 6 00 00 14",
+      "portfolio": "portfolio.example.com/arjun_mehta",
+      "summary": "QA Engineering Team Lead with hands-on experience in Leadership, Test Automation and Selenium. Focused on automation that shortens releases and catches the regressions that matter.",
+      "skills": [
+        "Leadership",
+        "Test Automation",
+        "Selenium",
+        "Playwright",
+        "API Testing",
+        "CI/CD",
+        "Test Design",
+        "Jira",
+        "Agile"
+      ],
+      "experience": [
+        "The primary responsibility for the quality of our Imagicast product line, lead the QA team assigned to the Imagicast related quality tasks, established appropriate QA methods, inspections, tests and documentation to verify software quality prior to release in a shipping product.",
+        "Also, was involved in the diagnosis of product failures or performance problems reported from the field.",
+        "QA tasks applicable to the product included verifying operation of a DVD playback system, verifying operation of peripheral devices (e.g.",
+        "keyboard, printer) connected to the embedded system, verifying data collection functions over a wireless data network and verifying presentation of HTML pages on an internet device.",
+        "Performed QA tests on complex, multi threaded systems and interpreting specifications for product features and designed appropriate test cases.",
+        "Applied QA processes to reveal functional and performance problems affecting web pages in real time embedded systems.",
+        "SenticaXchange(TM) System Administration and Management Module functionality provides full access to customer information from each touch-point in the enterprise and to each customer or employees who interact with the customer.",
+        "These applications provide the breadth of functionality needed to succeed in the competitive wireless business.",
+        "Rounding out the offering, customer care functionality provides full access to customer information from each touch-point in the enterprise and to each customer care agent or other employees who interact with the customer.",
+        "Full business process management is provided with functionality in support, scheduling and dispatching, spare parts, logistics, and service billing and mobile field service as well as in contracts from the.",
+        "Performed analysis and Test Document designfor Oracle Customer Care/Service Applications including Oracle Telephony Management (OTM) system.",
+        "OTM is a high-volume cross-platform interface engine utilizing UNIX 10.x/C++, Oracle/SQL, and various network protocols."
+      ],
+      "education": [
+        [
+          "BSc Information Systems",
+          "Meridia Institute of Technology",
+          "2014 – 2016"
+        ]
+      ],
+      "certifications": [
+        "ISTQB Certified Tester"
+      ],
+      "languages": [
+        "English (C2)",
+        "Hindi (native)",
+        "Kannada (conversational)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV15",
+      "source_id": "83816738",
+      "name": "Fatima Zahra",
+      "slug": "Fatima_Zahra",
+      "title": "Test Automation Engineer",
+      "field": "qa",
+      "layout": "compact",
+      "job": "J05",
+      "location": "Casablanca, Morocco",
+      "email": "fatima_zahra@example.com",
+      "phone": "+33 6 00 00 15",
+      "portfolio": "portfolio.example.com/fatima_zahra",
+      "summary": "Test Automation Engineer with hands-on experience in Programming, Test Automation and Selenium. Focused on automation that shortens releases and catches the regressions that matter.",
+      "skills": [
+        "Programming",
+        "Test Automation",
+        "Selenium",
+        "Jira",
+        "Agile",
+        "Playwright",
+        "API Testing",
+        "CI/CD",
+        "Test Design"
+      ],
+      "experience": [
+        "Information Technology Intern (Test Automation Engineer) 05/2017 to 08/2017 Quartz River Casablanca, Morocco Created nicely baked ‘Test Automation Framework' to provide an execution environment for the automation test scripts.",
+        "The framework allowed automated regression testing of ‘WebTix', frontend/web interface that ExtremeTix's (Ticketing Solution Company) clients use to access web services.",
+        "Extensively used Selenium WebDriver and Spring Boot combined to write automation scripts for dynamic pages of ‘WebTix' written on AngularJS Framework.",
+        "Modularized web components as Java objects following Page Object Model i.e created Object repository for all locators which can be easily automated.",
+        "Leveraged the benefits of both data-driven and behavior-driven approaches and built the framework that is maintainable and reusable.",
+        "Integrated automated tests with Cucumber (behavior-driven testing framework) to allow Quality Assurance team write high-level use cases in plain text.",
+        "Leveraged Jenkins to build automated tests project and use Selenium Grid to run parallel tests across multiple browsers and platforms.",
+        "Automated reports generation and distribution.",
+        "Interpreted and converted manual test cases into automation smoke and regression suites.",
+        "Trained and supported the QA team with automation framework and script issues.",
+        "Collaborated with the QA team and went through an evolutionary approach in writing concise documentation to help configure the framework and add new automated tests as required.",
+        "Worked on JIRA tool to create and track new project/issue."
+      ],
+      "education": [
+        [
+          "BSc Information Systems",
+          "Meridia Institute of Technology",
+          "2014 – 2016"
+        ]
+      ],
+      "certifications": [
+        "ISTQB Certified Tester"
+      ],
+      "languages": [
+        "Arabic (native)",
+        "French (C1)",
+        "English (C1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV16",
+      "source_id": "41152404",
+      "name": "Noah Williams",
+      "slug": "Noah_Williams",
+      "title": "QA Test Analyst",
+      "field": "qa",
+      "layout": "classic",
+      "job": "J05",
+      "location": "Austin, United States",
+      "email": "noah_williams@example.com",
+      "phone": "+33 6 00 00 16",
+      "portfolio": "portfolio.example.com/noah_williams",
+      "summary": "QA Test Analyst with hands-on experience in TECHNICAL, Test Automation and Selenium. Focused on automation that shortens releases and catches the regressions that matter.",
+      "skills": [
+        "TECHNICAL",
+        "Test Automation",
+        "Selenium",
+        "Jira",
+        "Agile",
+        "Playwright",
+        "API Testing",
+        "CI/CD",
+        "Test Design"
+      ],
+      "experience": [
+        "August 2014 to February 2015 Glacier Cloud Test Analyst-Intern/Contractor Responsibilities: System testing and functional testing on E-commerce websites.",
+        "This involves testing it against the functional specification and integration testing the system in case of website is integrated.",
+        "Conducting cross browser and cross platform testing on different desktop browsers, Mobile phones and various Tablets.",
+        "Analyzing the Requirements provided by client in Functional and Technical requirements specification and Communicating with BA, Developers and Project coordinators.",
+        "Writing functional and non-functional requirement test cases based of functional specification.",
+        "Performing integration testing in co-ordination with client for the site, which is integrated with external system."
+      ],
+      "education": [
+        [
+          "BSc Information Systems",
+          "Meridia Institute of Technology",
+          "2014 – 2016"
+        ]
+      ],
+      "certifications": [
+        "ISTQB Certified Tester"
+      ],
+      "languages": [
+        "English (native)",
+        "Spanish (B1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV17",
+      "source_id": "29051656",
+      "name": "Chiara Bianchi",
+      "slug": "Chiara_Bianchi",
+      "title": "Database Administrator",
+      "field": "dba",
+      "layout": "table",
+      "job": "J06",
+      "location": "Rome, Italy",
+      "email": "chiara_bianchi@example.com",
+      "phone": "+33 6 00 00 17",
+      "portfolio": "portfolio.example.com/chiara_bianchi",
+      "summary": "Database Administrator with hands-on experience in SQL Server, Oracle and Performance Tuning. Focused on performance, recoverability and zero-drama migrations.",
+      "skills": [
+        "SQL Server",
+        "Oracle",
+        "Performance Tuning",
+        "Backup/Recovery",
+        "Replication",
+        "SQL",
+        "Linux",
+        "PostgreSQL"
+      ],
+      "experience": [
+        "Information Technology Specialist 03/2018 to Current Lantern Retail Rome, Italy Primary responsibilities include production support, installation and configuration, migration, backup and recovery, performance tuning, cloning, security, upgrades, and patches.",
+        "Planned, installed and upgraded multiple Oracle databases from 11.2.0.4 to 12.2.0.",
+        "Added targets to OEM 13c and used OEM 13c to monitored databases.",
+        "Created rules, security profiles using OEM 13c.",
+        "Performed Hot/Cold Backup, Recovery and Cloning of databases using RMAN Planned and implemented Backup strategies, used RMAN and Crontab to schedule backup.",
+        "Installed and upgraded databases from MySQL 5.6 to 5.7 and implemented mysqld_multi for better performance.",
+        "Migrated databases from on-premise to AWS using Database migration services.",
+        "Launched and maintained RDS and EC2 instances in AWS.",
+        "Created Snapshots, Elastic IPs, EBS Volumes, Security Groups per clients/costumers request.",
+        "Created security groups to manage inbound and outbound rules.",
+        "Database Administrator 12/2014 to Current Lantern Retail Rome, Italy Troubleshot and resolved web application issues escalated from customer support and other departments with a 100% success rate.",
+        "Worked with clients to analyze computing and network needs and implemented appropriate solutions within each department's budget."
+      ],
+      "education": [
+        [
+          "MSc Database Systems",
+          "Atlas Polytechnic",
+          "2011 – 2013"
+        ]
+      ],
+      "certifications": [
+        "PostgreSQL Associate",
+        "Oracle Certified Professional"
+      ],
+      "languages": [
+        "Italian (native)",
+        "English (C1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV18",
+      "source_id": "26746496",
+      "name": "Viktor Novak",
+      "slug": "Viktor_Novak",
+      "title": "Database Programmer",
+      "field": "dba",
+      "layout": "classic",
+      "job": "J06",
+      "location": "Prague, Czech Republic",
+      "email": "viktor_novak@example.com",
+      "phone": "+33 6 00 00 18",
+      "portfolio": "portfolio.example.com/viktor_novak",
+      "summary": "Database Programmer with hands-on experience in SQL Server, SQL and PostgreSQL. Focused on performance, recoverability and zero-drama migrations.",
+      "skills": [
+        "SQL Server",
+        "SQL",
+        "PostgreSQL",
+        "Oracle",
+        "Performance Tuning",
+        "Backup/Recovery",
+        "Replication",
+        "Linux"
+      ],
+      "experience": [
+        "Projects: Atlas: Description: This project is all about requesting, scheduling the tutoring sessions.",
+        "There are three roles tied to application they are Tutee, Tutor, and Scheduler.",
+        "A tutee requests for tutoring for the classes that he/she enrolled and gives availability apart from the class timing through Availability Grid and Tutor submits availability.",
+        "A scheduler will go through those availabilities and schedule time and location for tutoring.",
+        "Also, there are some set of rules for dropping the tutoring sessions which are incorporated in this project.",
+        "The other piece of this project is automated emails through Scheduled task which runs every day.",
+        "Responsibilities: Created a Availability Calendar Grid.",
+        "In grid each cell represents time (1 hour span) and day of the week.",
+        "Clicking on the cell toggles the availability.",
+        "Automatically populated the course schedule which comes from different database(Worked with data warehouse team in order to get that data) Developed C# Console Application for Scheduled email task.",
+        "Got rid of data tables and table adapters in the main project as they are tightly coupled.",
+        "Created Class libraries out of the main project to access the database which can be used by both Console Application for Schedule task and web application."
+      ],
+      "education": [
+        [
+          "MSc Database Systems",
+          "Atlas Polytechnic",
+          "2011 – 2013"
+        ]
+      ],
+      "certifications": [
+        "PostgreSQL Associate",
+        "Oracle Certified Professional"
+      ],
+      "languages": [
+        "Czech (native)",
+        "English (C1)",
+        "German (B1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV19",
+      "source_id": "15145575",
+      "name": "Leila Mansour",
+      "slug": "Leila_Mansour",
+      "title": "IT Support Officer",
+      "field": "support",
+      "layout": "classic",
+      "job": "J07",
+      "location": "Paris, France",
+      "email": "leila_mansour@example.com",
+      "phone": "+33 6 00 00 19",
+      "portfolio": "portfolio.example.com/leila_mansour",
+      "summary": "IT Support Officer with hands-on experience in Windows, Active Directory and Networking. Calm with users, precise with evidence, and disciplined about documentation.",
+      "skills": [
+        "Windows",
+        "Active Directory",
+        "Networking",
+        "Hardware",
+        "Microsoft 365",
+        "Ticketing",
+        "Customer Service",
+        "ITIL"
+      ],
+      "experience": [
+        "IT Support Officer March 2011 to August 2015 Orchid Byte System Administrator April 2010 to January 2011 Orchid Byte Lab Technician Technical Support April 2009 to March 2010 Orchid Byte Comprehensive knowledge of CISCO networking technologies and Protocols.",
+        "Handling the network infrastructure LAN/WAN, migration & configuration of network Devices (Routers, Switches, Firewalls etc.).",
+        "Skilled in planning and implementing LAN/WAN solutions.",
+        "OSPF, Static and Default Route) Assisting in the design & implementation of the network and troubleshooting.",
+        "Troubleshooting Extending high-end technical support on various Servers and ensuring high customer satisfaction levels through prompt redressal of their problems.",
+        "Configuring and troubleshooting IP Phones, Network Printers and Virtual Interface (VMWare) related issues.",
+        "Assigning user nodes to various devices installed and networked, handle allocation and protection of user rights, as per company's policies.",
+        "Configure windows server 2003 and 2008 with Active Directory ,Terminal Server Group Policy and manage Data server with security.",
+        "SAP Online Support System Backup and Recovery DR to HADR Data synchronization Monitoring.",
+        "User management Transaction Lock/Unlock User Authorization and Users Role Windows Servers Microsoft active directory services, Server +33 6 00 00 19, Configure Domain security policies, Local security policies Configure and manage File server and Share Folders.",
+        "Design: DNS and DHCP servers in +33 6 00 00 19 Server.",
+        "share folders and implementing group polices."
+      ],
+      "education": [
+        [
+          "BSc Information Technology",
+          "Lakeside University",
+          "2018 – 2020"
+        ]
+      ],
+      "certifications": [
+        "Cisco Certified",
+        "Microsoft Certified Professional"
+      ],
+      "languages": [
+        "Arabic (native)",
+        "French (native)",
+        "English (C1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV20",
+      "source_id": "52618188",
+      "name": "Samuel Adeyemi",
+      "slug": "Samuel_Adeyemi",
+      "title": "IT Help Desk Specialist",
+      "field": "support",
+      "layout": "compact",
+      "job": "J07",
+      "location": "Lagos, Nigeria",
+      "email": "samuel_adeyemi@example.com",
+      "phone": "+33 6 00 00 20",
+      "portfolio": "portfolio.example.com/samuel_adeyemi",
+      "summary": "IT Help Desk Specialist with hands-on experience in Windows, Active Directory and Ticketing. Calm with users, precise with evidence, and disciplined about documentation.",
+      "skills": [
+        "Windows",
+        "Active Directory",
+        "Ticketing",
+        "Hardware",
+        "Customer Service",
+        "Microsoft 365",
+        "Networking",
+        "ITIL"
+      ],
+      "experience": [
+        "Importing and exporting data from SAP and Sharepoint and manipulating and compiling data to create weekly Power Point presentation for executive management team.",
+        "Measurements include shipments, order cycle time, aged orders, inventory, forecasting, etc.",
+        "Work with other business organizations and vendors to resolve any data or system issues.",
+        "Provide visibility to department metrics by maintaining current information on HP's internal site.",
+        "Customer Service Professional March 2007 to August 2008 Umbra Shield - Lagos, Nigeria Answers incoming customer telephone calls in a courteous and professional manner.",
+        "Responds to and investigates customer inquiries, concerns, orders and issues received via phone, fax, email, Shell Source, and EDI in a timely and courteous manner.",
+        "Responsible for entering orders and resolving customer issues for many different products using the SAP/CRM and Remedy tool.",
+        "Researches and resolves customer complaints and/or ordering issues and determines effective method of distribution to satisfy customer needs.",
+        "Assign, escalate, and notify appropriate agents/managers of customer issues to ensure fast and effective support delivery and resolutions using Remedy Maintain relationship with sales team, customers and manufacturing and suppliers."
+      ],
+      "education": [
+        [
+          "BSc Information Technology",
+          "Lakeside University",
+          "2018 – 2020"
+        ]
+      ],
+      "certifications": [
+        "CompTIA A+",
+        "Microsoft 365 Fundamentals"
+      ],
+      "languages": [
+        "English (native)",
+        "Yoruba (native)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV21",
+      "source_id": "40018190",
+      "name": "Inès Lemaire",
+      "slug": "Ines_Lemaire",
+      "title": "IT Support Technician",
+      "field": "support",
+      "layout": "modern",
+      "job": "J07",
+      "location": "Grenoble, France",
+      "email": "ines_lemaire@example.com",
+      "phone": "+33 6 00 00 21",
+      "portfolio": "portfolio.example.com/ines_lemaire",
+      "summary": "IT Support Technician with hands-on experience in Active Directory, Hardware and Customer Service. Calm with users, precise with evidence, and disciplined about documentation.",
+      "skills": [
+        "Active Directory",
+        "Hardware",
+        "Customer Service",
+        "Windows",
+        "Microsoft 365",
+        "Ticketing",
+        "Networking",
+        "ITIL"
+      ],
+      "experience": [
+        "in network/hardware/operating system troubleshooting, web page design, PC assembly, technical support,and customer service.",
+        "Analytical Helpdesk technician adept at resolving complex issues.",
+        "Delivered production work using Active Directory and Hardware, with tests, documentation and a clean handover.",
+        "Partnered with product, design and operations on scoping, delivery and post-release support.",
+        "Improved team standards through code review, runbooks and incident follow-ups."
+      ],
+      "education": [
+        [
+          "BSc Information Technology",
+          "Lakeside University",
+          "2018 – 2020"
+        ]
+      ],
+      "certifications": [
+        "CompTIA A+",
+        "Microsoft 365 Fundamentals"
+      ],
+      "languages": [
+        "French (native)",
+        "English (C1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV22",
+      "source_id": "37664296",
+      "name": "Ravi Patel",
+      "slug": "Ravi_Patel",
+      "title": "Lead UX/UI Designer",
+      "field": "design",
+      "layout": "modern",
+      "job": "J04",
+      "location": "London, United Kingdom",
+      "email": "ravi_patel@example.com",
+      "phone": "+33 6 00 00 22",
+      "portfolio": "portfolio.example.com/ravi_patel",
+      "summary": "Lead UX/UI Designer with hands-on experience in Prototyping, HTML/CSS and Figma. Turns complex workflows into accessible, shipped interfaces.",
+      "skills": [
+        "Prototyping",
+        "HTML/CSS",
+        "Figma",
+        "Design Systems",
+        "Usability Research",
+        "Accessibility",
+        "Adobe CC",
+        "Wireframing"
+      ],
+      "experience": [
+        "Lead UX/UI Designer Sep 2014 to Jun 2016 Cobalt Harbor - London, United Kingdom Lead UX/UI designer at Cobalt Harbor an industry leader in secure document management software.",
+        "Primary role included lead for two web applications Cobalt Harbor s Client Provisioning Portal and Client Management Portal.",
+        "The provisioning web application portal is used by Cobalt Harbor's account managers to set up new clients.",
+        "My tasks were to successfully design set up client companies with unique settings, permissions and bulk licensing procurement.",
+        "The Client Application Portal is designed to be used by the client company's administrators to manage users.",
+        "The app featured, bulk and singular user on-boarding, license management and cunsumtion, locking and resetting users, auditing and login methods for both local and active directory users.",
+        "I work in an Agile work enviorment with two week sprint cycles Manage stories via Target Process Establish best practice usability and maintained patterns of experience and brand Daily Collaboration with Designers, Scrum Master, BA, DEV, QA and PO across two products.",
+        "Accountable for maintaining brand - via click through comps and style-guides Recently working on mobile IOS conversions Initialed weekly sketch and collaboration sessions with team to better understand and incorporate a variety of perspectives on flows and task completion.",
+        "Consistently adhered to all sprint delivery schedules and deadlines.",
+        "Features and Site Prototypes were created using Axure, XD, Photoshop and or Illustrator.",
+        "Axure used for navigation prototype click throughs and flow charts.",
+        "Senior UX/UI Designer May 2014 to Sep 2014 Cobalt Harbor - London, United Kingdom The objective at LPL was to redesign many antiquated stock brokerage software."
+      ],
+      "education": [
+        [
+          "BA Interaction Design",
+          "Cedar Valley University",
+          "2014 – 2016"
+        ]
+      ],
+      "certifications": [
+        "Nielsen Norman Group UX Certification"
+      ],
+      "languages": [
+        "English (native)",
+        "Gujarati (native)",
+        "Hindi (C1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV23",
+      "source_id": "34317538",
+      "name": "Anna Kowalska",
+      "slug": "Anna_Kowalska",
+      "title": "Lead Interaction Designer",
+      "field": "design",
+      "layout": "classic",
+      "job": "J04",
+      "location": "Krakow, Poland",
+      "email": "anna_kowalska@example.com",
+      "phone": "+33 6 00 00 23",
+      "portfolio": "portfolio.example.com/anna_kowalska",
+      "summary": "Lead Interaction Designer with hands-on experience in User Centered Design, Prototyping and Figma. Turns complex workflows into accessible, shipped interfaces.",
+      "skills": [
+        "User Centered Design",
+        "Prototyping",
+        "Figma",
+        "Design Systems",
+        "Usability Research",
+        "Accessibility",
+        "HTML/CSS",
+        "Adobe CC",
+        "Wireframing"
+      ],
+      "experience": [
+        "Lead Interaction Designer 05/2012 to Current Juniper Lane Krakow, Poland Tim is the lead interaction designer on a nine person Agile software development team creating software for use in healthcare facilities.",
+        "His role as one of three BAs on the team has him conducting user testing and interviews, data gathering, persona development, wire-framing, story writing, interface analysis, and being the general usability evangelist.",
+        "He acts as the NHSN point of contact, keeping the software compliant with evolving CDC requirements.",
+        "His team produces incremental updates to the code base on a two week sprint cycle and the velocity of his team has increased steadily over the last six months.",
+        "Tim also serves on the Wellness committee and the Safety Committee as a floor warden and first responder.",
+        "VP of Engineering / Product Development Director 09/2009 to 04/2012 Juniper Lane Krakow, Poland Tim worked as the VP of Engineering and product development.",
+        "His responsibilities included managing the current suite of virtual reality software, designing the future software and hardware offerings, vendor relations, client support, systems design, sensor design, quality control and quality assurance, technology specialist, and usability evangelist.",
+        "Other responsibilities included bringing new technology and opportunities to the company, driving the new vision for the company, and developing an on-line community around the new products.",
+        "Innovation Engineer 09/2009 to 04/2012 Juniper Lane Krakow, Poland Tim worked as an innovation engineer, bridging the gap between need and technology.",
+        "He utilized his skills as an engineer to create unique solutions for client needs.",
+        "Intoxiclock: Took third generation product and migrated it from simple input device to multimedia application on a netbook.",
+        "Upgraded poster sized input panel to USB HID device."
+      ],
+      "education": [
+        [
+          "BA Interaction Design",
+          "Cedar Valley University",
+          "2014 – 2016"
+        ]
+      ],
+      "certifications": [
+        "Nielsen Norman Group UX Certification"
+      ],
+      "languages": [
+        "Polish (native)",
+        "English (C1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV24",
+      "source_id": "94417768",
+      "name": "Mohamed Ali",
+      "slug": "Mohamed_Ali",
+      "title": "Senior Product Designer",
+      "field": "design",
+      "layout": "compact",
+      "job": "J04",
+      "location": "Tunis, Tunisia",
+      "email": "mohamed_ali@example.com",
+      "phone": "+33 6 00 00 24",
+      "portfolio": "portfolio.example.com/mohamed_ali",
+      "summary": "Senior Product Designer with hands-on experience in Team leadership, Figma and Design Systems. Turns complex workflows into accessible, shipped interfaces.",
+      "skills": [
+        "Team leadership",
+        "Figma",
+        "Design Systems",
+        "Usability Research",
+        "Prototyping",
+        "Accessibility",
+        "HTML/CSS",
+        "Adobe CC",
+        "Wireframing"
+      ],
+      "experience": [
+        "Senior Product Designer April 1984 to Current Helios Forge - Tunis, Tunisia Conceived, developed and specified product components for new product development.",
+        "Worked with product planners and industrial designers to conceptualize and refine product concepts.",
+        "Developed and tested models of alternate designs and processing methods to assess cost and manufacturing feasibility.",
+        "Created solid model component and assembly files for virtual representation of designs.",
+        "Ordered rapid prototypes and supervised testing and ongoing development and performance of design.",
+        "Supported product designs through test analysis and simulation.",
+        "Coordinated project tooling release of injection molded components.",
+        "Evaluated pre-production mold shot samples and refined for improved assembly and performance.",
+        "Coordinated any special secondary operations, fixturing or manufacturing sensitive mandates.",
+        "Developed internal processes and plans for mechanical verification, product development and factory processes.",
+        "Recommended design modifications to eliminate machine and system malfunctions.",
+        "Created detailed engineering drawings, technical drawings, schematics and computer-generated reports for new product development."
+      ],
+      "education": [
+        [
+          "BA Interaction Design",
+          "Cedar Valley University",
+          "2014 – 2016"
+        ]
+      ],
+      "certifications": [
+        "Nielsen Norman Group UX Certification"
+      ],
+      "languages": [
+        "Arabic (native)",
+        "French (C1)",
+        "English (B2)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV25",
+      "source_id": "25949631",
+      "name": "Julia Schneider",
+      "slug": "Julia_Schneider",
+      "title": "Web Designer",
+      "field": "design",
+      "layout": "table",
+      "job": "J04",
+      "location": "Zurich, Switzerland",
+      "email": "julia_schneider@example.com",
+      "phone": "+33 6 00 00 25",
+      "portfolio": "portfolio.example.com/julia_schneider",
+      "summary": "Web Designer with hands-on experience in Figma, Design Systems and Usability Research. Turns complex workflows into accessible, shipped interfaces.",
+      "skills": [
+        "Figma",
+        "Design Systems",
+        "Usability Research",
+        "Prototyping",
+        "Accessibility",
+        "HTML/CSS",
+        "Adobe CC",
+        "Wireframing"
+      ],
+      "experience": [
+        "Quartz River Zurich, Switzerland Freelance Website Designer 09/2012 to Current Specialized in cold calls to business owners looking for a web designer or online marketing manager for their businesses online presence and marketing necessities.",
+        "Focused on sales for websites, and website development, logo designs, and online marketing services/materials on a remote independent contractor for hire basis.",
+        "Cross selling of widget applications and installation assistance for current and newly designed websites, with tracking links for lead development and follow up.",
+        "Sales and creation of ads, back links, marketing promotions on sites such as Twitter, Facebook, and Foursquare, and consistently generating new ideas to ensure above average marketing results.",
+        "Over 10 years experience with internet based web designing, marketing, SEO, PPC, social media networks, and analytic research, as well online presentations, web research, email response handling and customer support.",
+        "Quartz River Zurich, Switzerland Account Manager 08/2013 to 05/2014 Contacted Prime a multinational organisation Defense Contractors, Contract Managers, Small Business Liaison Officers, Purchasing Managers, and Buyers on a daily basis.",
+        "B2B development calls at an average of 150 outbound calls a day.",
+        "Obtained Request for Quotes, Bids, and Information requirements for the procurement of capacitors, electronic components, semi conductors, hard to find parts, and commercial off the shelf items.",
+        "Created and sent out mass marketing campaigns via email, social media, LinkedIn, and newsletter distribution.",
+        "Developed ongoing business ­ supplier relationships on a daily basis for the securing of future requirements.",
+        "Signed the company up on a daily basis with 10 new supplier diversity portals for automated submissions and receipt of requirements.",
+        "Quartz River Zurich, Switzerland Owner / Senior Business Consultant 04/2006 to 09/2012 Responsible for lead development through self generation of internet marketing campaigns, b2b cold calls, relationship development, live networking and referrals from sales."
+      ],
+      "education": [
+        [
+          "BA Interaction Design",
+          "Cedar Valley University",
+          "2014 – 2016"
+        ]
+      ],
+      "certifications": [
+        "Nielsen Norman Group UX Certification"
+      ],
+      "languages": [
+        "German (native)",
+        "English (C2)",
+        "French (B1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV26",
+      "source_id": "32985311",
+      "name": "Kenji Watanabe",
+      "slug": "Kenji_Watanabe",
+      "title": "Software Engineering Analyst",
+      "field": "analyst",
+      "layout": "classic",
+      "job": "J12",
+      "location": "Osaka, Japan",
+      "email": "kenji_watanabe@example.com",
+      "phone": "+33 6 00 00 26",
+      "portfolio": "portfolio.example.com/kenji_watanabe",
+      "summary": "Software Engineering Analyst with hands-on experience in Programming, SQL and Python. Comfortable moving between data, code and business stakeholders.",
+      "skills": [
+        "Programming",
+        "SQL",
+        "Python",
+        "Testing",
+        "Data Analysis",
+        "Reporting",
+        "APIs",
+        "Agile",
+        "Documentation"
+      ],
+      "experience": [
+        "02/2017 to 07/2017 Software Engineering Analyst Glacier Cloud - Osaka, Japan Enactus chapter of Meridia Institute of Technology Founded project Soul of the clay as the team lead of Enactus to aid the artisans by up skilling them with modern day techniques, thereby increasing the income of these artisans by 150%.",
+        "Executed project Naritva, where I along with my team implemented a socio-economic business model in order to improve women sanitation in rural areas of India with motive to reduce diseases prevalent among rural women.",
+        "Executed project Jaivika to bolster farmers by setting up machinery to produce low cost manure from organic waste.",
+        "Student Alumni Interaction Cell - Administered alumni relations as a senior member in SAIC and held the responsibility of event management in cultural events.",
+        "12/2016 to 02/2017 Software Engineering Analyst Project- Global Site System Services Delivered automation tools using HP Quick Test Professional and VB script to achieve 95 percent test coverage and increase the efficiency of process by 25 percent.",
+        "12/2015 to 11/2016 Associate Software Engineer Project- Global Site System Services Worked as a part of quality assurance team for one of the leading Oil and Gas Company by functional testing in a simulation lab to assure the smooth functioning of 300 sites across the globe.",
+        "Communicated with a team of business analysts in order to understand the business scenarios and draft test scenarios for application testing."
+      ],
+      "education": [
+        [
+          "MSc Computer Science",
+          "Northvale University",
+          "2013 – 2015"
+        ]
+      ],
+      "certifications": [
+        "Udemy certified SQL."
+      ],
+      "languages": [
+        "Japanese (native)",
+        "English (B2)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV27",
+      "source_id": "10265057",
+      "name": "Laura García",
+      "slug": "Laura_Garcia",
+      "title": "RF Systems Engineer",
+      "field": "embedded",
+      "layout": "modern",
+      "job": "J10",
+      "location": "Madrid, Spain",
+      "email": "laura_garcia@example.com",
+      "phone": "+33 6 00 00 27",
+      "portfolio": "portfolio.example.com/laura_garcia",
+      "summary": "RF Systems Engineer with hands-on experience in C, C++ and RF. Strong on debugging, test rigs and documentation from prototype to production.",
+      "skills": [
+        "C",
+        "C++",
+        "RF",
+        "MATLAB",
+        "Testing",
+        "Embedded Systems",
+        "Electronics",
+        "Debugging"
+      ],
+      "experience": [
+        "Working RF Systems Engineer May 2014 to Current Lantern Retail Qualification · Multidisciplinary background: RF hardware designs, manufacturing operations and data analyst.",
+        "Delivered production work using C and C++, with tests, documentation and a clean handover.",
+        "Partnered with product, design and operations on scoping, delivery and post-release support.",
+        "Improved team standards through code review, runbooks and incident follow-ups."
+      ],
+      "education": [
+        [
+          "MSc Electrical Engineering",
+          "Meridia Institute of Technology",
+          "2012 – 2014"
+        ]
+      ],
+      "certifications": [
+        "Certified Electronics Technician"
+      ],
+      "languages": [
+        "Spanish (native)",
+        "English (C1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV28",
+      "source_id": "24647794",
+      "name": "David Cohen",
+      "slug": "David_Cohen",
+      "title": "Electrical Engineer",
+      "field": "embedded",
+      "layout": "classic",
+      "job": "J10",
+      "location": "Tel Aviv, Israel",
+      "email": "david_cohen@example.com",
+      "phone": "+33 6 00 00 28",
+      "portfolio": "portfolio.example.com/david_cohen",
+      "summary": "Electrical Engineer with hands-on experience in C, C++ and RF. Strong on debugging, test rigs and documentation from prototype to production.",
+      "skills": [
+        "C",
+        "C++",
+        "RF",
+        "Electronics",
+        "MATLAB",
+        "Testing",
+        "Embedded Systems",
+        "Debugging"
+      ],
+      "experience": [
+        "Mosaic Ridge July 2015 Conducted a successful research project on innovative use of Active Noise Control (ANC), 3-D Noise Mapping and Passive Noise Control systems as a solution for acoustical noise control issues in fast growing cities.",
+        "Mosaic Ridge October 2014 Successfully engineered a new transmission line to feed a new load in a city's transmission system using PowerWorld simulation software, and ETAP.",
+        "Performed Three-Phase Power Systems circuit analysis of the new system.",
+        "Performed cost analysis and allocation for the project.",
+        "Mosaic Ridge September 2014 to August 2015 Engineering Intern Lead AutoCAD Drafting team of 3 in drafting 2D maps of Oil and Gas production sites.",
+        "Contributed in building Spill Prevention, Control and Countermeasure (SPCC) plans for Oil and Gas Production Facilities, data entry, and various office duties assigned by my manager.",
+        "Enhanced my communication and leadership skills within my team and my manager."
+      ],
+      "education": [
+        [
+          "MSc Electrical Engineering",
+          "Meridia Institute of Technology",
+          "2012 – 2014"
+        ]
+      ],
+      "certifications": [
+        "Certified Electronics Technician"
+      ],
+      "languages": [
+        "Hebrew (native)",
+        "English (C2)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV29",
+      "source_id": "93349646",
+      "name": "Amina Diallo",
+      "slug": "Amina_Diallo",
+      "title": "DevOps / Infrastructure Consultant",
+      "field": "devops",
+      "layout": "modern",
+      "job": "J09",
+      "location": "Dakar, Senegal",
+      "email": "amina_diallo@example.com",
+      "phone": "+33 6 00 00 29",
+      "portfolio": "portfolio.example.com/amina_diallo",
+      "summary": "DevOps / Infrastructure Consultant with hands-on experience in AWS, Linux and Terraform. Focused on golden paths, reliability and secure supply chains.",
+      "skills": [
+        "AWS",
+        "Linux",
+        "Terraform",
+        "Kubernetes",
+        "CI/CD",
+        "Ansible",
+        "Prometheus",
+        "Docker"
+      ],
+      "experience": [
+        "07/2016 Orchid Byte Consultant Collaborate with Clients, customers to ensure successful implementations which includes.",
+        "Implement OEM 12c setup, Apply BP, Plugins, performance monitoring, notification set up.",
+        "Install/upgrade/patch Oracle Database, performance tuning.",
+        "Install/upgrade/patch Oracle WebLogic servers, deploy applications.",
+        "12/+33 6 00 00 29/2016 Orchid Byte - City Project Manager Led teams across broad technical, financial and business disciplines.",
+        "Focused teams on business objectives and tracked progress to ensure project milestones were completed on time, on budget and with the desired results.",
+        "Mitigated risk factors through careful analysis of financial and statistical data.",
+        "Anticipated and managed change effectively in rapidly evolving global business environments.",
+        "Defined processes and tools best suited to each project.",
+        "Moved between agile and waterfall approaches depending on project specifics and client goals, creating detailed project road maps, plans, schedules and work breakdown structures.",
+        "Recruit, work with new team members to bring them on board in quick time Writing technical documents to help team members in executing new projects Provide technical guidance throughout the project life cycle Process development in a continual manner and provide trouble shooting assistance.",
+        "02/+33 6 00 00 29/2014 Principal systems Consultant Part of Oracle Public Cloud's Monitoring Solution team - CloudEM Operation's team."
+      ],
+      "education": [
+        [
+          "BSc Computer Engineering",
+          "Atlas Polytechnic",
+          "2013 – 2015"
+        ]
+      ],
+      "certifications": [
+        "Oracle Application server",
+        "Oracle Management Server"
+      ],
+      "languages": [
+        "French (native)",
+        "English (B2)",
+        "Wolof (native)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "CV30",
+      "source_id": "27080812",
+      "name": "Erik Johansson",
+      "slug": "Erik_Johansson",
+      "title": "Data & Marketing Technology Lead",
+      "field": "data",
+      "layout": "classic",
+      "job": "J11",
+      "location": "Stockholm, Sweden",
+      "email": "erik_johansson@example.com",
+      "phone": "+33 6 00 00 30",
+      "portfolio": "portfolio.example.com/erik_johansson",
+      "summary": "Data & Marketing Technology Lead with hands-on experience in Data Quality, SQL and Python. Turns operational data into decisions and measurable outcomes.",
+      "skills": [
+        "Data Quality",
+        "SQL",
+        "Python",
+        "Tableau",
+        "Power BI",
+        "Analytics",
+        "ETL",
+        "Stakeholders"
+      ],
+      "experience": [
+        "04/2017 to Current Vice-President Data and Marketing Technology Umbra Shield - Stockholm, Sweden Driving evolution of the firm into a data-driven marketing company, leading the design and delivery of data-driven products, services, strategies, and platforms.",
+        "Setting the strategy and direction for a newly formed Data Division while hitting ambitious growth targets.",
+        "Leadership of in-house startup Orchestrate, which is a marketing funnel automation and lead nurturing platform for B2B markets that capitalizes on content marketing.",
+        "Leading full life cycle product development for data & data-driven products, including market research, positioning, processes, and technology.",
+        "Acting as product owner for data and martech across all platforms in our Agile processes.",
+        "Ensuring compliance with data privacy legislation functioning as Data Protection Officer.",
+        "03/2011 to 03/2017 Vice-President Digital Media Umbra Shield - Stockholm, Sweden Responsible for shaping and executing product vision and strategy and driving digital business transformation.",
+        "Led product management, digital marketing, and digital strategy.",
+        "Responsible for 35 reports, budget of $5 million, 100+ web sites, 80+ mobile apps, matrix P&L owner for $25+ million digital business.",
+        "Led product development, market research, digital strategy, internal digital consulting, web production, online marketing, video production, and directory management.",
+        "Founded and co-led an in-house business startup at the junction of marketing technology, machine learning, and data.",
+        "Led extensive market research and co-wrote business plan."
+      ],
+      "education": [
+        [
+          "MSc Data Science",
+          "Cedar Valley University",
+          "2016 – 2018"
+        ]
+      ],
+      "certifications": [
+        "Google Data Analytics"
+      ],
+      "languages": [
+        "Swedish (native)",
+        "English (C2)",
+        "German (B1)"
+      ],
+      "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+      "license": "CC0-1.0"
+    }
+  ],
+  "jobs": [
+    {
+      "id": "J01",
+      "title": "Security Analyst",
+      "company": "Umbra Shield",
+      "location": "Dubai, UAE",
+      "mode": "On-site",
+      "level": "Mid",
+      "years": 3,
+      "must": [
+        "SIEM",
+        "incident response",
+        "MITRE ATT&CK",
+        "EDR",
+        "security operations"
+      ],
+      "nice": [
+        "Python",
+        "Splunk",
+        "ISO 27001",
+        "threat hunting",
+        "phishing response"
+      ],
+      "summary": "Monitor, triage and contain security incidents across cloud and endpoint telemetry. Write detections that survive real traffic."
+    },
+    {
+      "id": "J02",
+      "title": "Network / Cloud Engineer",
+      "company": "Zephyr Mesh",
+      "location": "Remote (EU)",
+      "mode": "Remote",
+      "level": "Senior",
+      "years": 5,
+      "must": [
+        "network design",
+        "BGP",
+        "firewalls",
+        "AWS or Azure",
+        "automation"
+      ],
+      "nice": [
+        "Cisco",
+        "Terraform",
+        "Kubernetes",
+        "observability",
+        "CCNP"
+      ],
+      "summary": "Own a hybrid network and cloud estate: routing, segmentation, connectivity and the automation that keeps it reproducible."
+    },
+    {
+      "id": "J03",
+      "title": ".NET / Web Developer",
+      "company": "Helios Forge",
+      "location": "Lyon, France",
+      "mode": "Hybrid",
+      "level": "Mid",
+      "years": 3,
+      "must": [
+        "C#",
+        "ASP.NET",
+        "SQL Server",
+        "JavaScript",
+        "REST APIs"
+      ],
+      "nice": [
+        "Azure",
+        "Entity Framework",
+        "React",
+        "CI/CD",
+        "testing"
+      ],
+      "summary": "Build and maintain business-critical web applications in .NET, with a focus on clean APIs and reliable releases."
+    },
+    {
+      "id": "J04",
+      "title": "UX/UI Designer",
+      "company": "Northwind Atlas",
+      "location": "Paris, France",
+      "mode": "Remote-friendly",
+      "level": "Senior",
+      "years": 4,
+      "must": [
+        "Figma",
+        "design systems",
+        "usability research",
+        "prototyping",
+        "accessibility"
+      ],
+      "nice": [
+        "HTML/CSS",
+        "mobile design",
+        "workshop facilitation",
+        "analytics"
+      ],
+      "summary": "Design complex B2B workflows end to end: research, prototypes, design-system components and accessible shipped UI."
+    },
+    {
+      "id": "J05",
+      "title": "QA Automation Engineer",
+      "company": "Lantern Retail",
+      "location": "Remote (EU)",
+      "mode": "Remote",
+      "level": "Senior",
+      "years": 4,
+      "must": [
+        "Playwright or Selenium",
+        "test automation",
+        "API testing",
+        "CI/CD",
+        "test design"
+      ],
+      "nice": [
+        "TypeScript",
+        "performance testing",
+        "accessibility",
+        "contract testing"
+      ],
+      "summary": "Build automation that shortens release qualification and catches the regressions that matter."
+    },
+    {
+      "id": "J06",
+      "title": "Database Administrator",
+      "company": "Quartz River",
+      "location": "London, UK",
+      "mode": "Hybrid",
+      "level": "Senior",
+      "years": 6,
+      "must": [
+        "PostgreSQL or SQL Server",
+        "performance tuning",
+        "backup/recovery",
+        "replication",
+        "SQL"
+      ],
+      "nice": [
+        "Oracle",
+        "partitioning",
+        "Ansible",
+        "cloud databases",
+        "observability"
+      ],
+      "summary": "Keep production databases fast, available and recoverable. Own tuning, migrations and the runbooks."
+    },
+    {
+      "id": "J07",
+      "title": "IT Support Officer",
+      "company": "Willow Health",
+      "location": "Tunis, Tunisia",
+      "mode": "On-site",
+      "level": "Junior",
+      "years": 2,
+      "must": [
+        "Windows",
+        "Microsoft 365",
+        "Active Directory",
+        "ticketing",
+        "networking"
+      ],
+      "nice": [
+        "macOS",
+        "Linux",
+        "Intune",
+        "ITIL",
+        "asset management"
+      ],
+      "summary": "Support employees across devices, identity and SaaS. Write the knowledge-base article after fixing the issue."
+    },
+    {
+      "id": "J08",
+      "title": "Engineering Manager",
+      "company": "Glacier Cloud",
+      "location": "Berlin, Germany",
+      "mode": "Hybrid",
+      "level": "Manager",
+      "years": 8,
+      "must": [
+        "people management",
+        "delivery",
+        "backend or platform",
+        "hiring",
+        "incident management"
+      ],
+      "nice": [
+        "distributed systems",
+        "OKRs",
+        "coaching",
+        "architecture"
+      ],
+      "summary": "Lead a backend/platform team: hiring, growth, delivery predictability and a healthy on-call culture."
+    },
+    {
+      "id": "J09",
+      "title": "DevOps Engineer",
+      "company": "Glacier Cloud",
+      "location": "Remote (EU)",
+      "mode": "Remote",
+      "level": "Senior",
+      "years": 5,
+      "must": [
+        "AWS",
+        "Terraform",
+        "Kubernetes",
+        "CI/CD",
+        "observability"
+      ],
+      "nice": [
+        "Go",
+        "Argo CD",
+        "Prometheus",
+        "security",
+        "cost optimisation"
+      ],
+      "summary": "Build golden paths and reliable infrastructure for a multi-tenant SaaS platform."
+    },
+    {
+      "id": "J10",
+      "title": "Embedded / RF Engineer",
+      "company": "Xenon Motion",
+      "location": "Munich, Germany",
+      "mode": "On-site",
+      "level": "Senior",
+      "years": 5,
+      "must": [
+        "C/C++",
+        "embedded systems",
+        "RF or electronics",
+        "debugging",
+        "testing"
+      ],
+      "nice": [
+        "RTOS",
+        "ARM",
+        "PCB",
+        "MATLAB",
+        "safety"
+      ],
+      "summary": "Develop and debug embedded/RF systems from prototype to production, with rigorous test and documentation habits."
+    },
+    {
+      "id": "J11",
+      "title": "Data Analyst",
+      "company": "Mosaic Ridge",
+      "location": "Dakar, Senegal",
+      "mode": "Remote-friendly",
+      "level": "Junior",
+      "years": 2,
+      "must": [
+        "SQL",
+        "dashboards",
+        "statistics",
+        "stakeholder communication"
+      ],
+      "nice": [
+        "Power BI",
+        "Python",
+        "experimentation",
+        "data quality"
+      ],
+      "summary": "Turn operational data into decisions: dashboards, analyses and clear recommendations."
+    },
+    {
+      "id": "J12",
+      "title": "Software Engineer",
+      "company": "Helios Forge",
+      "location": "Paris, France",
+      "mode": "Hybrid",
+      "level": "Senior",
+      "years": 5,
+      "must": [
+        "software design",
+        "SQL",
+        "APIs",
+        "testing",
+        "code review"
+      ],
+      "nice": [
+        "Python",
+        "C#",
+        "cloud",
+        "observability",
+        "mentoring"
+      ],
+      "summary": "Design and ship maintainable services and internal tools, with strong review and testing habits."
+    }
+  ]
+}

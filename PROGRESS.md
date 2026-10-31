@@ -86,6 +86,16 @@ Plan decisions are in `docs/PLAN.md` §2. Changes and additions since approval:
 
 ## Log
 
+### P5 Communication and P6 Knowledge: 2026-10-31
+
+Committed in small steps. Each step below is one commit.
+
+1. **Test CV corpus and the 6.2 GB zip fix.**
+   - Added Oussema's corpus: `data/cvs/` (30 CVs, each in PDF, DOCX, HTML, MD, TXT and JSON; 2 scanned; `index.csv`, `applications.csv`, `ground_truth.json`) and `data/jobs/` (12 job descriptions, J01–J12). Generator: `tools/build_cv_corpus.py`, profiles in `tools/demo_data.py`.
+   - Bug: the generator zipped `data/cvs` into `data/cvs/tech_cv_corpus.zip`, so the zip contained itself and grew to 6.2 GB (corrupt). Every Docker build uploaded it, which made `astra.py check` fail with `bake: exit status 143`. The zip now goes to `data/tech_cv_corpus.zip`. Zips and `data/source/` (Kaggle `Resume.csv`) are ignored by git and Docker.
+   - The corrupt zip is still on disk at `data/cvs/tech_cv_corpus.zip` and safe to delete.
+   - Not wired into the seed yet: `load_demo` still loads the 42 generated CVs in `data/demo/cvs` (those carry the eval labels).
+
 ### Screening, web shell and two-layer ranking: 2026-10-31
 
 **Built**

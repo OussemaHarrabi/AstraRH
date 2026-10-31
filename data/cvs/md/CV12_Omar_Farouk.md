@@ -1,0 +1,47 @@
+# Omar Farouk
+**Engineering Manager**
+
+Munich, Germany · omar_farouk@example.com · +33 6 00 00 12 · portfolio.example.com/omar_farouk
+
+## Summary
+Engineering Manager with a track record of leading teams across Architecture, Team Leadership and Hiring. Focused on delivery predictability, hiring and healthy on-call.
+
+## Core skills
+
+- Architecture
+- Team Leadership
+- Hiring
+- Delivery
+- Incident Management
+- OKRs
+- Coaching
+- Stakeholders
+
+## Experience
+
+- Software Engineering Manager August 2011 to Current Cobalt Harbor - Munich, Germany Orchestrate key internal IT developments for large-scale enterprise solutions while managing budgets and capacity planning company-wide.
+- Cross-train a professional team of 10+ employees on software development using C#, ASP.NET and JavaScript, and SQL.
+- Foster relationships between competitive organizations in order to coordinate cross-functional software, oversee career guidance/progress, and monitor success ratios.
+- Senior Software Engineer April 2008 to August 2011 Cobalt Harbor - Munich, Germany Coordinated highly responsive web-based software development using C#, ASP.NET and JavaScript, SQL and Dojo.
+- Built loyalty and rapport as a result of strong written and verbal communication while overseeing, supporting, and enhancing existing systems and software.
+- Strategically maintained department and enterprise Cognos reporting systems, along with system architecture/ design.
+- Senior Software Engineer/Architect April 2003 to August 2008 Cobalt Harbor - Munich, Germany Led teams in full life cycle software development using C#, ASP.NET and JavaScript, SQL as a result of strong expertise in supporting and enhancing existing legacy systems and software.
+- Assigned to train others and maintain the department and enterprise Crystal reporting systems, along with system architecture and design.
+- Acquired further multi-department exposure as Development Manager at Matrix Bancorp, and Supervisor/ Developer at MCI WorldCom.
+
+## Education
+
+- **MSc Software Engineering** — Cedar Valley University · 2010 – 2012
+
+## Certifications
+
+- Certified ScrumMaster
+
+## Languages
+
+- Arabic (native)
+- English (C1)
+- German (B2)
+
+---
+*Synthetic demo CV — fictional identity. Source text CC0-1.0.*

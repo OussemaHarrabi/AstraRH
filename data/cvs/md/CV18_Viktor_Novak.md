@@ -1,0 +1,51 @@
+# Viktor Novak
+**Database Programmer**
+
+Prague, Czech Republic · viktor_novak@example.com · +33 6 00 00 18 · portfolio.example.com/viktor_novak
+
+## Summary
+Database Programmer with hands-on experience in SQL Server, SQL and PostgreSQL. Focused on performance, recoverability and zero-drama migrations.
+
+## Core skills
+
+- SQL Server
+- SQL
+- PostgreSQL
+- Oracle
+- Performance Tuning
+- Backup/Recovery
+- Replication
+- Linux
+
+## Experience
+
+- Projects: Atlas: Description: This project is all about requesting, scheduling the tutoring sessions.
+- There are three roles tied to application they are Tutee, Tutor, and Scheduler.
+- A tutee requests for tutoring for the classes that he/she enrolled and gives availability apart from the class timing through Availability Grid and Tutor submits availability.
+- A scheduler will go through those availabilities and schedule time and location for tutoring.
+- Also, there are some set of rules for dropping the tutoring sessions which are incorporated in this project.
+- The other piece of this project is automated emails through Scheduled task which runs every day.
+- Responsibilities: Created a Availability Calendar Grid.
+- In grid each cell represents time (1 hour span) and day of the week.
+- Clicking on the cell toggles the availability.
+- Automatically populated the course schedule which comes from different database(Worked with data warehouse team in order to get that data) Developed C# Console Application for Scheduled email task.
+- Got rid of data tables and table adapters in the main project as they are tightly coupled.
+- Created Class libraries out of the main project to access the database which can be used by both Console Application for Schedule task and web application.
+
+## Education
+
+- **MSc Database Systems** — Atlas Polytechnic · 2011 – 2013
+
+## Certifications
+
+- PostgreSQL Associate
+- Oracle Certified Professional
+
+## Languages
+
+- Czech (native)
+- English (C1)
+- German (B1)
+
+---
+*Synthetic demo CV — fictional identity. Source text CC0-1.0.*

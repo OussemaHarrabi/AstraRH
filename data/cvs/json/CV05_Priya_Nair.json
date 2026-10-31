@@ -1,0 +1,54 @@
+{
+  "id": "CV05",
+  "source_id": "63158213",
+  "name": "Priya Nair",
+  "slug": "Priya_Nair",
+  "title": "Senior Network Engineer",
+  "field": "network",
+  "layout": "modern",
+  "job": "J02",
+  "location": "Berlin, Germany",
+  "email": "priya_nair@example.com",
+  "phone": "+33 6 00 00 05",
+  "portfolio": "portfolio.example.com/priya_nair",
+  "summary": "Senior Network Engineer with hands-on experience in BGP, OSPF and Cisco. Strong on troubleshooting, documentation and keeping complex networks boring.",
+  "skills": [
+    "BGP",
+    "OSPF",
+    "Cisco",
+    "Firewalls",
+    "MPLS",
+    "VPN",
+    "Wireshark",
+    "Network Automation"
+  ],
+  "experience": [
+    "Network Engineer Nov 2011 to Aug 2014 Quartz River - Berlin, Germany Responsible for maintaining network with over 5000 users.",
+    "Responsible for setup and install of switches and routers.",
+    "Includes Configuration and Hardening for both Cisco and Brocade.",
+    "Responsible for activating user, printer, VTC ports and troubleshooting link inactivity on a daily basis, as well as issues with 802.1x, MAB issues, port-channeling, link-aggregation, VTP issues, RSA Key issues.",
+    "Used Knowledge base to find solutions for issues that arose with customers networks using Pro-series network program running on Windows Server 2000 and Windows Server 2003 R2.",
+    "Communicated with team members to successfully keep customer downtime to a minimum.",
+    "Includes Configuration and Hardening for Cisco."
+  ],
+  "education": [
+    [
+      "BSc Network Engineering",
+      "Meridia Institute of Technology",
+      "2014 – 2016"
+    ]
+  ],
+  "certifications": [
+    "CCT Data Center",
+    "CCNP",
+    "CCNA",
+    "MCSE"
+  ],
+  "languages": [
+    "English (native)",
+    "German (B1)",
+    "Malayalam (native)"
+  ],
+  "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+  "license": "CC0-1.0"
+}

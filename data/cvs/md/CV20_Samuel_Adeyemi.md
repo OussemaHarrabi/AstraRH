@@ -1,0 +1,47 @@
+# Samuel Adeyemi
+**IT Help Desk Specialist**
+
+Lagos, Nigeria · samuel_adeyemi@example.com · +33 6 00 00 20 · portfolio.example.com/samuel_adeyemi
+
+## Summary
+IT Help Desk Specialist with hands-on experience in Windows, Active Directory and Ticketing. Calm with users, precise with evidence, and disciplined about documentation.
+
+## Core skills
+
+- Windows
+- Active Directory
+- Ticketing
+- Hardware
+- Customer Service
+- Microsoft 365
+- Networking
+- ITIL
+
+## Experience
+
+- Importing and exporting data from SAP and Sharepoint and manipulating and compiling data to create weekly Power Point presentation for executive management team.
+- Measurements include shipments, order cycle time, aged orders, inventory, forecasting, etc.
+- Work with other business organizations and vendors to resolve any data or system issues.
+- Provide visibility to department metrics by maintaining current information on HP's internal site.
+- Customer Service Professional March 2007 to August 2008 Umbra Shield - Lagos, Nigeria Answers incoming customer telephone calls in a courteous and professional manner.
+- Responds to and investigates customer inquiries, concerns, orders and issues received via phone, fax, email, Shell Source, and EDI in a timely and courteous manner.
+- Responsible for entering orders and resolving customer issues for many different products using the SAP/CRM and Remedy tool.
+- Researches and resolves customer complaints and/or ordering issues and determines effective method of distribution to satisfy customer needs.
+- Assign, escalate, and notify appropriate agents/managers of customer issues to ensure fast and effective support delivery and resolutions using Remedy Maintain relationship with sales team, customers and manufacturing and suppliers.
+
+## Education
+
+- **BSc Information Technology** — Lakeside University · 2018 – 2020
+
+## Certifications
+
+- CompTIA A+
+- Microsoft 365 Fundamentals
+
+## Languages
+
+- English (native)
+- Yoruba (native)
+
+---
+*Synthetic demo CV — fictional identity. Source text CC0-1.0.*
