@@ -17,7 +17,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from kernel import explain
+from kernel import explain, trust
 from kernel.db import utcnow
 from kernel.identity.models import UserAccount
 from kernel.people.models import (
@@ -29,6 +29,7 @@ from kernel.people.models import (
     Position,
     Skill,
 )
+from kernel.trust.models import Proposal
 from packs.journey.models import (
     BuddyAssignment,
     Checkin,
@@ -311,6 +312,51 @@ def _decision_record(
     return record.id
 
 
+def _plan_proposal(
+    session: Session,
+    tenant_id: UUID,
+    plan: OnboardingPlan,
+    employee: Employee,
+    maps: dict[str, dict[str, Any]],
+    users: dict[UUID, UUID],
+) -> None:
+    key = f"journey.plan.activate:{plan.id}"
+    if session.scalar(select(Proposal).where(Proposal.idempotency_key == key)):
+        return
+    draft = explain.DecisionDraft(
+        kind="onboarding_plan",
+        question="Should we activate this 30/60/90 plan?",
+        outcome={"plan_id": str(plan.id), "phase": plan.phase},
+        subject={"employee_id": str(employee.id)},
+        rationale="Draft built from the role template and role profile; a human decides.",
+        evidence=[
+            explain.Evidence(
+                ref=f"plan:{plan.id}",
+                factor_key=None,
+                source_type="onboarding_template",
+                source_id=str(plan.template_id),
+                quote="Role template and role-profile requirements",
+            )
+        ],
+        not_considered=["name", "gender", "age", "nationality", "photo"],
+        limits=["This is a draft; it becomes active only after approval."],
+        versions={"model": "seed", "prompt_hash": "seed"},
+        view_roles=["admin", "hr", "manager", "employee"],
+    )
+    record = explain.record(session, tenant_id, draft)
+    trust.propose(
+        session,
+        tenant_id,
+        "journey.plan.activate",
+        {"plan_id": str(plan.id)},
+        f"Activate the onboarding plan for {employee.display_name}",
+        record.id,
+        key,
+        target={"type": "employee", "id": str(employee.id)},
+        requested_by=_user_id(maps["employees"].get("EMP-006"), users),
+    )
+
+
 def seed(session: Session, tenant_id: UUID, world: dict) -> None:
     maps = _maps(session)
     users = _users(session)
@@ -326,6 +372,7 @@ def seed(session: Session, tenant_id: UUID, world: dict) -> None:
     pulse_payload = _read_json("pulse_survey.json")
     pulse_by_kind = {survey["kind"]: survey["questions"] for survey in pulse_payload["surveys"]}
     plan_payload = _read_json("plans.json")
+    plan_map: dict[str, OnboardingPlan] = {}
 
     for seed_plan in plan_payload["plans"]:
         employee = maps["employees"].get(str(seed_plan["employee_id"]))
@@ -340,6 +387,7 @@ def seed(session: Session, tenant_id: UUID, world: dict) -> None:
             )
         )
         if existing is not None:
+            plan_map[str(seed_plan["employee_id"])] = existing
             continue
         plan = OnboardingPlan(
             tenant_id=tenant_id,
@@ -349,10 +397,13 @@ def seed(session: Session, tenant_id: UUID, world: dict) -> None:
             target_ramp_date=_date(seed_plan.get("target_ramp_date")),
             status=str(seed_plan["status"]),
             phase=str(seed_plan["phase"]),
-            plan_approved_by=_user_id(maps["employees"].get("EMP-006"), users),
+            plan_approved_by=None
+            if str(seed_plan["status"]) == "draft"
+            else _user_id(maps["employees"].get("EMP-006"), users),
         )
         session.add(plan)
         session.flush()
+        plan_map[str(seed_plan["employee_id"])] = plan
 
         template_tasks = {
             row.position: row
@@ -573,6 +624,17 @@ def seed(session: Session, tenant_id: UUID, world: dict) -> None:
                     caveat=str(seed_impact["caveat"]),
                 )
             )
+
+    draft_plan = plan_map.get("EMP-010")
+    if draft_plan is not None and draft_plan.status == "draft":
+        _plan_proposal(
+            session,
+            tenant_id,
+            draft_plan,
+            maps["employees"]["EMP-010"],
+            maps,
+            users,
+        )
 
     for seed_gap in plan_payload.get("background_gaps", []):
         employee = maps["employees"].get(str(seed_gap["employee_id"]))

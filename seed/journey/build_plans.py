@@ -25,7 +25,7 @@ HERO = "EMP-041"
 MISSING_EVIDENCE_TASK = "GEN-17"
 
 PLAN_CONFIG = [
-    {"employee_id": "EMP-010", "template": "GENERIC", "start": "2026-12-01", "status": "approved"},
+    {"employee_id": "EMP-010", "template": "GENERIC", "start": "2026-12-01", "status": "draft"},
     {
         "employee_id": "EMP-011",
         "template": "GENERIC",
@@ -108,6 +108,8 @@ def task_status(employee: dict[str, Any], task: dict[str, Any], plan_status: str
     task_id = str(task["id"])
     if plan_status == "completed":
         return "completed"
+    if plan_status == "draft":
+        return "pending"
     if plan_status == "approved":
         return "completed" if task_id in {"GEN-01", "GEN-02"} else "pending"
     if employee["employee_id"] == HERO and task_id == "BE-12":
@@ -542,7 +544,7 @@ def build_plan(
         "target_ramp_date": iso(planning.due_at(start, 90)),
         "status": str(config["status"]),
         "phase": plan_phase,
-        "plan_approved_by": "EMP-006",
+        "plan_approved_by": None if str(config["status"]) == "draft" else "EMP-006",
         "approval_id": f"APR-{employee['employee_id']}-PLAN",
         "tasks": tasks,
         "checkins": checkins,

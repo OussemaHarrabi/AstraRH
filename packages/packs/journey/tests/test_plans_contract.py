@@ -46,7 +46,7 @@ def test_every_plan_has_a_consistent_task_and_checkin_shape():
             "day90",
             "completed",
         }
-        assert item["status"] in {"approved", "in_progress", "completed"}
+        assert item["status"] in {"draft", "approved", "in_progress", "completed"}
         assert len(item["tasks"]) >= 15
         task_ids = [task["task_id"] for task in item["tasks"]]
         assert len(task_ids) == len(set(task_ids))
@@ -161,4 +161,5 @@ def test_no_sentiment_or_individual_risk_field_exists():
     text = json.dumps(payload()).lower()
     for forbidden in ("sentiment", "flight_risk", "flight risk", "performance_rating"):
         assert forbidden not in text
+
 
