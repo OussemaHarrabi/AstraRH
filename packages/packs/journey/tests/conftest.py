@@ -7,6 +7,6 @@ The container's PYTHONPATH will also include the packs directory once P3 lands t
 import sys
 from pathlib import Path
 
-PACKS_ROOT = Path(__file__).resolve().parents[2]
-if str(PACKS_ROOT) not in sys.path:
-    sys.path.insert(0, str(PACKS_ROOT))
+PACKAGES_ROOT = Path(__file__).resolve().parents[3]
+if str(PACKAGES_ROOT) not in sys.path:
+    sys.path.insert(0, str(PACKAGES_ROOT))

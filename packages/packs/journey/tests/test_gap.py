@@ -3,7 +3,8 @@
 from decimal import Decimal
 
 import pytest
-from journey.services.gap import (
+
+from packs.journey.services.gap import (
     Assessment,
     Evidence,
     InvalidLevel,

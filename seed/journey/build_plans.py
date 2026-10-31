@@ -15,10 +15,10 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 SEED = ROOT / "seed" / "journey"
-sys.path.insert(0, str(ROOT / "packages" / "packs"))
+sys.path.insert(0, str(ROOT / "packages"))
 
-from journey.services import gap as gap_math  # noqa: E402
-from journey.services import planning  # noqa: E402
+from packs.journey.services import gap as gap_math  # noqa: E402
+from packs.journey.services import planning  # noqa: E402
 
 AS_OF = datetime(2026, 11, 18, 9, 0)
 HERO = "EMP-041"

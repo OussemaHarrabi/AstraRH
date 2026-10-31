@@ -2,7 +2,7 @@
 
 from datetime import date, datetime
 
-from journey.services.planning import (
+from packs.journey.services.planning import (
     add_working_days,
     attention,
     dossier,
