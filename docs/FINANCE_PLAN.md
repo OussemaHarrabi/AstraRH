@@ -59,6 +59,8 @@ What already exists and we reuse as is:
 
 ### Contract changes needed from the kernel owner
 
+**Superseded numbering.** The single list of kernel requests is now in [FINANCE_PAYMENT_DESIGN.md](FINANCE_PAYMENT_DESIGN.md) section 8. Mapping: C1 is K1, C2 is K4, C3 is K5, C4 is K10, C5 is K11, C6 is K12. The table below is kept for history.
+
 Teammates edit only `packages/packs/finance/**` and `apps/web/src/modules/finance/**`. These need a contract-change issue to Oussema, raised early:
 
 | # | Change | Why | Fallback if not ready |
@@ -88,7 +90,7 @@ Schema `finance`. Every table: `id` (uuid7), `tenant_id`, `created_at`, RLS on. 
 - `civp_extension_request`: `placement_id`, `requested_end`, `status`, `approved_by`. A date change needs approval.
 
 **Rules**
-- `rule_set`: `kind` (tax, contributions, civp), `jurisdiction`, `version`, `status` (draft, tested, approved, active, superseded), `valid_from`, `valid_to`, `source_ref`, `approved_by`, `definition` (JSONB: brackets, rates, caps, rounding), `definition_hash`, `is_demo`.
+- `rule_set`: `kind` (tax, contributions, civp), `jurisdiction`, `version`, `status` (draft, active, superseded; see decision D15), `valid_from`, `valid_to`, `source_ref`, `approved_by`, `definition` (JSONB: brackets, rates, caps, rounding), `definition_hash`, `is_demo`.
 
 **Payroll**
 - `payroll_input_batch`: `source` (time, leave, compensation, manual import), `period`, `status`, `received_event_id`.
@@ -118,7 +120,7 @@ Status and outcome are separate. Each transition names who may cause it.
 | CIVP placement | `draft` → `aneti_pending` → `approved` → `active` → `extension_review` or `completed` | ANETI status arrives as an event or a human entry. Activation needs eligibility documents verified plus a human decision. An extension needs approval before any date change |
 | Payroll run | `draft` → `calculated` → `approval_pending` → `approved` → `payment_pending` → `paid` → `closed` | Calculation is a job. Submit is R1. **Approve is R3.** Payment status moves it forward. A payment service can never mark a run approved |
 | Payment line | `due` → `submitted` → `paid` or `part_paid` or `failed` or `reversed` | Release is an **R3 external action**. Status comes back from the provider and is reconciled |
-| Rule set | `draft` → `tested` → `approved` → `active` → `superseded` | **Activation is R3.** A rule set needs its tests green before `tested` |
+| Rule set | `draft` → `active` → `superseded` (decision D15) | **Activation is R3.** Its hand-checked examples must pass when it is proposed and again when it takes effect |
 
 Blocking validation issues stop a transition. Warnings and review items need a named human to resolve them, with a reason, before approval.
 

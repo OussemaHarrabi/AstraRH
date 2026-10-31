@@ -4,6 +4,16 @@ owner: moetaz
 status: preview
 description: Tunisian payroll, CIVP placements, payment and reconciliation, with every figure replayable.
 models: packs.finance.models
+api: packs.finance.api:router
+
+actions:
+  - id: finance.rules.activate
+    risk: R3
+    channel: internal
+    handler: packs.finance.handlers:activate_rule_set
+    approver_roles: [admin, finance]
+    view_roles: [admin, finance, hr, auditor]
+    description: Make a rule set the active payroll rules. Needs a second person and password confirmation.
 
 publishes:
   - finance.engagement.validated.v1

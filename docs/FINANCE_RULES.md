@@ -11,11 +11,13 @@ Reference for the data the payroll calculation runs on and the formula that uses
 | `data/demo/finance/rule_set_tn_2026_demo.json` | The demo rule set (id `tn-private-2026-demo-v1`) |
 | `packages/packs/finance/payroll/rules.py` | Reads, checks and hashes a rule set. Picks the one in force on a day |
 | `packages/packs/finance/payroll/calc.py` | The pure payslip formula |
-| `tests/test_finance_calc.py` | 35 tests, with expected values worked out by hand |
+| `packages/packs/finance/payroll/examples.py` | Runs a rule set's own hand-checked examples |
+| `tests/test_finance_calc.py` | 47 pure tests, with expected values worked out by hand |
+| `tests/test_finance_rules_api.py` | Rule sets and the calculator over HTTP, with the real database roles |
 
 ## 2. Rule set format
 
-All numbers are strings and become `Decimal`. Nothing is a float.
+All decimal values **must be written as strings** and must be finite. A JSON number, `NaN` or `Infinity` is refused with a clear message. This keeps the stored text exactly what was approved, because the database rewrites some JSON numbers (for example `1e20`), which would break the hash. Whole numbers such as `version`, `rounding_places` and `max_children` stay plain integers.
 
 | Field | Meaning | Checked |
 |---|---|---|
@@ -53,7 +55,9 @@ employer cost      = gross + employer CNSS + other employer charges
 
 - **Rounding:** unrounded `Decimal` is used internally. Each displayed line is rounded once, half up, to `rounding_places`. Net pay is the sum of the rounded lines, so the lines always add up exactly.
 - **Output:** a payslip lists each line with `code`, `label`, `kind` (earning, deduction, tax, employer cost), `base`, `rate`, `amount` and a `rule_ref` such as `tn-private-2026-demo-v1#cnss_employee`. It also returns the working values (monthly and annual taxable, expenses, family deductions, net taxable) so a screen can show the arithmetic.
-- **Refusals:** gross of zero or less, an unknown child kind, or a disabled child when the rule set has no value for it all raise `PayslipInvalid`.
+- **Solidarity levy step (intended).** Above the exempt amount the levy applies to the **whole** net taxable amount, so one millime more gross can lower net pay (gross 512.580 gives net 462.962, gross 512.581 gives 460.880). This follows the law as written: LF 2018 art. 53 raises **every** rate of the income tax scale, including the 0% band, and LF 2020 art. 39 exempts income **up to and including** 5,000. Sources: [LF 2018 text](https://jibaya.tn/wp-content/uploads/2024/01/Loi-de-Finances-2018.pdf), [OpenFisca Tunisia issue 474](https://github.com/openfisca/openfisca-tunisia/issues/474). Still to verify against the official texts, like every value here.
+- **Display.** The income tax and levy lines show the monthly share of net taxable (net taxable divided by 12) as their base. The annual figures are in the working values.
+- **Refusals:** gross with more decimal places than the rule set rounds to, gross of zero or less, an unknown child kind, or a disabled child when the rule set has no value for it all raise `PayslipInvalid`.
 - **Not covered yet:** overtime, benefits in kind, taxable bonus treatment, dependent parents, sector schemes, proration. These are listed as unsupported, not approximated.
 
 ## 4. Demo values and verification status
@@ -69,7 +73,7 @@ employer cost      = gross + employer CNSS + other employer charges
 | Student child | 1,000 TND | Unverified |
 | Disabled child | 1,200 TND | Unverified. One source gives no amount |
 | Income tax brackets | 0, 15, 25, 30, 33, 36, 38, 40 percent at 5,000, 10,000, 20,000, 30,000, 40,000, 50,000, 70,000 | Unverified. One source claims a different 2026 scale and looks wrong |
-| Solidarity levy | 0.5 percent, exempt within 5,000 | Unverified. Described as temporary |
+| Solidarity levy | 0.5 percent, exempt up to and including 5,000, charged on the whole amount above | Unverified. Half a point is extended through 2026 (LF 2026 art. 87, NC 1/2026), and 1 point is expected from 2027. **The demo rule set therefore ends on 2026-12-31** |
 | Employer charges | none in the demo rule set | Sector rates (training tax, housing fund, work accident) belong to employer configuration |
 
 **To drop the demo flag:** check each value against the official text (CNSS, Finance Law 2026 from the tax authority, ANETI), record who checked what and when in `source_ref`, and set `is_demo` to false. That change goes through the R3 rule activation once it exists.
@@ -91,6 +95,28 @@ The first row also matches a published worked example from a payroll guide. A se
 
 Other tests cover: lines summing to net pay, net rising with gross, identical output for identical input, the expense cap, only four children counting, student and disabled amounts, the exempt levy, net taxable never below zero, bracket edges, the CNSS ceiling, employer charges changing only employer cost, refusals, hash changes, malformed rule sets, and exactly-one rule-set selection. A final test checks that `calc.py` imports nothing but `dataclasses`, `decimal` and the rules module, and contains no float.
 
-## 6. Running the tests
+## 6. Examples and the rule set lifecycle
+
+**Examples.** A rule set carries its own hand-checked examples in an `examples` list: `name`, `input` (`gross`, `head_of_family`, `children`) and `expect` (any of `employee_deductions`, `income_tax`, `solidarity`, `net_pay`, `employer_cost`). The demo rule set holds the four cases in section 5. `payroll/examples.py` runs them against the formula and reports each mismatch with the expected and actual value. A rule set with no example, or with a failing one, **cannot be activated**.
+
+**Lifecycle (simplified from the design).** `draft` then `active`. The earlier design had separate `tested` and `approved` states. Testing is now a result computed on demand and re-checked at activation, which is stronger than a stored flag, and approval is the R3 proposal itself. The `superseded` state is reserved and not used yet.
+
+| Step | Who | How |
+|---|---|---|
+| Save a draft | `finance`, `admin` | `POST /packs/finance/rule-sets`. A malformed set is refused, a duplicate id gives 409 |
+| Try the examples | `finance`, `hr`, `admin`, `auditor` | `POST /packs/finance/rule-sets/{id}/test`. Nothing changes |
+| Propose activation | `finance`, `admin` | `POST /packs/finance/rule-sets/{id}/activate`. Needs examples that pass and no overlap with an active set. Creates an R3 proposal with a decision record that lists every field that changes against the previous rule set |
+| Approve | A **different** `finance` or `admin` user | Password confirmation required. The requester cannot approve. A rejected, failed or expired request can be made again (an expired one is marked superseded). While one is open, a second request gets 409 |
+| Take effect | The worker | Takes a per-tenant lock, then re-checks the hash, the examples and overlaps. A rule set changed after approval is refused and the proposal fails. After activation the database forbids any change to its content |
+
+**Date selection.** A calculation uses the one **active** rule set whose period contains the date. Drafts are never used. None, or several, gives an error and no result.
+
+**Overlap.** A new rule set must not overlap an active one. To replace a set from a given date, the earlier set needs its own `valid_to` before the new set's `valid_from`, because an active rule set can never be edited (the database enforces it).
+
+**Which day.** When no date is given, the calculator uses today's date in Tunis (UTC+1 all year), not the server's UTC date.
+
+**Known limit.** Proposing over HTTP does not work yet because of kernel request K9 in [FINANCE_PAYMENT_DESIGN.md](FINANCE_PAYMENT_DESIGN.md). The endpoint exists and its test is marked as an expected failure until the kernel is fixed.
+
+## 7. Running the tests
 
 The full suite runs through `python astra.py check` once the stack is up. The calculation tests need no database, so they can also run alone with pytest and `--noconftest` from the repository root with `PYTHONPATH=packages`.

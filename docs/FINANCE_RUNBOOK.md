@@ -19,28 +19,26 @@ python3 astra.py check    # lint and the full test suite, run in a container
 
 Ports used on the host: 8080 (app), 3001 (Grafana), 8025 (mail), 7474 and 7687 (Neo4j), 9001 (MinIO), 55432 (Postgres). Another project using 5432 or 6379 does not conflict.
 
-## 3. Known issue on macOS: the database init script does not run
+## 3. macOS: the database init step (fixed on 2026-11-01)
 
-**Symptom.** `up` ends with `service "migrate" didn't complete successfully`. The migrate log says `password authentication failed for user "astra_owner"`. The Postgres log, on first start, says `01-init.sh: /bin/bash: bad interpreter: Permission denied`, and the next start says `Skipping initialization`.
+**What used to happen.** The roles and schemas were created by `ops/postgres/init/01-init.sh`, mounted into the Postgres container. Docker Desktop for Mac reports that file as executable but cannot run it, so the first start failed with `01-init.sh: /bin/bash: bad interpreter: Permission denied`. The roles were never created, and `migrate` then failed with `password authentication failed for user "astra_owner"`.
 
-**Cause.** The script is mounted from the host into the Postgres container. On Docker Desktop for Mac the mount makes the entrypoint treat the file as executable although it is not, so it tries to run it and fails. The roles and schemas are never created. The repo was built on Windows, where this does not happen.
+**The fix.** The script is now `ops/postgres/init/01-init.sql`. The Postgres entrypoint reads `.sql` files with `psql`, so nothing has to be executable, and it behaves the same on macOS, Windows and Linux. The passwords are read from the container environment with psql's `\getenv`. The SQL body is unchanged.
 
-**Workaround used (changes nothing in the repo and loses no data):**
+**How it was verified, on this Mac, without touching the running stack:**
+- A throwaway Postgres container with an empty volume ran `01-init.sql` through the normal entrypoint and completed.
+- A second throwaway database, built with the **old** script fed through standard input, was compared with it: 39 facts (4 roles and their flags, 11 schemas with owners and permissions, 20 default-permission rules, extensions, database grants) are **identical**.
+- The API role logged in with its password.
+- With one password missing, initialisation **stops** with an error (exit code 3) instead of creating a role with an empty password.
+
+**If your database was created before the fix** and `migrate` fails with a password error, the init step never ran. Either run it once by hand, which keeps your data:
 
 ```bash
-docker exec -i astrarh-postgres-1 bash -s < ops/postgres/init/01-init.sh
+docker exec -i astrarh-postgres-1 psql -v ON_ERROR_STOP=1 -U postgres -d astra < ops/postgres/init/01-init.sql
 python3 astra.py up
 ```
 
-This feeds the same script to bash through standard input. It creates the four roles (`astra_owner`, `astra_api`, `astra_worker`, `astra_executor`) and all ten schemas, including `finance`. Check with:
-
-```bash
-docker exec astrarh-postgres-1 psql -U postgres -d astra -Atc "select rolname from pg_roles where rolname like 'astra_%'"
-```
-
-If the database is brand new and holds nothing you need, `python3 astra.py down --wipe` followed by the workaround above also works. **`--wipe` deletes all local data.**
-
-**Proper fix (kernel and ops owner).** Make the init step independent of the file's execute bit, for example by calling it through `bash` in a one-line `.sh` wrapper that the entrypoint sources, or by turning it into a SQL file with the passwords supplied another way. Raised as request **K8** in [FINANCE_PAYMENT_DESIGN.md](FINANCE_PAYMENT_DESIGN.md) section 8.
+or, if the database holds nothing you need, `python3 astra.py down --wipe` then `python3 astra.py up`. **`--wipe` deletes all local data.**
 
 ## 4. Baseline observed on 2026-10-31
 

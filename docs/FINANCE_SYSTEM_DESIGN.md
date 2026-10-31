@@ -33,7 +33,7 @@ The finance pack owns engagements, payroll, CIVP records, rule sets and payment 
 
 | Process | Finance work it does | It must never |
 |---|---|---|
-| `api` | Serve finance routes, create proposals, record approvals through the kernel, run the calculator preview | Hold bank credentials, call a model |
+| `api` | Serve finance routes, record approvals through the kernel, run the calculator. It **cannot create proposals yet** (kernel request K9) | Hold bank credentials, call a model |
 | `worker` | Consume events, calculate runs as jobs, apply approved **internal** actions, reconcile payments from execution results, run the reader and explainer through the gateway | Release payment, approve anything |
 | `executor` | Run the approved **external** `finance.payment.release` through the bank adapter, reconcile by lookup | Read payroll tables, call a model |
 | `ml` | Parse contract documents in a sandbox (A7) | Reach a network |
@@ -121,7 +121,7 @@ Columns by table (types shortened):
 | `payment_status_event` | `payment_line_id`, `status`, `provider_ref`, `amount`, `received_at`. Append-only |
 | `ai_suggestion` | `task`, `document_ref_id`, `field`, `value`, `confidence`, `evidence`, `status`, `confirmed_by`, `confirmed_at` |
 
-**Integrity rules enforced in the database where possible:** unique idempotency keys, non-overlapping validity periods (exclusion constraints), `payment_status_event` and `payslip_line` insert-only, closed runs immutable (trigger), and RLS on every table with a follow-up revision that enables it (a test fails otherwise).
+**Integrity rules enforced in the database:** see section 4.1 for what is actually built. Overlap checks are in the service layer, not exclusion constraints.
 
 ### 4.1 What is built (2026-10-31)
 
@@ -131,9 +131,11 @@ Migrations on the `finance` branch: `3e65e32a7d91` (20 tables) and `finance_0002
 |---|---|
 | 20 tables | `employer_profile`, `engagement`, `engagement_amendment`, `pay_item`, `document_ref`, `validation_issue`, `civp_placement`, `civp_ledger_entry`, `civp_training`, `civp_extension_request`, `rule_set`, `payroll_input_batch`, `payroll_input`, `payroll_run`, `payslip`, `payslip_line`, `adjustment`, `payment_batch`, `payment_line`, `payment_status_event` |
 | Row-level security | On all 20, enforced by the shared `enable_rls` policy. A test compares the database's own list with the models |
-| Role permissions | The executor has no access to the schema. The API can only read payslips, payment batches, lines and bank statuses, and can draft but not change a rule set. Only the worker writes bank statuses, insert and read only |
+| Role permissions | The executor has no access to the schema. The API can only read payslips, payment batches, lines and bank statuses. Only the worker writes bank statuses, insert and read only |
+| Rule sets (`finance_0003`) | A new rule set must be a draft, except when inserted by the owner role (migrations and seed). Once active, its content never changes, for any role, owner included. Status moves only `draft → active → superseded`. Only drafts can be deleted. The service also refuses an active rule set whose content no longer matches its approved hash, so calculation stops instead of using tampered rules |
+| Runs (`finance_0003`) | A new run must be a draft (owner excepted). Status follows `draft ⇄ calculated → approval_pending → approved → payment_pending → paid → closed`, with `approval_pending → draft` for a rejection. Moving to `approved`, `payment_pending`, `paid` or `closed` is reserved to the worker, which applies approved actions |
 | Append-only | `payment_status_event` rejects update and delete, even from the owner role (trigger) |
-| Frozen when submitted | Once a run is `approval_pending`, `approved`, `payment_pending`, `paid` or `closed`, its payslip figures and lines cannot change or be deleted. Rejecting returns it to `draft` first |
+| Frozen when submitted | Once a run is `approval_pending`, `approved`, `payment_pending`, `paid` or `closed`, its payslips and lines cannot be inserted, changed, deleted or moved to another run or payslip (`finance_0003`). Rejecting returns it to `draft` first |
 | Closed runs | A `closed` run cannot be updated, and only a `draft` run can be deleted |
 | Uniqueness | `external_request_id` and `source_event_id` per tenant on engagements, `source_event_id` on inputs, one ledger row per placement, month and payer, one payment line per payslip, unique idempotency key, unique execution per payment batch |
 
@@ -193,7 +195,7 @@ stateDiagram-v2
   active --> completed
 ```
 
-Rule sets move `draft → tested → approved → active → superseded`. Status and outcome are separate everywhere: **calculated, approved and paid are three different facts.**
+Rule sets move `draft → active → superseded` (decision D15). Tests are run on demand and re-checked at activation, and the database refuses any other move. Status and outcome are separate everywhere: **calculated, approved and paid are three different facts.**
 
 ## 6. The calculation core
 
@@ -296,6 +298,21 @@ Base path `/api/packs/finance`. Standard cookie session, CSRF header on writes, 
 
 Approve and reject for any proposal use the kernel trust routes, not new ones. Validation responses use the field-level issue shape from the interface spec.
 
+### 8.1 What is built (2026-10-31)
+
+Router `packs.finance.api` is mounted under `/packs/finance` through the manifest. Code is in `service.py`, `handlers.py` and `api.py`. Tests are in `tests/test_finance_rules_api.py`.
+
+| Route | Roles | Status |
+|---|---|---|
+| `POST /calculator/net` | admin, finance, hr, auditor | Built. Gross to net under the active rule set for a date. Amounts are returned as strings. Nothing is stored |
+| `POST /calculator/compare` | same | Built. Up to 6 scenarios |
+| `GET /rule-sets`, `GET /rule-sets/{id}` | same | Built. The list hides definitions |
+| `POST /rule-sets` | admin, finance | Built. Saves a draft |
+| `POST /rule-sets/{id}/test` | same as reading | Built. Runs the hand-checked examples |
+| `POST /rule-sets/{id}/activate` | admin, finance | Built, but **blocked over HTTP by kernel request K9** (the API role cannot create the proposal). Works when the proposal is created by the worker, which the tests do |
+
+Action `finance.rules.activate` (R3, internal) is declared in the manifest and registered in the action catalogue. Its handler re-checks everything when it runs.
+
 ## 9. Event catalogue (planned)
 
 Models live in `events.py`, named `<pack>.<entity>.<verb>.v1`. **Payloads carry IDs, status and the totals a consumer needs, never salary lines, bank details or identity.**
@@ -395,4 +412,4 @@ Test data is fictional and uses the shared Carthage Demo Systems world. Worked e
 | **[kernel]** `WORKER_QUEUES` needs a finance queue | Run calculation inline for demo size otherwise |
 | **[verify]** All rates, brackets, deductions, CIVP amounts and limits | Reviewed demo data until checked against official text |
 | Scope breadth | Slices S1 to S5 let us stop at any point with a working product |
-| macOS setup untested | First task before code is `python astra.py init`, `up`, `smoke` |
+| macOS setup | Done, with one workaround for the database init script (see the runbook and K8) |

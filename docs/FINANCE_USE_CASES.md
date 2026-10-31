@@ -116,7 +116,7 @@ Anything that depends on a Tunisian legal value is marked **[verify]**: the valu
 | ID | Pri | Use case | Actor | Main flow | Exceptions and rules | Risk |
 |---|---|---|---|---|---|---|
 | G1 | P1 | **Load demo rule set** | Admin, finance | Seed CNSS, deductions, IRPP brackets, CSS, CIVP amounts as data with `is_demo` and `source_ref` | Cannot be active without a version, validity period and hash | R1 |
-| G2 | P1 | **Test a rule set** | Finance | Run hand-checked examples against a draft rule set. Status `tested` only if all pass | Failing example blocks the status change | R1 |
+| G2 | P1 | **Test a rule set** | Finance | Run the rule set's own hand-checked examples. Nothing is stored (decision D15) | A failing example blocks activation, at the request and again when it takes effect | R1 |
 | G3 | P1 | **Activate a rule set (R3)** | Approver | Activation proposal with the diff against the active one and the test results. Approver confirms with step-up | New set must not overlap an active period. Old set becomes `superseded`, never deleted. Past runs still replay with the old set | R3 |
 | G4 | P2 | **Rule change notice** | System | When a rule set is activated, finance gets a task to review its next run and the impact preview | Preview is a calculation, not an AI guess | R0 |
 | G5 | P2 | **Impact preview** | Finance | Recalculate last run's inputs with a draft rule set, show totals and per-employee differences | Nothing is saved | R0 |

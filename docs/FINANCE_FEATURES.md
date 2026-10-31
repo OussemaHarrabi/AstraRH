@@ -18,7 +18,7 @@ Status of every feature is `planned` unless noted below. Update this table as wo
 
 **Progress (tables):** the data model for S1 to S3 is built, with security rules and 16 database tests (FT-58 and the integrity parts of FT-57, FT-59, FT-61 and FT-62 are partly in place at the database level). See [FINANCE_SYSTEM_DESIGN.md](FINANCE_SYSTEM_DESIGN.md) section 4.1.
 
-**Progress (calculation):** FT-10 and FT-42 are partly done (calculation core and demo rule set, tested, see [FINANCE_RULES.md](FINANCE_RULES.md)). The calculator API, rule storage and rule tests through the API are still to do. FT-43 is done for the calculation (hand-checked cases). Everything else is planned.
+**Progress (calculation and rules):** FT-10 (calculator), FT-42 (rule sets as data), FT-43 (rule tests) and the activation part of FT-44 are built and tested, see [FINANCE_RULES.md](FINANCE_RULES.md) and [FINANCE_SYSTEM_DESIGN.md](FINANCE_SYSTEM_DESIGN.md) section 8.1. FT-11 (compare) is built. Activation over HTTP waits for kernel request K9. Impact preview (FT-45), employer configuration (FT-46) and the verification record (FT-47) are still to do. Everything else is planned.
 
 ### Engagements
 

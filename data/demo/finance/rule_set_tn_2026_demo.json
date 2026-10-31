@@ -3,9 +3,9 @@
   "version": 1,
   "jurisdiction": "TN",
   "valid_from": "2026-01-01",
-  "valid_to": null,
+  "valid_to": "2026-12-31",
   "is_demo": true,
-  "source_ref": "UNVERIFIED demo values from secondary sources, see docs/FINANCE_PLAN.md section 8.1. Check against the official CNSS, Finance Law 2026 and ANETI texts before real use.",
+  "source_ref": "UNVERIFIED demo values from secondary sources, see docs/FINANCE_PLAN.md section 8.1. Check against the official CNSS, Finance Law 2026 and ANETI texts before real use. Ends on 2026-12-31 because the half-point solidarity levy is extended only through 2026 (LF 2026 art. 87, NC 1/2026); 1 point is expected from 2027.",
   "rounding_places": 3,
   "contributions": {
     "cnss_employee_rate": "0.0968",
@@ -37,5 +37,51 @@
     "rate": "0.005",
     "exempt_up_to": "5000"
   },
-  "employer_charges": []
+  "employer_charges": [],
+  "examples": [
+    {
+      "name": "head of family, 2 children, gross 2000",
+      "input": { "gross": "2000", "head_of_family": true, "children": ["child", "child"] },
+      "expect": {
+        "employee_deductions": "193.600",
+        "income_tax": "253.683",
+        "solidarity": "7.990",
+        "net_pay": "1544.727",
+        "employer_cost": "2341.400"
+      }
+    },
+    {
+      "name": "head of family, 2 children, gross 3500",
+      "input": { "gross": "3500", "head_of_family": true, "children": ["child", "child"] },
+      "expect": {
+        "employee_deductions": "338.800",
+        "income_tax": "670.279",
+        "solidarity": "14.764",
+        "net_pay": "2476.157",
+        "employer_cost": "4097.450"
+      }
+    },
+    {
+      "name": "single, gross 400, within the exempt amount",
+      "input": { "gross": "400" },
+      "expect": {
+        "employee_deductions": "38.720",
+        "income_tax": "0.000",
+        "solidarity": "0.000",
+        "net_pay": "361.280",
+        "employer_cost": "468.280"
+      }
+    },
+    {
+      "name": "head of family, gross 10000, top bracket",
+      "input": { "gross": "10000", "head_of_family": true },
+      "expect": {
+        "employee_deductions": "968.000",
+        "income_tax": "2931.967",
+        "solidarity": "44.202",
+        "net_pay": "6055.831",
+        "employer_cost": "11707.000"
+      }
+    }
+  ]
 }

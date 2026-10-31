@@ -205,7 +205,7 @@ Committed in small steps. Each step below is one commit.
 - `ops/compose.yaml`: caddy, web, api, worker, executor, ml, postgres + pgvector, neo4j, minio, mailpit, otel-lgtm. Third-party images are pinned by digest. Memory limits suit a 7.8 GB host.
 - `ops/compose.dev.yaml`: live reload and loopback tool ports. It mounts named folders only, so `.env` never enters a container.
 - Networks: `edge_internal`, `data`, `graph`, `files`, `ml`, `mail` and `telemetry` are internal. Only `worker` gets `llm_egress`.
-- `ops/postgres/init/01-init.sh`: roles `astra_owner`, `astra_api`, `astra_worker`, `astra_executor`, none with superuser or BYPASSRLS; ten schemas; executor limited to `trust`; pgvector and pg_trgm.
+- `ops/postgres/init/01-init.sql` (was `01-init.sh` until 2026-11-01, changed so it also runs on macOS; see `docs/FINANCE_RUNBOOK.md`): roles `astra_owner`, `astra_api`, `astra_worker`, `astra_executor`, none with superuser or BYPASSRLS; ten schemas; executor limited to `trust`; pgvector and pg_trgm.
 - `ops/caddy/Caddyfile`: security headers, CSP, 25 MB body cap.
 - `astra.py`: `init`, `up [--secure]`, `down [--wipe]`, `ps`, `logs`, `check`, `smoke`.
 - Process skeletons in `apps/`, `packages/kernel/obs.py` (traces, metrics, logs over OTLP), `kernel/heartbeat.py`.

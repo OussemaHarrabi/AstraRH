@@ -45,6 +45,20 @@ class EmployerCharge:
 
 
 @dataclass(frozen=True)
+class Example:
+    """A hand-checked payslip that the rule set must reproduce before it can be activated."""
+
+    name: str
+    gross: Decimal
+    head_of_family: bool
+    children: tuple[str, ...]
+    expect: dict[str, Decimal]
+
+
+EXPECTED_FIELDS = {"employee_deductions", "income_tax", "solidarity", "net_pay", "employer_cost"}
+
+
+@dataclass(frozen=True)
 class RuleSet:
     id: str
     version: int
@@ -64,17 +78,29 @@ class RuleSet:
     css_rate: Decimal
     css_exempt_up_to: Decimal
     employer_charges: tuple[EmployerCharge, ...]
+    examples: tuple[Example, ...]
     definition_hash: str
 
     def covers(self, day: date) -> bool:
         return self.valid_from <= day and (self.valid_to is None or day <= self.valid_to)
 
+    def overlaps(self, other: "RuleSet") -> bool:
+        ends_after_other_starts = self.valid_to is None or self.valid_to >= other.valid_from
+        other_ends_after_start = other.valid_to is None or other.valid_to >= self.valid_from
+        return ends_after_other_starts and other_ends_after_start
+
 
 def _decimal(value: Any, name: str) -> Decimal:
+    """Numbers are written as strings, so the stored text is exactly what was approved."""
+    if not isinstance(value, str):
+        raise RuleSetInvalid(f"{name}: write numbers as strings, not {type(value).__name__}")
     try:
-        return Decimal(str(value))
+        number = Decimal(value)
     except Exception as exc:  # noqa: BLE001 - any bad literal is a data error
         raise RuleSetInvalid(f"{name}: {value!r} is not a number") from exc
+    if not number.is_finite():
+        raise RuleSetInvalid(f"{name}: {value!r} is not a finite number")
+    return number
 
 
 def _rate(value: Any, name: str) -> Decimal:
@@ -110,6 +136,31 @@ def _brackets(raw: list[dict[str, Any]]) -> tuple[Bracket, ...]:
         brackets.append(Bracket(up_to, _rate(item["rate"], "bracket rate")))
         previous = up_to if up_to is not None else previous
     return tuple(brackets)
+
+
+def _examples(raw: list[dict[str, Any]]) -> tuple[Example, ...]:
+    examples = []
+    for item in raw:
+        expect = {
+            field: _decimal(value, f"example {item['name']} {field}")
+            for field, value in item["expect"].items()
+        }
+        unknown = set(expect) - EXPECTED_FIELDS
+        if unknown or not expect:
+            raise RuleSetInvalid(f"example {item['name']}: expects unknown or no fields {unknown}")
+        data = item["input"]
+        examples.append(
+            Example(
+                name=str(item["name"]),
+                gross=_decimal(data["gross"], f"example {item['name']} gross"),
+                head_of_family=bool(data.get("head_of_family", False)),
+                children=tuple(data.get("children", [])),
+                expect=expect,
+            )
+        )
+    if len({e.name for e in examples}) != len(examples):
+        raise RuleSetInvalid("examples: names must be unique")
+    return tuple(examples)
 
 
 def parse(definition: dict[str, Any]) -> RuleSet:
@@ -162,11 +213,12 @@ def parse(definition: dict[str, Any]) -> RuleSet:
             css_rate=_rate(css["rate"], "css.rate"),
             css_exempt_up_to=_amount(css["exempt_up_to"], "css.exempt_up_to"),
             employer_charges=charges,
+            examples=_examples(definition.get("examples", [])),
             definition_hash=payload_hash(definition),
         )
     except RuleSetInvalid:
         raise
-    except (KeyError, TypeError, ValueError) as exc:
+    except (KeyError, TypeError, ValueError, ArithmeticError) as exc:
         raise RuleSetInvalid(f"Rule set is incomplete or malformed: {exc!r}") from exc
 
 

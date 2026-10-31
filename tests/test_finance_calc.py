@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from packs.finance.payroll import calc, rules
+from packs.finance.payroll import calc, examples, rules
 
 ROOT = Path(__file__).resolve().parents[1]
 RULE_FILE = ROOT / "data/demo/finance/rule_set_tn_2026_demo.json"
@@ -244,3 +244,99 @@ def test_calc_is_pure_and_uses_no_floats():
     for node in ast.walk(tree):
         assert not (isinstance(node, ast.Constant) and isinstance(node.value, float))
         assert not (isinstance(node, ast.Name) and node.id == "float")
+
+
+def test_the_demo_rule_sets_own_examples_all_pass(rule_set):
+    results = examples.run(rule_set)
+    assert len(results) == 4
+    assert all(result.passed for result in results)
+
+
+def test_a_wrong_example_is_reported_with_expected_and_actual(definition):
+    wrong = copy.deepcopy(definition)
+    wrong["examples"][0]["expect"]["net_pay"] = "1500.000"
+    (first, *rest) = examples.run(rules.parse(wrong))
+    assert not first.passed
+    assert first.mismatches == {"net_pay": (Decimal("1500.000"), Decimal("1544.727"))}
+    assert all(result.passed for result in rest)
+
+
+def test_an_example_the_formula_refuses_fails_with_a_reason(definition):
+    broken = copy.deepcopy(definition)
+    broken["examples"][0]["input"]["children"] = ["pet"]
+    (first, *_) = examples.run(rules.parse(broken))
+    assert not first.passed
+    assert "pet" in first.error
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda d: d["examples"][0]["expect"].update(gross="1"),
+        lambda d: d["examples"][0].update(expect={}),
+        lambda d: d["examples"][1].update(name=d["examples"][0]["name"]),
+        lambda d: d["examples"][0]["input"].update(gross="lots"),
+    ],
+)
+def test_malformed_examples_are_rejected(definition, mutate):
+    broken = copy.deepcopy(definition)
+    mutate(broken)
+    with pytest.raises(rules.RuleSetInvalid):
+        rules.parse(broken)
+
+
+@pytest.mark.parametrize(
+    ("first", "second", "overlap"),
+    [
+        (("2026-01-01", None), ("2026-07-01", None), True),
+        (("2026-01-01", "2026-06-30"), ("2026-07-01", None), False),
+        (("2026-01-01", "2026-07-01"), ("2026-07-01", None), True),
+        (("2026-01-01", "2026-12-31"), ("2025-01-01", "2025-12-31"), False),
+        (("2026-03-01", "2026-04-30"), ("2026-01-01", "2026-12-31"), True),
+    ],
+)
+def test_overlap_between_rule_sets(definition, first, second, overlap):
+    def build(period, rule_id):
+        data = copy.deepcopy(definition)
+        data.update(id=rule_id, valid_from=period[0], valid_to=period[1])
+        return rules.parse(data)
+
+    a, b = build(first, "a"), build(second, "b")
+    assert a.overlaps(b) is overlap
+    assert b.overlaps(a) is overlap
+
+
+def test_gross_with_more_places_than_the_rule_set_rounds_to_is_refused(definition):
+    two_places = copy.deepcopy(definition)
+    two_places["rounding_places"] = 2
+    with pytest.raises(calc.PayslipInvalid, match="decimal places"):
+        run(rules.parse(two_places), "2000.125")
+    assert run(rules.parse(two_places), "2000.12").gross == Decimal("2000.12")
+
+
+def test_tax_lines_show_the_monthly_share_of_net_taxable_as_base(rule_set):
+    slip = run(rule_set, "2000", True, ["child", "child"])
+    by_code = {item.code: item for item in slip.lines}
+    assert by_code["IRPP"].base == Decimal("1598.067")
+    assert by_code["CSS"].base == Decimal("1598.067")
+
+
+def test_the_solidarity_levy_steps_at_the_exempt_amount_as_the_law_reads(rule_set):
+    """Intended, not a bug: above 5,000 net taxable the levy applies to the whole amount
+    (LF 2018 art. 53 raises every rate of the scale; LF 2020 art. 39 exempts income up to
+    5,000). One millime more gross can therefore lower net pay. See docs/FINANCE_RULES.md."""
+    below = run(rule_set, "512.580")
+    above = run(rule_set, "512.581")
+    assert below.working["annual_net_taxable"] <= Decimal("5000")
+    assert above.working["annual_net_taxable"] > Decimal("5000")
+    assert below.solidarity == Decimal("0.000")
+    assert above.solidarity == Decimal("2.083")
+    assert above.net_pay < below.net_pay
+
+
+@pytest.mark.parametrize("value", [0.005, 1, "NaN", "Infinity", "-Infinity", "sNaN"])
+def test_rates_must_be_finite_numbers_written_as_strings(definition, value):
+    broken = copy.deepcopy(definition)
+    broken["css"]["rate"] = value
+    with pytest.raises(rules.RuleSetInvalid):
+        rules.parse(broken)

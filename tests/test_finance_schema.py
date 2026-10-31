@@ -67,7 +67,8 @@ def make_engagement(tenant_id: UUID, employee_id: UUID) -> UUID:
 
 
 def make_run(tenant_id: UUID, status: str = "draft") -> UUID:
-    with as_role("worker"), tenant_session(tenant_id) as session:
+    """Only the owner role (seed and migrations) may create a run that is not a draft."""
+    with as_role("worker" if status == "draft" else "owner"), tenant_session(tenant_id) as session:
         run = m.PayrollRun(
             tenant_id=tenant_id,
             period_start=MONTH,
@@ -218,25 +219,77 @@ def test_the_api_cannot_write_payslips_or_payments(tenant):
         assert session.query(m.Payslip).count() == 1
 
 
-def test_the_api_cannot_activate_a_rule_set(tenant):
-    with as_role("api"), tenant_session(tenant) as session:
-        rule = m.RuleSetRecord(
-            tenant_id=tenant,
-            rule_id=f"rs-{uuid4().hex[:6]}",
-            version=1,
-            jurisdiction="TN",
-            valid_from=MONTH,
-            definition={},
-            definition_hash="0" * 64,
-        )
-        session.add(rule)
+def rule_set_row(tenant_id: UUID, status: str = "draft") -> m.RuleSetRecord:
+    return m.RuleSetRecord(
+        tenant_id=tenant_id,
+        rule_id=f"rs-{uuid4().hex[:6]}",
+        version=1,
+        jurisdiction="TN",
+        status=status,
+        valid_from=MONTH,
+        definition={"css": {"rate": "0.005"}},
+        definition_hash="0" * 64,
+    )
+
+
+def add_rule_set(tenant_id: UUID, role: str, status: str = "draft") -> UUID:
+    with as_role(role), tenant_session(tenant_id) as session:
+        row = rule_set_row(tenant_id, status)
+        session.add(row)
         session.flush()
-        rule_id = rule.id
+        return row.id
+
+
+def test_the_api_cannot_activate_a_rule_set(tenant):
+    rule_id = add_rule_set(tenant, "api")
     with pytest.raises(DBAPIError, match="permission denied"):
         with as_role("api"), tenant_session(tenant) as session:
             session.execute(
                 text("UPDATE finance.rule_set SET status = 'active' WHERE id = :i"), {"i": rule_id}
             )
+    for role in ("api", "worker"):
+        with pytest.raises(DBAPIError, match="must be a draft"):
+            add_rule_set(tenant, role, status="active")
+
+
+def test_an_active_rule_set_never_changes_even_for_the_owner(tenant):
+    active = add_rule_set(tenant, "owner", status="active")
+    for role in ("worker", "owner"):
+        with pytest.raises(DBAPIError, match="cannot be changed"):
+            with as_role(role), tenant_session(tenant) as session:
+                session.execute(
+                    text(
+                        "UPDATE finance.rule_set "
+                        'SET definition = \'{"css": {"rate": "0.02"}}\' WHERE id = :i'
+                    ),
+                    {"i": active},
+                )
+    with pytest.raises(DBAPIError, match="cannot go from active to draft"):
+        with as_role("worker"), tenant_session(tenant) as session:
+            session.execute(
+                text("UPDATE finance.rule_set SET status = 'draft' WHERE id = :i"), {"i": active}
+            )
+    with pytest.raises(DBAPIError, match="Only a draft rule set can be deleted"):
+        with as_role("worker"), tenant_session(tenant) as session:
+            session.execute(text("DELETE FROM finance.rule_set WHERE id = :i"), {"i": active})
+    with as_role("worker"), tenant_session(tenant) as session:
+        session.execute(
+            text("UPDATE finance.rule_set SET status = 'superseded' WHERE id = :i"), {"i": active}
+        )
+
+
+def test_a_draft_rule_set_can_be_edited_activated_or_deleted(tenant):
+    draft = add_rule_set(tenant, "worker")
+    with as_role("worker"), tenant_session(tenant) as session:
+        session.execute(
+            text("UPDATE finance.rule_set SET source_ref = 'edited' WHERE id = :i"), {"i": draft}
+        )
+        session.execute(
+            text("UPDATE finance.rule_set SET status = 'active' WHERE id = :i"), {"i": draft}
+        )
+    other = add_rule_set(tenant, "worker")
+    with as_role("worker"), tenant_session(tenant) as session:
+        session.execute(text("DELETE FROM finance.rule_set WHERE id = :i"), {"i": other})
 
 
 def test_a_submitted_run_freezes_its_payslips_and_lines(tenant):
@@ -247,6 +300,7 @@ def test_a_submitted_run_freezes_its_payslips_and_lines(tenant):
             {"i": slip},
         )
 
+    set_run_status(tenant, run, "calculated")
     set_run_status(tenant, run, "approval_pending")
     with pytest.raises(DBAPIError, match="cannot be changed"):
         with as_role("worker"), tenant_session(tenant) as session:
@@ -449,3 +503,84 @@ def test_the_finance_pack_uses_no_floats():
         for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
             assert not (isinstance(node, ast.Constant) and isinstance(node.value, float)), path
             assert not (isinstance(node, ast.Name) and node.id == "float"), path
+
+
+def submitted(tenant_id: UUID):
+    employee, engagement, run, slip = full_slip(tenant_id)
+    set_run_status(tenant_id, run, "calculated")
+    set_run_status(tenant_id, run, "approval_pending")
+    return employee, engagement, run, slip
+
+
+def test_nothing_can_be_added_to_a_submitted_run(tenant):
+    employee, engagement, run, slip = submitted(tenant)
+    with pytest.raises(DBAPIError, match="cannot be changed"):
+        with as_role("worker"), tenant_session(tenant) as session:
+            session.add(
+                m.PayslipLine(
+                    tenant_id=tenant,
+                    payslip_id=slip,
+                    position=2,
+                    code="BONUS",
+                    label="Bonus",
+                    kind="earning",
+                    base=Decimal("1.000"),
+                    amount=Decimal("1.000"),
+                    rule_ref="test#bonus",
+                )
+            )
+            session.flush()
+    other = make_employee(tenant)
+    with pytest.raises(DBAPIError, match="cannot be added"):
+        make_payslip(tenant, run, other, make_engagement(tenant, other))
+
+
+def test_payslips_and_lines_cannot_be_moved_out_of_or_into_a_submitted_run(tenant):
+    employee, engagement, frozen_run, frozen_slip = submitted(tenant)
+    draft_run = make_run(tenant)
+    with pytest.raises(DBAPIError, match="cannot be moved"):
+        with as_role("worker"), tenant_session(tenant) as session:
+            session.execute(
+                text("UPDATE finance.payslip SET run_id = :r WHERE id = :i"),
+                {"r": draft_run, "i": frozen_slip},
+            )
+    other = make_employee(tenant)
+    draft_slip = make_payslip(tenant, draft_run, other, make_engagement(tenant, other))
+    with pytest.raises(DBAPIError, match="cannot be changed"):
+        with as_role("worker"), tenant_session(tenant) as session:
+            session.execute(
+                text("UPDATE finance.payslip_line SET payslip_id = :f WHERE payslip_id = :d"),
+                {"f": frozen_slip, "d": draft_slip},
+            )
+
+
+def test_a_run_follows_the_allowed_path_and_only_the_worker_approves(tenant):
+    employee, engagement, run, slip = submitted(tenant)
+    with pytest.raises(DBAPIError, match="Only an approved action"):
+        with as_role("api"), tenant_session(tenant) as session:
+            session.execute(
+                text("UPDATE finance.payroll_run SET status = 'approved' WHERE id = :i"), {"i": run}
+            )
+    set_run_status(tenant, run, "approved")
+    for role in ("api", "worker"):
+        with pytest.raises(DBAPIError, match="cannot go from approved to draft"):
+            with as_role(role), tenant_session(tenant) as session:
+                session.execute(
+                    text("UPDATE finance.payroll_run SET status = 'draft' WHERE id = :i"),
+                    {"i": run},
+                )
+    with pytest.raises(DBAPIError, match="cannot go from draft to paid"):
+        set_run_status(tenant, make_run(tenant), "paid")
+    with pytest.raises(DBAPIError, match="must be a draft"):
+        with as_role("worker"), tenant_session(tenant) as session:
+            session.add(
+                m.PayrollRun(
+                    tenant_id=tenant,
+                    period_start=MONTH,
+                    period_end=date(2026, 11, 30),
+                    pay_date=date(2026, 11, 30),
+                    regime_id="TN_PRIVATE_NON_AGRI",
+                    status="approved",
+                )
+            )
+            session.flush()

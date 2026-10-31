@@ -8,12 +8,14 @@ Order, with every value taken from the rule set:
     family deductions  = head of family + children (first N only)
     net taxable        = annual taxable - expenses - family deductions, never below 0
     income tax         = progressive brackets on net taxable, divided by 12
-    solidarity levy    = rate x net taxable, divided by 12, none within the exempt amount
+    solidarity levy    = rate x net taxable, divided by 12, none within the exempt amount.
+                         On the whole amount once above it, so there is a step at the threshold
     net pay            = gross - employee CNSS - income tax - solidarity levy
     employer cost      = gross + employer CNSS + other employer charges
 
 Each displayed line is rounded once, half up, to the rule set's decimal places, and net pay is the
-sum of those rounded lines, so the lines always add up exactly.
+sum of those rounded lines, so the lines always add up exactly. Gross may not have more decimal
+places than that. The income tax and levy lines show the monthly share of net taxable as base.
 """
 
 from dataclasses import dataclass, field
@@ -110,6 +112,8 @@ def payslip(data: PayslipInput, rules: RuleSet) -> Payslip:
     if data.gross <= 0:
         raise PayslipInvalid("Gross pay must be above zero")
     places = rules.places
+    if _round(data.gross, places) != data.gross:
+        raise PayslipInvalid(f"Gross pay has more than {places} decimal places")
     ref = rules.id
 
     cnss_base = data.gross
@@ -131,6 +135,7 @@ def payslip(data: PayslipInput, rules: RuleSet) -> Payslip:
         css = _round(net_taxable * rules.css_rate / MONTHS, places)
 
     net_pay = data.gross - cnss_employee - income_tax - css
+    monthly_net_taxable = _round(net_taxable / MONTHS, places)
 
     lines = [
         Line("GROSS", "Gross salary", EARNING, data.gross, None, data.gross, f"{ref}#gross"),
@@ -147,7 +152,7 @@ def payslip(data: PayslipInput, rules: RuleSet) -> Payslip:
             "IRPP",
             "Income tax (IRPP)",
             TAX,
-            net_taxable,
+            monthly_net_taxable,
             None,
             income_tax,
             f"{ref}#irpp_brackets",
@@ -156,7 +161,7 @@ def payslip(data: PayslipInput, rules: RuleSet) -> Payslip:
             "CSS",
             "Social solidarity contribution (CSS)",
             TAX,
-            net_taxable,
+            monthly_net_taxable,
             rules.css_rate,
             css,
             f"{ref}#css",
