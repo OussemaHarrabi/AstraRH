@@ -6,7 +6,7 @@
 
 **If you are resuming after a context reset, read in this order:** this section → `docs/PLAN.md` (the approved plan, full detail) → `docs/ARCHITECTURE.md` → `docs/SETUP.md`.
 
-- **Current phase:** P5 Communication and P6 Knowledge, backend first. Built, tested and committed in small steps (see the P5/P6 log). **Next: fill the remaining backend APIs the UI needs** (slot holds, ICS invites, ticket handling, inbox listing), then one browser pass.
+- **Current phase:** P5 Communication and P6 Knowledge, backend first. Built, tested and committed in small steps (see the P5/P6 log). Backend APIs for the UI are done (steps 5 to 8). **Next, from the 2026-11-01 backend review, in order:** (1) live inbound mail: a worker poller that ingests new mail from the HR mailbox, turns CV attachments into applications, and turns a candidate's "Tuesday works" reply into a booking proposal; (2) the recruiter's calendar as a real source (ICS free/busy import plus busy-block API), not seed rows only; (3) security headers, per-user rate limits on model-backed routes, and candidate erasure/retention; (4) one `/overview` endpoint for the dashboard, and an up-to-date `docs/API.md`; (5) load test on real volumes plus runnable security drills; (6) root README and demo script. Then one browser pass, then the team branches.
 - **Priority, set by Oussema on 2026-10-31:** ship the hackathon brief's six axes deep and solid first. Teammates' services and team tooling wait until that is done. Ship fast, and test in one final pass rather than retesting at each step.
 - **Original P5/P6 plan.** Steps 1 to 3 and 5 are built (see the log); step 4 still lacks slot holds and ICS:
   1. **Inbox and digest** (`packages/kernel/comms/`, schema `comms`): thread, message, classification, digest, digest_item, template. Fictional email seed (about 40) in `data/demo/emails.json` covering applications, reschedules, salary, visa, legal threats and spam, linked to demo candidates. LangGraph agent: classify each message through `ctx.read_untrusted` (type, urgency, needs-human with reason), then a daily digest grouped by type and urgency. Web page `/inbox`.
@@ -32,8 +32,8 @@
 | P2 Kernel | **Done** |
 | P3 `platform-v0` | Web shell and seed **done**. Team tooling (`_example`, CI, prompts) moved to the end |
 | P4 Screening | **Done** |
-| P5 Communication | **In progress**: inbox, replies, follow-ups, booking built and tested. Slot holds, ICS and UI pass left |
-| P6 Knowledge | **In progress**: cited answers, refusal and tickets built and tested. Ticket handling API and UI pass left |
+| P5 Communication | **In progress**: inbox, replies, follow-ups, booking, slot holds, invites, cancel/reschedule and inbox listing/handled/corrections built and tested. Backend done; UI pass left |
+| P6 Knowledge | **In progress**: cited answers, refusal, ticket handling, answer feedback and policy versions built and tested. UI pass left |
 | P7 AstraGraph | Not started |
 | P8 Integration and proof | Not started |
 
@@ -121,6 +121,26 @@ Committed in small steps. Each step below is one commit.
    - Booking releases the interview's other held slots. If a person rejects the slots email, `talent.release_rejected_slots` (on `trust.proposal.rejected.v1`) frees the holds and sets the interview to `slots_declined`. Expired holds simply stop counting.
    - The slots proposal target now includes `interview_id`, and its explanation states when the hold expires.
    - **Verified:** ruff clean, `tests/test_communications.py` **46 passed**. New tests: held slots aren't offered to a second candidate, booking frees the other two, and rejecting the offer frees all three.
+6. **Calendar invites, cancelling and rescheduling** (2026-11-01).
+   - `kernel/schedule/ics.py` renders RFC 5545 invites (REQUEST or CANCEL). The proposal stores the invite as plain fields (uid, title, times, attendees, method, sequence), so the approval hash covers exactly what is sent; the `.ics` file is only rendered at send time. Strict patterns stop an address or UID from adding lines to the file.
+   - The mail adapter now has `build()` (checks plus message, no network) and `send()`. It attaches `invite.ics` as `text/calendar; method=...` and refuses an invite that doesn't list the recipient.
+   - The booking confirmation carries a REQUEST invite. One UID per interview (`interview-{id}@astrarh.example.test`), so a cancellation replaces the event in the candidate's calendar.
+   - New action `talent.interview.cancel` (R2, internal, approved by admin/hr/recruiter). It frees the holds and the booked seats, sets `calendar.booking.status` to cancelled (migration `656f9f6580d8`), and publishes `talent.interview.cancelled.v1`. If the interview was booked, it proposes a cancellation email with a CANCEL invite (sequence 1). With `reschedule: true` it opens a new interview request, so the scheduler offers fresh times.
+   - API: `GET /packs/talent/interviews/{id}`, and `POST /packs/talent/interviews/{id}/cancel` with `{reason, reschedule}`, which proposes the cancellation. Interview JSON now includes `ends_at`, `booking_id` and `created_at`.
+   - **Verified:** ruff clean, `tests/test_communications.py` **55 passed**. New tests: the invite is valid and folded, injection attempts are refused, the attachment goes only to listed attendees, cancelling frees the calendar and prepares a CANCEL invite, a repeat cancel does nothing, rescheduling opens a new request, and cancelling an unbooked interview sends nothing.
+7. **HR ticket handling, answer feedback and policy versions** (2026-11-01).
+   - Tickets now have a lifecycle: open → claimed (assignee) → answered or closed. Only the assignee can answer a claimed ticket. An HR answer goes back to the employee's question (`answered_by: hr`, no citations, since a person wrote it). Closing sets the question to closed. Each resolution publishes `knowledge.ticket.resolved.v1` and writes an audit entry (`kernel.ticket.answer`, `kernel.ticket.close`, both R1).
+   - Employees rate an answer (`kernel.question.feedback`, R0). Not helpful opens one ticket carrying their comment and the assistant's answer, so HR sees what went wrong.
+   - Policy versions: a document is `processing`, `active`, `superseded` or `failed`. Publishing a new version supersedes the old one and deactivates its passages, so search only ranks current text. A unique partial index (`one_active_version`) means the database allows one active version per policy. HR publishes markdown through the API; the worker indexes it on `knowledge.document.submitted.v1`, so the API still never calls a model or embedder.
+   - Migration `4d6882bacaaa`. Manifest adds `kernel.document.publish` (R1).
+   - API: `GET /knowledge/tickets?status=active|open|claimed|answered|closed|all&mine=`, `GET /knowledge/tickets/{id}`, `POST /knowledge/tickets/{id}/claim|release|answer|close`, `POST /knowledge/questions/{id}/feedback`, `GET /knowledge/stats` (HR), `GET /knowledge/documents` (readable to the caller only), `GET /knowledge/documents/{id}` (sections), `POST /knowledge/documents` (HR, 202).
+   - **Verified:** ruff clean. New `tests/test_knowledge_api.py` over real HTTP plus `tests/test_communications.py`: **63 passed**. Covers claim conflicts, HR-only queue, closing, one ticket per unhelpful answer, feedback only after an answer, new version replacing the old in search, the database refusing two active versions, and HR publishing with the worker indexing and role filtering the listing.
+8. **Inbox listing, handled state and sorting corrections** (2026-11-01).
+   - Threads are `open` or `handled`, with who handled them, when, and a note. An approved reply sent from the thread marks it handled ("Approved reply sent"). A new inbound email reopens it, so nothing falls silently out of the queue.
+   - A person can correct the assistant's sorting of a message (type, urgency, needs a person, reason). The model's first values are kept in `model_values`, so the correction rate is measurable. Each correction publishes `comms.classification.corrected.v1` and writes an audit entry. Digest items show `corrected` and `thread_status`.
+   - New actions `kernel.email.handle` and `kernel.email.correct` (both R1). Migration `40a1419fcb48`. The type and urgency vocabulary moved to `kernel/comms/vocabulary.py`, so the API does not import LangGraph (the API image does not install it; this broke API start-up once).
+   - API: `GET /comms/threads?status=open|handled|all&needs_human=&type=&q=&before=&limit=` (newest first, cursor paging, `q` escaped for LIKE), `GET /comms/threads/{id}` (each message carries its sorting), `POST /comms/threads/{id}/handled` and `/reopen` (409 if already in that state), `PUT /comms/messages/{id}/sorting`, `GET /comms/stats` (open, handled, needing a person, by type, flagged, correction count).
+   - **Verified:** ruff clean. New `tests/test_inbox_api.py` covers filters, LIKE escaping, paging, handled/reopen with audit, corrections keeping model values, role checks and cross-tenant 404s. **Full suite: 322 passed, 2 skipped.**
 
 ### Screening, web shell and two-layer ranking: 2026-10-31
 

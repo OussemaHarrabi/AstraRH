@@ -18,6 +18,14 @@ class Thread(TenantMixin, Base):
     subject: Mapped[str] = mapped_column(Text, nullable=False)
     party_email: Mapped[str] = mapped_column(String(320), nullable=False, index=True)
     last_message_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    # open: someone still has to deal with it. handled: a person closed it or a reply went out.
+    # A new inbound message reopens it.
+    status: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="open", server_default="open", index=True
+    )
+    handled_by: Mapped[UUID | None] = mapped_column(UUID_TYPE)
+    handled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    handled_note: Mapped[str | None] = mapped_column(Text)
 
 
 class Message(TenantMixin, Base):
@@ -53,6 +61,10 @@ class Classification(TenantMixin, Base):
     quote: Mapped[str | None] = mapped_column(Text)
     flagged: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     flags: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=False, default=list)
+    # Set when a person corrects the sorting. The model's values are kept for evals.
+    corrected_by: Mapped[UUID | None] = mapped_column(UUID_TYPE)
+    corrected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    model_values: Mapped[dict | None] = mapped_column(JSONB)
 
 
 class Digest(TenantMixin, Base):

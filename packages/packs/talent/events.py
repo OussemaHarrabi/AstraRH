@@ -71,3 +71,9 @@ class InterviewRequested(BaseModel):
 class InterviewBooked(BaseModel):
     interview_id: UUID
     booking_id: UUID
+
+
+@event_type("talent.interview.cancelled.v1")
+class InterviewCancelled(BaseModel):
+    interview_id: UUID
+    reason: str = ""

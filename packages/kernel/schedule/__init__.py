@@ -24,6 +24,7 @@ __all__ = [
     "Hold",
     "Slot",
     "book",
+    "cancel",
     "find_slots",
     "free_slots",
     "hold",
@@ -176,4 +177,18 @@ def book(
         raise AdapterRejected("Someone booked this slot at the same moment.") from exc
     if owner:
         release(session, owner)
+    return booking
+
+
+def cancel(session: Session, booking_id: UUID) -> Booking:
+    """Frees everyone's time but keeps the booking, so the history stays complete."""
+    booking = session.get(Booking, booking_id, with_for_update=True)
+    if booking is None:
+        raise AdapterRejected("Booking not found")
+    if booking.status == "cancelled":
+        return booking
+    session.execute(delete(BookingSeat).where(BookingSeat.booking_id == booking_id))
+    booking.status = "cancelled"
+    booking.cancelled_at = utcnow()
+    session.flush()
     return booking

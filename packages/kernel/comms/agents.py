@@ -12,21 +12,9 @@ from kernel.ai import AgentContext, EvidenceSpan, load_prompt
 from kernel.ai.graphs import AgentState, agent_node
 from kernel.comms import MessageClassified, force_human_reason
 from kernel.comms.models import Classification, Message
+from kernel.comms.vocabulary import MessageType
 from kernel.events import publish
 
-MessageType = Literal[
-    "application",
-    "availability",
-    "reschedule",
-    "question",
-    "offer_or_salary",
-    "legal_or_complaint",
-    "visa_or_permit",
-    "policy_question",
-    "internal",
-    "spam",
-    "other",
-]
 FLAG_REASON = "This message tries to instruct the AI"
 
 
