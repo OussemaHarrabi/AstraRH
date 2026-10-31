@@ -4,6 +4,7 @@ owner: wassim
 status: preview
 description: Onboarding, follow-up, skill gaps and training tied to KPIs, with a human deciding about people.
 models: packs.journey.models
+api: packs.journey.api:router
 
 ui:
   route: /journey
@@ -98,3 +99,4 @@ publishes:
 consumes:
   - talent.candidate.hired.v1
   - trust.action.executed.v1
+
