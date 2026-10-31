@@ -1,0 +1,253 @@
+# AstraRH stack. Network and credential boundaries here are security controls:
+# see docs/ARCHITECTURE.md before changing who can reach what.
+name: astrarh
+
+x-python-hardening: &python-hardening
+  image: astrarh-python:local
+  restart: unless-stopped
+  read_only: true
+  tmpfs: [/tmp]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+
+x-otel-env: &otel-env
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-lgtm:4318
+  OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+  OTEL_PYTHON_FASTAPI_EXCLUDED_URLS: healthz
+  ASTRA_ENV: ${ASTRA_ENV:-dev}
+
+services:
+  caddy:
+    image: caddy:2.10-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d
+    restart: unless-stopped
+    environment:
+      CSP_SCRIPT_EXTRA: ${CSP_SCRIPT_EXTRA:-}
+      CSP_CONNECT_EXTRA: ${CSP_CONNECT_EXTRA:-}
+    volumes:
+      - ./ops/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+    ports: ["127.0.0.1:8080:80"]
+    networks: [edge_public, edge_internal]
+    depends_on:
+      api: { condition: service_healthy }
+      web: { condition: service_healthy }
+    mem_limit: 64m
+
+  web:
+    build:
+      context: .
+      dockerfile: ops/docker/web.Dockerfile
+      target: production
+    image: astrarh-web:local
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://api:8000
+      NEXT_TELEMETRY_DISABLED: "1"
+    networks: [edge_internal]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+    mem_limit: 768m
+
+  api:
+    <<: *python-hardening
+    build:
+      context: .
+      dockerfile: ops/docker/python.Dockerfile
+    command: ["uvicorn", "apps.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      <<: *otel-env
+      OTEL_SERVICE_NAME: astra-api
+      DATABASE_URL: postgresql://astra_api:${ASTRA_API_PASSWORD}@postgres:5432/astra
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      SESSION_SECRET: ${SESSION_SECRET}
+    networks: [edge_internal, data, graph, files, telemetry]
+    depends_on:
+      postgres: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    mem_limit: 512m
+
+  worker:
+    <<: *python-hardening
+    build:
+      context: .
+      dockerfile: ops/docker/python.Dockerfile
+    command: ["python", "-m", "apps.worker.main"]
+    environment:
+      <<: *otel-env
+      OTEL_SERVICE_NAME: astra-worker
+      DATABASE_URL: postgresql://astra_worker:${ASTRA_WORKER_PASSWORD}@postgres:5432/astra
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      ML_URL: http://ml:8001
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      LLM_FAST_MODEL: ${LLM_FAST_MODEL}
+      LLM_STANDARD_MODEL: ${LLM_STANDARD_MODEL}
+      LLM_FALLBACK_MODEL: ${LLM_FALLBACK_MODEL}
+      LLM_GUARD_MODEL: ${LLM_GUARD_MODEL}
+    networks: [data, graph, files, ml, telemetry, llm_egress]
+    depends_on:
+      postgres: { condition: service_healthy }
+      ml: { condition: service_healthy }
+    healthcheck: &heartbeat-check
+      test: ["CMD", "python", "-c", "import os,time,sys; sys.exit(0 if time.time()-os.path.getmtime('/tmp/heartbeat')<90 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 15s
+    mem_limit: 768m
+
+  executor:
+    <<: *python-hardening
+    build:
+      context: .
+      dockerfile: ops/docker/python.Dockerfile
+    command: ["python", "-m", "apps.executor.main"]
+    environment:
+      <<: *otel-env
+      OTEL_SERVICE_NAME: astra-executor
+      DATABASE_URL: postgresql://astra_executor:${ASTRA_EXECUTOR_PASSWORD}@postgres:5432/astra
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+    networks: [data, mail, telemetry]
+    depends_on:
+      postgres: { condition: service_healthy }
+    healthcheck: *heartbeat-check
+    mem_limit: 256m
+
+  ml:
+    <<: *python-hardening
+    build:
+      context: .
+      dockerfile: ops/docker/python.Dockerfile
+      args:
+        EXTRA: ml
+    image: astrarh-ml:local
+    command: ["uvicorn", "apps.ml.main:app", "--host", "0.0.0.0", "--port", "8001"]
+    environment:
+      <<: *otel-env
+      OTEL_SERVICE_NAME: astra-ml
+    networks: [ml, telemetry]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8001/healthz', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    mem_limit: 1536m
+
+  postgres:
+    image: pgvector/pgvector:pg17@sha256:7d0a41464797aeb9862dfdc0bbf1526b82cfd324cdd8036df19e3545f4a9ccb8
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: astra
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      ASTRA_OWNER_PASSWORD: ${ASTRA_OWNER_PASSWORD}
+      ASTRA_API_PASSWORD: ${ASTRA_API_PASSWORD}
+      ASTRA_WORKER_PASSWORD: ${ASTRA_WORKER_PASSWORD}
+      ASTRA_EXECUTOR_PASSWORD: ${ASTRA_EXECUTOR_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./ops/postgres/init:/docker-entrypoint-initdb.d:ro
+    networks: [data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d astra"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    mem_limit: 1g
+
+  neo4j:
+    image: neo4j:5.26-community@sha256:249a1ec6e3c52d82101a5ed33d6ed2b5ed5b0017b21a28c0bfebc335e87fb177
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
+      NEO4J_server_memory_heap_initial__size: 256m
+      NEO4J_server_memory_heap_max__size: 512m
+      NEO4J_server_memory_pagecache_size: 128m
+    volumes:
+      - neo4j_data:/data
+    networks: [graph]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:7474 || curl -sf http://127.0.0.1:7474"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+    mem_limit: 1g
+
+  # Named volumes start root-owned; the MinIO image runs as non-root user 65532.
+  minio-volume-init:
+    image: caddy:2.10-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d
+    command: ["sh", "-c", "chown -R 65532:65532 /data"]
+    volumes:
+      - minio_data:/data
+    network_mode: none
+    restart: "no"
+
+  # Chainguard build: the upstream MinIO project stopped publishing official images.
+  minio:
+    image: cgr.dev/chainguard/minio@sha256:3b6e40c30ecd5cea627e382ff0b82ca841f58c52294578787043ee80c8ef7c82
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    networks: [files]
+    depends_on:
+      minio-volume-init: { condition: service_completed_successfully }
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 512m
+
+  mailpit:
+    image: axllent/mailpit:v1.27@sha256:e22dce5b36f93c77082e204a3942fb6b283b7896e057458400a4c88344c3df68
+    restart: unless-stopped
+    networks: [mail]
+    mem_limit: 64m
+
+  otel-lgtm:
+    image: grafana/otel-lgtm@sha256:4c8056c9c05fcb3c8fd93800e85334bfd79b4d0271b47a54a121a64af41fe1fe
+    restart: unless-stopped
+    ports: ["127.0.0.1:3001:3000"]
+    volumes:
+      - ./ops/grafana/dashboards:/otel-lgtm/astrarh-dashboards:ro
+    networks: [telemetry, telemetry_ui]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+    mem_limit: 1536m
+
+networks:
+  edge_public: {}
+  edge_internal: { internal: true }
+  data: { internal: true }
+  graph: { internal: true }
+  files: { internal: true }
+  ml: { internal: true }
+  mail: { internal: true }
+  telemetry: { internal: true }
+  telemetry_ui: {}
+  llm_egress: {}
+
+volumes:
+  postgres_data: {}
+  neo4j_data: {}
+  minio_data: {}

@@ -1,0 +1,44 @@
+[project]
+name = "astrarh"
+version = "0.1.0"
+description = "AstraRH: one HR ecosystem from hire to retain, on a shared trust layer"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "boto3>=1.40",
+    "fastapi>=0.115",
+    "httpx>=0.27",
+    "neo4j>=5.26,<6",
+    "opentelemetry-exporter-otlp-proto-http>=1.30",
+    "opentelemetry-instrumentation-fastapi>=0.51b0",
+    "opentelemetry-instrumentation-httpx>=0.51b0",
+    "opentelemetry-instrumentation-logging>=0.51b0",
+    "opentelemetry-sdk>=1.30",
+    "psycopg[binary]>=3.2",
+    "uvicorn[standard]>=0.32",
+]
+
+[project.optional-dependencies]
+# Parsing and embedding libraries are added here in Phase 4.
+ml = []
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.8",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = [".", "packages"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+ignore = ["S101"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "packages"]
+pythonpath = [".", "packages"]

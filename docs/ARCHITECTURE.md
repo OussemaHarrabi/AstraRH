@@ -85,5 +85,6 @@ Applies to every pack, for legal and ethical reasons (EU AI Act Art. 5(1)(f) and
 
 ## Technology
 
-Python 3.12, FastAPI, SQLAlchemy 2, Alembic, Pydantic 2, Procrastinate, LangGraph, Docling, fastembed, Next.js, TypeScript, Cytoscape.js, PostgreSQL 17, pgvector, Neo4j Community, MinIO, OpenTelemetry, Grafana (`otel-lgtm`), Caddy, Docker Compose.
+Python 3.12, FastAPI, SQLAlchemy 2, Alembic, Pydantic 2, Procrastinate, LangGraph, Docling, fastembed, Next.js 16, TypeScript, Cytoscape.js, PostgreSQL 17, pgvector, Neo4j Community, MinIO (Chainguard build), OpenTelemetry, Grafana (`otel-lgtm`), Caddy, Docker Compose.
+Models: Claude Haiku first (`claude-haiku-5-5`), Groq (`openai/gpt-oss-20b`) as fallback, Groq prompt guard as one injection layer.
 Tasks run through `python astra.py <command>`, which works the same on Windows, macOS and Linux. Exact versions are pinned in the lock files and compose file.

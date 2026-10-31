@@ -1,0 +1,73 @@
+# Development overlay: live code reload and loopback-only tool ports.
+# Mounts specific folders only, never the repo root, so .env stays out of containers.
+x-python-dev: &python-dev
+  image: astrarh-python:dev
+  build:
+    context: .
+    dockerfile: ops/docker/python.Dockerfile
+    args:
+      INSTALL_DEV: "1"
+  volumes: &python-mounts
+    - ./apps:/app/apps:ro
+    - ./packages:/app/packages:ro
+    - ./tests:/app/tests:ro
+    - ./pyproject.toml:/app/pyproject.toml:ro
+    - ./ops/compose.yaml:/app/ops/compose.yaml:ro
+
+services:
+  caddy:
+    environment:
+      CSP_SCRIPT_EXTRA: "'unsafe-eval'"
+      CSP_CONNECT_EXTRA: "ws:"
+
+  web:
+    build:
+      target: development
+    image: astrarh-web:dev
+    read_only: false
+    environment:
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ./apps/web/src:/app/src:ro
+      - ./apps/web/public:/app/public:ro
+
+  api:
+    <<: *python-dev
+    command: ["uvicorn", "apps.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-dir", "apps", "--reload-dir", "packages"]
+    environment:
+      WATCHFILES_FORCE_POLLING: "true"
+
+  worker:
+    <<: *python-dev
+
+  executor:
+    <<: *python-dev
+
+  ml:
+    <<: *python-dev
+    image: astrarh-ml:dev
+    build:
+      context: .
+      dockerfile: ops/docker/python.Dockerfile
+      args:
+        EXTRA: ml
+        INSTALL_DEV: "1"
+
+  postgres:
+    ports: ["127.0.0.1:55432:5432"]
+    networks: [data, dev_tools]
+
+  neo4j:
+    ports: ["127.0.0.1:7474:7474", "127.0.0.1:7687:7687"]
+    networks: [graph, dev_tools]
+
+  minio:
+    ports: ["127.0.0.1:9001:9001"]
+    networks: [files, dev_tools]
+
+  mailpit:
+    ports: ["127.0.0.1:8025:8025"]
+    networks: [mail, dev_tools]
+
+networks:
+  dev_tools: {}
