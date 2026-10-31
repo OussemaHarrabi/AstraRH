@@ -6,7 +6,7 @@ Each pack with a `seed.py` adds its own data: seed(session, tenant_id, world).
 import json
 import logging
 import os
-from datetime import date
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from importlib import import_module
 from pathlib import Path
@@ -14,7 +14,7 @@ from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from kernel.db import global_session, tenant_session
+from kernel.db import global_session, tenant_session, utcnow
 from kernel.identity import hash_password
 from kernel.identity.models import RoleAssignment, Tenant, UserAccount
 from kernel.people.models import (
@@ -27,6 +27,8 @@ from kernel.people.models import (
     SkillRelation,
 )
 from kernel.registry import active_packs, import_all_models
+from kernel.schedule import TIMEZONE
+from kernel.schedule.models import BusyBlock
 
 ROOT = Path(__file__).resolve().parents[2]
 WORLD_FILE = ROOT / "data" / "world.json"
@@ -137,6 +139,30 @@ def seed_users(session: Session, tenant_id, world: dict) -> None:
     session.flush()
 
 
+def seed_calendars(session: Session, tenant_id) -> None:
+    """Busy mornings for the recruiter and the interviewer, so free slots are meaningful."""
+    if session.scalar(select(BusyBlock.id).limit(1)):
+        return
+    today = utcnow().astimezone(TIMEZONE).date()
+    people = {
+        "nadia@cds.example.test": [(9, 11)],
+        "karim@cds.example.test": [(9, 10), (11, 13), (15, 16)],
+    }
+    for offset in range(1, 15):
+        day = today + timedelta(days=offset)
+        for participant, blocks in people.items():
+            for start_hour, end_hour in blocks:
+                session.add(
+                    BusyBlock(
+                        tenant_id=tenant_id,
+                        participant=participant,
+                        starts_at=datetime.combine(day, time(start_hour), tzinfo=TIMEZONE),
+                        ends_at=datetime.combine(day, time(end_hour), tzinfo=TIMEZONE),
+                        label="Meetings",
+                    )
+                )
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO)
     import_all_models()
@@ -149,6 +175,8 @@ def main() -> None:
     with tenant_session(tenant_id) as session:
         seed_people(session, tenant_id, world)
         seed_users(session, tenant_id, world)
+    with tenant_session(tenant_id) as session:
+        seed_calendars(session, tenant_id)
     for manifest in active_packs():
         if manifest.id == "kernel":
             continue

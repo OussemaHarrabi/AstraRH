@@ -95,6 +95,14 @@ Committed in small steps. Each step below is one commit.
    - Bug: the generator zipped `data/cvs` into `data/cvs/tech_cv_corpus.zip`, so the zip contained itself and grew to 6.2 GB (corrupt). Every Docker build uploaded it, which made `astra.py check` fail with `bake: exit status 143`. The zip now goes to `data/tech_cv_corpus.zip`. Zips and `data/source/` (Kaggle `Resume.csv`) are ignored by git and Docker.
    - The corrupt zip is still on disk at `data/cvs/tech_cv_corpus.zip` and safe to delete.
    - Not wired into the seed yet: `load_demo` still loads the 42 generated CVs in `data/demo/cvs` (those carry the eval labels).
+2. **Kernel: inbox, calendar and policy answers.**
+   - `kernel/comms/` (schema `comms`: thread, message, classification, digest, digest_item). The `inbox_triage` LangGraph agent reads each inbound email through `ctx.read_untrusted` and records type, urgency and needs-a-person with a reason. Rules force a person for legal or complaints, discrimination or harassment, salary or offers, visas, health and personal data requests, whatever the model says. Daily digest grouped by type, most urgent first. `record_outbound` keeps approved replies in the same thread even when the subject was edited (the bug the lost session found).
+   - `kernel/schedule/` (schema `calendar`: busy_block, booking, booking_seat). One seat row per person and slot, under a unique constraint, so a double booking fails in the database, not just in code. Seed adds busy mornings for Nadia and Karim for the next 14 days.
+   - `kernel/knowledge/` (schema `knowledge`: document, chunk, question, ticket). One passage per section. Hybrid search (pgvector + full-text, fused by rank), with the role filter inside the WHERE of both searches, so restricted text can't even be ranked. The `policy_answers` agent: injection guard, forced-human topics, then a minimum similarity, then a cited answer. Every sentence must cite a passage and every quote must appear in it word for word, or the question goes to HR as a ticket.
+   - **Bug fixed today:** the citation check split `"...per year. [C1]"` into two sentences, so correct answers were refused (eval: 1/8 answered). A trailing citation now belongs to the sentence before it, and the prompt asks for `"... [C1]."`. Regression cases added to `test_check_answer_rules`.
+   - Demo data: `data/demo/emails.json` (22 fictional emails, written by `tools/generate_demo_data.py`) and `data/demo/policies/` (leave, remote, expenses, conduct, and salary bands restricted to hr/admin/finance). Loaded by `astra.py seed`.
+   - Migrations, with RLS in their own revisions: `ae38104e4ebd`, `kernel_0003_comms_calendar_rules`, `b83efbe1d77d`, `kernel_0005_knowledge_rules`.
+   - API: `GET/POST /comms/digest`, `GET /comms/threads/{id}`, `POST/GET /knowledge/questions`, `GET /knowledge/questions/{id}`, `GET /knowledge/tickets`.
 
 ### Screening, web shell and two-layer ranking: 2026-10-31
 

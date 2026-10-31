@@ -1,0 +1,17 @@
+# Fictional policies of Carthage Demo Systems. audience_roles empty means everyone.
+- id: POL-LEAVE
+  title: Leave policy
+  file: leave.md
+- id: POL-REMOTE
+  title: Remote work policy
+  file: remote.md
+- id: POL-EXPENSES
+  title: Travel and expenses policy
+  file: expenses.md
+- id: POL-CONDUCT
+  title: Code of conduct
+  file: conduct.md
+- id: POL-PAY-BANDS
+  title: Salary bands
+  file: pay_bands.md
+  audience_roles: [hr, admin, finance]
