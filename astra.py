@@ -6,7 +6,10 @@
     python astra.py down [--wipe]    stop (--wipe: also delete all local data)
     python astra.py ps               show service status
     python astra.py logs [service]   follow logs
-    python astra.py check            lint and unit tests
+    python astra.py check [args]     lint and all tests (args pass to pytest)
+    python astra.py live             one real model call, to test your LLM key
+    python astra.py makemigration <kernel|pack> "message"
+    python astra.py graph-rebuild    rebuild Neo4j from the event log
     python astra.py smoke            verify health, isolation, permissions and telemetry
 """
 
@@ -124,15 +127,43 @@ def cmd_logs(args: argparse.Namespace) -> int:
     return compose("logs", "--follow", "--tail", "100", *extra).returncode
 
 
-def cmd_check(_: argparse.Namespace) -> int:
+def cmd_check(args: argparse.Namespace) -> int:
     require_env()
-    failed = 0
-    for tool_args in (
-        ["ruff", "check", "--no-cache", "apps", "packages", "tests"],
-        ["pytest", "-q", "-p", "no:cacheprovider"],
-    ):
-        failed |= compose("exec", "-T", "api", *tool_args).returncode
+    run_tool = ("run", "--rm", "--build", "--no-deps", "tests")
+    failed = compose(*run_tool, "ruff", "check", "--no-cache", "apps", "packages", "tests").returncode
+    failed |= compose(*run_tool, "pytest", "-q", "-p", "no:cacheprovider", *args.pytest_args).returncode
     return failed
+
+
+def cmd_live(_: argparse.Namespace) -> int:
+    """One real model call. Spends a fraction of a cent."""
+    require_env()
+    return compose(
+        "run", "--rm", "--no-deps", "-e", "RUN_LIVE=1", "tests",
+        "pytest", "-q", "-p", "no:cacheprovider",
+        "tests/test_ai.py::test_live_haiku_returns_valid_structured_output",
+    ).returncode
+
+
+def cmd_makemigration(args: argparse.Namespace) -> int:
+    require_env()
+    return compose(
+        "run", "--rm", "--build", "migrate",
+        "python", "-m", "kernel.migrate", "new", args.scope, args.message,
+    ).returncode
+
+
+def cmd_graph_rebuild(_: argparse.Namespace) -> int:
+    require_env()
+    code = (
+        "from kernel import graph, registry\n"
+        "from kernel.db import active_tenant_ids, tenant_session\n"
+        "registry.install_graph_projections()\n"
+        "for tenant_id in active_tenant_ids():\n"
+        "    with tenant_session(tenant_id) as session:\n"
+        "        print(tenant_id, graph.rebuild(session, tenant_id), 'events replayed')\n"
+    )
+    return compose("exec", "-T", "worker", "python", "-c", code).returncode
 
 
 class Smoke:
@@ -226,6 +257,11 @@ def smoke_isolation(s: Smoke) -> None:
     s.check("worker holds no mail settings", not env_var_present("worker", "SMTP_HOST"))
     s.check("executor holds no Neo4j password", not env_var_present("executor", "NEO4J_PASSWORD"))
     s.check("worker holds an LLM key", env_var_present("worker", "ANTHROPIC_API_KEY"))
+    for service in ["api", "executor"]:
+        no_sdk = service_python(service, "import anthropic")
+        s.check(f"{service} image has no LLM library", no_sdk.returncode != 0)
+    has_sdk = service_python("worker", "import anthropic, langgraph")
+    s.check("worker image has the LLM libraries", has_sdk.returncode == 0)
     env_exposed = service_python("api", "import os,sys; sys.exit(0 if os.path.exists('/app/.env') else 1)")
     s.check(".env is not inside containers", env_exposed.returncode != 0)
 
@@ -265,6 +301,18 @@ def smoke_telemetry(s: Smoke) -> None:
         s.check(f"{service} traces in Grafana", service not in pending)
 
 
+def smoke_end_to_end(s: Smoke) -> None:
+    print("\nEnd to end (real worker, executor, mailbox and graph)")
+    result = compose(
+        "run", "--rm", "--no-deps", "--quiet-pull", "-e", "RUN_LIVE_STACK=1", "tests",
+        "pytest", "-q", "-p", "no:cacheprovider", "tests/test_live_stack.py",
+        capture=True,
+    )
+    s.check("approve, execute, send, audit and project", result.returncode == 0)
+    if result.returncode != 0:
+        print(result.stdout[-2000:])
+
+
 def cmd_smoke(_: argparse.Namespace) -> int:
     require_env()
     smoke = Smoke()
@@ -272,6 +320,7 @@ def cmd_smoke(_: argparse.Namespace) -> int:
     smoke_isolation(smoke)
     smoke_database(smoke)
     smoke_telemetry(smoke)
+    smoke_end_to_end(smoke)
     print(f"\n{'ALL PASSED' if not smoke.failures else f'{smoke.failures} FAILED'}")
     return 1 if smoke.failures else 0
 
@@ -292,7 +341,15 @@ def main() -> int:
     logs = commands.add_parser("logs")
     logs.add_argument("service", nargs="?")
     logs.set_defaults(run=cmd_logs)
-    commands.add_parser("check").set_defaults(run=cmd_check)
+    check = commands.add_parser("check")
+    check.add_argument("pytest_args", nargs="*")
+    check.set_defaults(run=cmd_check)
+    commands.add_parser("live").set_defaults(run=cmd_live)
+    migration = commands.add_parser("makemigration")
+    migration.add_argument("scope", help="kernel or a pack id")
+    migration.add_argument("message")
+    migration.set_defaults(run=cmd_makemigration)
+    commands.add_parser("graph-rebuild").set_defaults(run=cmd_graph_rebuild)
     commands.add_parser("smoke").set_defaults(run=cmd_smoke)
     args = parser.parse_args()
     return args.run(args)

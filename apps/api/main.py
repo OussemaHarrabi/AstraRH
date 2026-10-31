@@ -8,12 +8,22 @@ from fastapi import FastAPI, Response
 from neo4j import GraphDatabase
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
+from kernel import registry, web
 from kernel.obs import setup_telemetry
 
 setup_telemetry()
 
-app = FastAPI(title="AstraRH API", version="0.1.0")
+is_dev = os.environ.get("ASTRA_ENV", "dev") == "dev"
+app = FastAPI(
+    title="AstraRH API",
+    version="0.1.0",
+    docs_url="/docs" if is_dev else None,
+    redoc_url=None,
+    openapi_url="/openapi.json" if is_dev else None,
+)
 FastAPIInstrumentor.instrument_app(app)
+web.install(app)
+registry.mount_pack_routers(app)
 
 
 def _postgres_ok() -> bool:

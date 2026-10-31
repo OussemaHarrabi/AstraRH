@@ -1,0 +1,118 @@
+# The kernel's own declarations. Same format as a pack manifest.
+id: kernel
+name: Platform core
+owner: oussema
+status: live
+description: Identity, trust ledger, explainability, events, AI runtime and graph.
+
+actions:
+  - id: kernel.email.send
+    risk: R2
+    channel: external
+    adapter: email.send
+    approver_roles: [admin, hr, recruiter]
+    view_roles: [admin, hr, recruiter, auditor]
+    description: Send an email that a person has reviewed.
+
+graph:
+  - event: ai.agent_run.completed.v1
+    nodes:
+      - label: AgentRun
+        id: $.run_id
+        props: { agent: $.agent, pack: $.pack, status: $.status }
+    edges:
+      - type: TRIGGERED
+        from: { label: Event, id: $.trigger_event_id }
+        to: { label: AgentRun, id: $.run_id }
+
+  - event: trust.proposal.created.v1
+    nodes:
+      - label: Proposal
+        id: $.proposal_id
+        props: { action_type: $.action_type, pack: $.pack, risk: $.risk, status: pending_approval }
+    edges:
+      - type: PROPOSED
+        from: { label: AgentRun, id: $.agent_run_id }
+        to: { label: Proposal, id: $.proposal_id }
+      - type: EXPLAINED_BY
+        from: { label: Proposal, id: $.proposal_id }
+        to: { label: Decision, id: $.decision_record_id }
+
+  - event: trust.proposal.approved.v1
+    nodes:
+      - label: Proposal
+        id: $.proposal_id
+        props: { status: approved }
+      - label: Human
+        id: $.approver_id
+    edges:
+      - type: APPROVED_BY
+        from: { label: Proposal, id: $.proposal_id }
+        to: { label: Human, id: $.approver_id }
+
+  - event: trust.proposal.rejected.v1
+    nodes:
+      - label: Proposal
+        id: $.proposal_id
+        props: { status: rejected }
+      - label: Human
+        id: $.approver_id
+    edges:
+      - type: REJECTED_BY
+        from: { label: Proposal, id: $.proposal_id }
+        to: { label: Human, id: $.approver_id }
+
+  - event: trust.action.executed.v1
+    nodes:
+      - label: Proposal
+        id: $.proposal_id
+        props: { status: executed }
+      - label: Execution
+        id: $.execution_id
+        props: { action_type: $.action_type }
+    edges:
+      - type: EXECUTED
+        from: { label: Proposal, id: $.proposal_id }
+        to: { label: Execution, id: $.execution_id }
+      - type: EMITTED
+        from: { label: Execution, id: $.execution_id }
+        to: { label: Event, id: $event.id }
+
+  - event: explain.decision.recorded.v1
+    nodes:
+      - label: Decision
+        id: $.decision_id
+        props: { kind: $.kind }
+      - label: Model
+        id: $.model
+      - label: Prompt
+        id: $.prompt_hash
+    edges:
+      - type: USED_MODEL
+        from: { label: Decision, id: $.decision_id }
+        to: { label: Model, id: $.model }
+      - type: USED_PROMPT
+        from: { label: Decision, id: $.decision_id }
+        to: { label: Prompt, id: $.prompt_hash }
+
+  - event: explain.decision.recorded.v1
+    for_each: $.factors
+    nodes:
+      - label: Factor
+        id: "fmt:{decision_id}:{key}"
+        props: { key: "@.key", title: "@.label" }
+    edges:
+      - type: HAS_FACTOR
+        from: { label: Decision, id: "@.decision_id" }
+        to: { label: Factor, id: "fmt:{decision_id}:{key}" }
+
+  - event: explain.decision.recorded.v1
+    for_each: $.evidence
+    nodes:
+      - label: Evidence
+        id: "@.ref"
+        props: { source_type: "@.source_type", source_id: "@.source_id" }
+    edges:
+      - type: SUPPORTS
+        from: { label: Evidence, id: "@.ref" }
+        to: { label: Factor, id: "fmt:{decision_id}:{factor_key}" }

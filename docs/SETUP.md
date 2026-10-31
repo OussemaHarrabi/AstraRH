@@ -58,8 +58,11 @@ Passwords are in your `.env`.
 | `python astra.py down --wipe` | Stop and **delete all local data** |
 | `python astra.py ps` | Status |
 | `python astra.py logs [service]` | Follow logs |
-| `python astra.py check` | Lint and tests. Run before every PR |
-| `python astra.py smoke` | Verify health, isolation, permissions and telemetry |
+| `python astra.py check` | Lint and all tests. Run before every PR |
+| `python astra.py smoke` | Verify health, isolation, permissions, telemetry and one real end-to-end flow |
+| `python astra.py live` | One real model call, to test your LLM key |
+| `python astra.py makemigration <kernel\|pack> "message"` | Generate a database migration |
+| `python astra.py graph-rebuild` | Rebuild Neo4j from the event log |
 
 ## 5. Troubleshooting
 

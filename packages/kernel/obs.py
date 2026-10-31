@@ -29,9 +29,7 @@ def setup_telemetry() -> None:
         return
     _configured = True
 
-    resource = Resource.create(
-        {"deployment.environment": os.environ.get("ASTRA_ENV", "dev")}
-    )
+    resource = Resource.create({"deployment.environment": os.environ.get("ASTRA_ENV", "dev")})
 
     tracer_provider = TracerProvider(resource=resource)
     tracer_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))

@@ -1,24 +1,47 @@
-"""AstraRH worker process: runs agents and jobs. It can propose, never send or approve."""
+"""AstraRH worker process: runs agents, the event relay and durable jobs.
+
+It can propose and apply approved internal actions. It can never send or approve: the database
+role can't write approvals, and this process holds no mail credentials.
+"""
 
 import logging
 import os
+import threading
 import time
 
 import httpx
 from opentelemetry import trace
 
+from kernel import registry
+from kernel.ai.graphs import setup_checkpoints
+from kernel.db import active_tenant_ids
+from kernel.events import relay_once
 from kernel.heartbeat import beat
+from kernel.jobs import WORKER_QUEUES, get_job_app
 from kernel.obs import setup_telemetry
 
 HEARTBEAT_SECONDS = 30
+RELAY_IDLE_SECONDS = 1
 
 log = logging.getLogger("astra.worker")
+tracer = trace.get_tracer("astra.worker")
 
 
-def main() -> None:
-    setup_telemetry()
-    tracer = trace.get_tracer("astra.worker")
-    log.info("worker started")
+def relay_loop() -> None:
+    """Every tenant in turn, each under its own RLS scope."""
+    while True:
+        worked = 0
+        try:
+            for tenant_id in active_tenant_ids():
+                worked += relay_once(tenant_id)
+                worked += registry.run_internal_actions(tenant_id)
+        except Exception:
+            log.exception("Relay pass failed")
+        if not worked:
+            time.sleep(RELAY_IDLE_SECONDS)
+
+
+def heartbeat_loop() -> None:
     while True:
         beat()
         with tracer.start_as_current_span("worker.heartbeat") as span:
@@ -29,6 +52,17 @@ def main() -> None:
                 span.record_exception(exc)
                 log.warning("ml service unreachable")
         time.sleep(HEARTBEAT_SECONDS)
+
+
+def main() -> None:
+    setup_telemetry()
+    registry.install_graph_projections()
+    registry.wire_agents()
+    setup_checkpoints()
+    threading.Thread(target=heartbeat_loop, daemon=True, name="heartbeat").start()
+    threading.Thread(target=relay_loop, daemon=True, name="relay").start()
+    log.info("worker started")
+    get_job_app().run_worker(queues=WORKER_QUEUES, install_signal_handlers=True)
 
 
 if __name__ == "__main__":

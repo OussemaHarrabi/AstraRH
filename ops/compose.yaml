@@ -17,6 +17,22 @@ x-otel-env: &otel-env
   ASTRA_ENV: ${ASTRA_ENV:-dev}
 
 services:
+  # One-shot: applies migrations and syncs the action catalogue with the owner role.
+  # This is the only process holding the owner password.
+  migrate:
+    <<: *python-hardening
+    restart: "no"
+    build:
+      context: .
+      dockerfile: ops/docker/python.Dockerfile
+    command: ["python", "-m", "kernel.migrate", "up"]
+    environment:
+      DATABASE_URL: postgresql://astra_owner:${ASTRA_OWNER_PASSWORD}@postgres:5432/astra
+    networks: [data]
+    depends_on:
+      postgres: { condition: service_healthy }
+    mem_limit: 256m
+
   caddy:
     image: caddy:2.10-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d
     restart: unless-stopped
@@ -55,7 +71,7 @@ services:
     build:
       context: .
       dockerfile: ops/docker/python.Dockerfile
-    command: ["uvicorn", "apps.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    command: ["uvicorn", "apps.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]
     environment:
       <<: *otel-env
       OTEL_SERVICE_NAME: astra-api
@@ -69,7 +85,7 @@ services:
       SESSION_SECRET: ${SESSION_SECRET}
     networks: [edge_internal, data, graph, files, telemetry]
     depends_on:
-      postgres: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
       interval: 10s
@@ -82,6 +98,9 @@ services:
     build:
       context: .
       dockerfile: ops/docker/python.Dockerfile
+      args:
+        EXTRA: worker
+    image: astrarh-worker:local
     command: ["python", "-m", "apps.worker.main"]
     environment:
       <<: *otel-env
@@ -100,9 +119,11 @@ services:
       LLM_STANDARD_MODEL: ${LLM_STANDARD_MODEL}
       LLM_FALLBACK_MODEL: ${LLM_FALLBACK_MODEL}
       LLM_GUARD_MODEL: ${LLM_GUARD_MODEL}
+      GUARD_REMOTE: ${GUARD_REMOTE:-off}
+      LLM_TENANT_DAILY_TOKENS: ${LLM_TENANT_DAILY_TOKENS:-2000000}
     networks: [data, graph, files, ml, telemetry, llm_egress]
     depends_on:
-      postgres: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
       ml: { condition: service_healthy }
     healthcheck: &heartbeat-check
       test: ["CMD", "python", "-c", "import os,time,sys; sys.exit(0 if time.time()-os.path.getmtime('/tmp/heartbeat')<90 else 1)"]
@@ -126,7 +147,7 @@ services:
       SMTP_PORT: "1025"
     networks: [data, mail, telemetry]
     depends_on:
-      postgres: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
     healthcheck: *heartbeat-check
     mem_limit: 256m
 

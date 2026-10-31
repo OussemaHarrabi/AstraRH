@@ -29,9 +29,13 @@ flowchart TB
 | Process | May | May never |
 |---|---|---|
 | `api` | Serve requests, record approvals | Hold mail or calendar credentials, call LLMs |
-| `worker` | Run agents, create proposals | Send anything, approve anything |
-| `executor` | Run approved proposals after re-checking them | Read CVs, call LLMs |
+| `worker` | Run agents, create proposals, apply approved **internal** actions through the same gate | Send anything, approve anything |
+| `executor` | Run approved **external** proposals after re-checking them | Read CVs, call LLMs |
 | `ml` | Parse and embed untrusted files | Reach any network |
+
+**External or internal.** An action that leaves the system (email, calendar) runs in `executor`, which can't read pack data. An action that only changes our own records (advance a stage, assign training) runs in `worker`, which can. Both pass the same approval gate.
+
+**Database roles enforce this too.** Only `astra_api` can insert an approval. Only `astra_worker` and `astra_executor` can record an execution. `astra_executor` sees a proposal only after it reaches approval, and can't read decision records or pack data. A bug in application code can't get around these rules.
 
 ## Data stores
 
