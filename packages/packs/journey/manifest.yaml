@@ -35,6 +35,12 @@ actions:
   - id: journey.checkin.schedule
     risk: R1
     description: Schedule the day 7/30/60/90 check-ins from the approved plan.
+  - id: journey.checkin.submit
+    risk: R1
+    description: Submit a structured check-in response.
+  - id: journey.task.complete
+    risk: R1
+    description: Record task completion and its evidence.
   - id: journey.checkin.notify
     risk: R2
     channel: external
