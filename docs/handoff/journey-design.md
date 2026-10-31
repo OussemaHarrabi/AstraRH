@@ -66,7 +66,7 @@ The important part is not the list of features. It is that **nothing is learned 
 
 Two supporting stories, both cheap and demo-able:
 
-- **Team gap heatmap (Horizon preview).** Aggregate confirmed gaps by team and skill at `k >= 5`. It shows the workforce-wide lane — "9 of 14 backend engineers have a Kubernetes gap" — **without** the campaign tables the schema does not have.
+- **Team gap heatmap (Horizon preview).** Aggregate confirmed gaps by team and skill at `k >= 5`. It shows the workforce-wide lane — "9 of 14 Engineering staff have a Kubernetes gap" — **without** the campaign tables the schema does not have.
 - **No sentiment, no ranking, no flight-risk score.** Say it on stage. We show facts and a reason; a human decides what to do. This is the legal line and a differentiator, not a limitation.
 
 ### 1.4 What the judge sees, by criterion
@@ -237,7 +237,7 @@ Code is table stakes; every team will have AI-written code. The score is the **t
 |---|---|---|---|---|---|
 | **D1** | **Probation dossier (Day 90)** | Computed export: milestones, evidence, check-ins, verified skills, missing items; manager review pack | Tunisia's trial period is a legal artifact. The agent assembles; the human decides. No new table | read-only over plan/tasks/check-ins/gaps | S |
 | **D2** | **Manager readiness pack** | Pre-start checklist (access, first task, calendar, buddy briefed), **first-win ladder** (3 escalating tasks), cohort line | The #1 onboarding failure is an unprepared manager. Time-to-first-contribution becomes demo-able | `template_task`, `onboarding_task` | S |
-| **D3** | **Team gap heatmap — Horizon preview** | Aggregate confirmed/proposed gaps by org unit + skill at `k >= 5`; no individual ranking; no campaign tables | Shows the workforce-wide lane today: "9 of 14 backend engineers have a K8s gap." The second lane without the deferred schema | `skill_requirement`, `skill_gap` + core reads | M |
+| **D3** | **Team gap heatmap — Horizon preview** | Aggregate confirmed/proposed gaps by org unit + skill at `k >= 5`; no individual ranking; no campaign tables | Shows the workforce-wide lane today: "9 of 14 Engineering staff have a K8s gap." The second lane without the deferred schema | `skill_requirement`, `skill_gap` + core reads | M |
 | **D4** | **Explainability pack** | `<WhyPanel>` on plan/gap; evidence drawer; edit-then-approve diff; "No evidence found" wording | Reliability and fairness in one click. The shared UI renders; journey supplies the record | shared `explain` + proposal envelope | S |
 | **D5** | **Manager weekly briefing** | 3 actions this week + a 1:1 packet from facts; LLM narrates validated numbers | Manager cockpit value: coordination time down, conversation quality up | read-only + prompt | M |
 | **D6** | **Reverse doc feedback** | Portal button "this doc is wrong / this step was useless" -> `support_flag(kind=doc_feedback)` -> HR queue; knowledge owner decides | Nobody builds the reverse feedback loop. It improves the RAG corpus without the agent editing docs | `support_flag` | S |
@@ -1070,3 +1070,4 @@ This is kept at the end on purpose. It is the list of places where the journey p
 ---
 
 *End of the implementation reference. The next commit is code: `seed/journey/` first, then the pack skeleton.*
+
