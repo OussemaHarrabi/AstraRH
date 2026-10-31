@@ -1,0 +1,56 @@
+id: talent
+name: Recruitment
+owner: oussema
+status: live
+description: From a job offer and a pile of CVs to an explained shortlist a recruiter can trust.
+models: packs.talent.models
+api: packs.talent.api:router
+
+ui:
+  route: /jobs
+  nav_label: Recruitment
+  roles: [admin, hr, recruiter, manager, auditor]
+
+actions:
+  - id: talent.cv.read
+    risk: R0
+    description: Read a CV into a structured profile with verified quotes.
+  - id: talent.rubric.draft
+    risk: R1
+    description: Draft screening criteria from a job offer, for a recruiter to review.
+  - id: talent.shortlist.confirm
+    risk: R2
+    channel: internal
+    handler: packs.talent.handlers:confirm_shortlist
+    approver_roles: [admin, hr, recruiter]
+    view_roles: [admin, hr, recruiter, auditor]
+    description: Move the top candidates to the shortlist.
+  - id: talent.application.reject
+    risk: R3
+    channel: internal
+    handler: packs.talent.handlers:reject_application
+    approver_roles: [admin, hr]
+    view_roles: [admin, hr, recruiter, auditor]
+    description: Reject a candidate. Needs a second person and password confirmation.
+
+agents:
+  - id: rubric_builder
+    events: [talent.job.created.v1]
+    entry: packs.talent.agents.rubric_builder:build
+    description: Drafts job-related criteria from the offer.
+  - id: cv_reader
+    events: [talent.cv.uploaded.v1]
+    entry: packs.talent.agents.cv_reader:build
+    description: Reads a CV with no identity and no tools, and checks every quote against the file.
+  - id: ranking
+    events: [talent.ranking.requested.v1]
+    entry: packs.talent.agents.ranking:build
+    description: Scores by formula, explains each result, and proposes a shortlist.
+
+publishes:
+  - talent.job.created.v1
+  - talent.cv.uploaded.v1
+  - talent.cv.processed.v1
+  - talent.ranking.requested.v1
+  - talent.ranking.completed.v1
+  - talent.application.stage_changed.v1

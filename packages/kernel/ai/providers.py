@@ -50,20 +50,27 @@ def strict_json_schema(schema: dict[str, Any]) -> dict[str, Any]:
     """Make a Pydantic schema acceptable to strict structured outputs."""
     node = json.loads(json.dumps(schema))
 
-    def visit(item: Any) -> None:
-        if isinstance(item, dict):
-            item.pop("title", None)
-            item.pop("default", None)
-            if item.get("type") == "object" or "properties" in item:
-                item["additionalProperties"] = False
-                item["required"] = list(item.get("properties", {}))
-            for value in item.values():
-                visit(value)
-        elif isinstance(item, list):
+    def visit_schema(item: Any) -> None:
+        if isinstance(item, list):
             for value in item:
-                visit(value)
+                visit_schema(value)
+            return
+        if not isinstance(item, dict):
+            return
+        item.pop("title", None)
+        item.pop("default", None)
+        if item.get("type") == "object" or "properties" in item:
+            item["additionalProperties"] = False
+            item["required"] = list(item.get("properties", {}))
+        for key, value in item.items():
+            # These maps hold user-chosen field names, which may themselves be "title" or "default".
+            if key in {"properties", "$defs"}:
+                for child in value.values():
+                    visit_schema(child)
+            else:
+                visit_schema(value)
 
-    visit(node)
+    visit_schema(node)
     return node
 
 

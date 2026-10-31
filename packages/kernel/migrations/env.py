@@ -26,6 +26,13 @@ def include_name(name, type_, parent_names):
     return True
 
 
+def include_object(obj, name, type_, reflected, compare_to):
+    """Only this scope's tables, so one pack's migration can never touch another's."""
+    if type_ == "table":
+        return obj.schema in scope_schemas()
+    return True
+
+
 def run() -> None:
     url = os.environ["DATABASE_URL"].replace("postgresql://", "postgresql+psycopg://", 1)
     engine = create_engine(url)
@@ -35,6 +42,7 @@ def run() -> None:
             target_metadata=Base.metadata,
             include_schemas=True,
             include_name=include_name,
+            include_object=include_object,
             version_table_schema="core",
             compare_type=True,
         )

@@ -281,6 +281,17 @@ def test_cost_comes_from_the_price_table():
     assert response.cost_usd == Decimal("0.60")
 
 
+def test_strict_schema_keeps_fields_named_like_schema_keywords():
+    class Role(BaseModel):
+        title: str
+        default: str
+
+    schema = strict_json_schema(Role.model_json_schema())
+    assert set(schema["properties"]) == {"title", "default"}
+    assert schema["required"] == ["title", "default"]
+    assert "title" not in schema["properties"]["title"]
+
+
 def test_strict_schema_closes_every_object():
     class Inner(BaseModel):
         a: int = 1

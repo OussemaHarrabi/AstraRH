@@ -14,6 +14,7 @@ from opentelemetry import trace
 
 from kernel import registry
 from kernel.ai.graphs import setup_checkpoints
+from kernel.ai.runner import install_agent_task
 from kernel.db import active_tenant_ids
 from kernel.events import relay_once
 from kernel.heartbeat import beat
@@ -22,6 +23,7 @@ from kernel.obs import setup_telemetry
 
 HEARTBEAT_SECONDS = 30
 RELAY_IDLE_SECONDS = 1
+AGENT_CONCURRENCY = 4
 
 log = logging.getLogger("astra.worker")
 tracer = trace.get_tracer("astra.worker")
@@ -62,7 +64,13 @@ def main() -> None:
     threading.Thread(target=heartbeat_loop, daemon=True, name="heartbeat").start()
     threading.Thread(target=relay_loop, daemon=True, name="relay").start()
     log.info("worker started")
-    get_job_app().run_worker(queues=WORKER_QUEUES, install_signal_handlers=True)
+    app = get_job_app()
+    install_agent_task(app)
+    # The relay defers jobs synchronously while the worker below runs them on its own connection.
+    app.open()
+    app.run_worker(
+        queues=WORKER_QUEUES, concurrency=AGENT_CONCURRENCY, install_signal_handlers=True
+    )
 
 
 if __name__ == "__main__":

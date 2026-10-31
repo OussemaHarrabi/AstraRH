@@ -14,7 +14,6 @@ An agent run ends by creating proposals. It never waits for approval and never a
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import timedelta
-from importlib import import_module
 from pathlib import Path
 from typing import Any, TypeVar
 from uuid import UUID
@@ -22,6 +21,7 @@ from uuid import UUID
 from opentelemetry import trace
 from pydantic import BaseModel
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from kernel import explain, trust
@@ -29,7 +29,7 @@ from kernel.ai.gateway import Gateway, PromptRef, default_gateway
 from kernel.ai.models import AgentRun, AgentStep, EvalResult, LlmCache, PromptVersion, SecurityEvent
 from kernel.ai.reader import EvidenceSpan, ReaderResult, read_untrusted
 from kernel.db import utcnow
-from kernel.events import Consumer, EventOutbox, add_consumer, event_type, publish
+from kernel.events import EventOutbox, event_type, publish
 from kernel.explain import DecisionDraft
 from kernel.explain.models import DecisionRecord
 from kernel.trust.audit import append as audit_append
@@ -81,18 +81,23 @@ class AgentContext:
     gateway: Gateway = default_gateway
     proposals: list[Proposal] = field(default_factory=list)
 
-    def _remember(self, prompt: PromptRef) -> None:
-        exists = self.session.scalar(
-            select(PromptVersion.id).where(
-                PromptVersion.name == prompt.name, PromptVersion.hash == prompt.hash
-            )
+    @property
+    def model_used(self) -> str | None:
+        """The model behind this run's latest call, recorded in decision records."""
+        return self.session.scalar(
+            select(AgentStep.model)
+            .where(AgentStep.run_id == self.run.id, AgentStep.model.is_not(None))
+            .order_by(AgentStep.created_at.desc())
+            .limit(1)
         )
-        if exists is None:
-            self.session.add(
-                PromptVersion(
-                    tenant_id=self.tenant_id, name=prompt.name, hash=prompt.hash, text=prompt.text
-                )
-            )
+
+    def _remember(self, prompt: PromptRef) -> None:
+        # Agents run in parallel, so two may record the same prompt at once.
+        self.session.execute(
+            insert(PromptVersion)
+            .values(tenant_id=self.tenant_id, name=prompt.name, hash=prompt.hash, text=prompt.text)
+            .on_conflict_do_nothing(index_elements=["tenant_id", "name", "hash"])
+        )
 
     def llm(self, tier: str, prompt: PromptRef, facts: str, schema: type[T]) -> T:
         """For trusted, already-validated facts. Untrusted text must use read_untrusted."""
@@ -216,15 +221,3 @@ def run_agent(
             ),
         )
     return run
-
-
-def register_agent(agent: str, pack: str, entry_path: str, events: list[str]) -> None:
-    """Wire "module:function" to its events. Failed runs are recorded, not retried."""
-    module_name, function_name = entry_path.split(":", 1)
-    entry = getattr(import_module(module_name), function_name)
-
-    def handler(session: Session, event: EventOutbox) -> None:
-        run_agent(session, agent, pack, entry, event.tenant_id, event)
-
-    for name in events:
-        add_consumer(name, Consumer(f"agent:{pack}.{agent}", handler))

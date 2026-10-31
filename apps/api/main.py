@@ -17,6 +17,9 @@ is_dev = os.environ.get("ASTRA_ENV", "dev") == "dev"
 app = FastAPI(
     title="AstraRH API",
     version="0.1.0",
+    description="The HR platform API. Sign in at /auth/login. State-changing calls need the "
+    "x-csrf-token header, whose value is the astra_csrf cookie.",
+    root_path=os.environ.get("API_ROOT_PATH", ""),
     docs_url="/docs" if is_dev else None,
     redoc_url=None,
     openapi_url="/openapi.json" if is_dev else None,

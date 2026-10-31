@@ -1,0 +1,802 @@
+{
+  "tenant": {
+    "slug": "cds",
+    "name": "Carthage Demo Systems"
+  },
+  "org_units": [
+    {
+      "id": "ORG-ENG",
+      "name": "Engineering"
+    },
+    {
+      "id": "ORG-PRD",
+      "name": "Product & Design"
+    },
+    {
+      "id": "ORG-SAL",
+      "name": "Sales"
+    },
+    {
+      "id": "ORG-OPS",
+      "name": "Operations & Support"
+    },
+    {
+      "id": "ORG-HR",
+      "name": "People"
+    },
+    {
+      "id": "ORG-FIN",
+      "name": "Finance"
+    }
+  ],
+  "positions": [
+    {
+      "id": "POS-BE",
+      "title": "Backend Engineer"
+    },
+    {
+      "id": "POS-FE",
+      "title": "Frontend Engineer"
+    },
+    {
+      "id": "POS-DATA",
+      "title": "Data Engineer"
+    },
+    {
+      "id": "POS-PM",
+      "title": "Product Manager"
+    },
+    {
+      "id": "POS-DES",
+      "title": "Product Designer"
+    },
+    {
+      "id": "POS-AE",
+      "title": "Account Executive"
+    },
+    {
+      "id": "POS-SUP",
+      "title": "Support Specialist"
+    },
+    {
+      "id": "POS-REC",
+      "title": "Recruiter"
+    },
+    {
+      "id": "POS-HRBP",
+      "title": "HR Business Partner"
+    },
+    {
+      "id": "POS-ACC",
+      "title": "Accountant"
+    },
+    {
+      "id": "POS-MGR",
+      "title": "Team Manager"
+    },
+    {
+      "id": "POS-CEO",
+      "title": "Chief Executive"
+    }
+  ],
+  "skills": [
+    {
+      "id": "SKILL-PY",
+      "name": "Python"
+    },
+    {
+      "id": "SKILL-SQL",
+      "name": "SQL"
+    },
+    {
+      "id": "SKILL-FASTAPI",
+      "name": "FastAPI"
+    },
+    {
+      "id": "SKILL-K8S",
+      "name": "Kubernetes"
+    },
+    {
+      "id": "SKILL-DOCKER",
+      "name": "Docker"
+    },
+    {
+      "id": "SKILL-OBS",
+      "name": "Observability"
+    },
+    {
+      "id": "SKILL-REACT",
+      "name": "React"
+    },
+    {
+      "id": "SKILL-TS",
+      "name": "TypeScript"
+    },
+    {
+      "id": "SKILL-DATA",
+      "name": "Data pipelines"
+    },
+    {
+      "id": "SKILL-PM",
+      "name": "Product management"
+    },
+    {
+      "id": "SKILL-UX",
+      "name": "UX design"
+    },
+    {
+      "id": "SKILL-NEG",
+      "name": "Negotiation"
+    },
+    {
+      "id": "SKILL-CRM",
+      "name": "CRM"
+    },
+    {
+      "id": "SKILL-SUPPORT",
+      "name": "Customer support"
+    },
+    {
+      "id": "SKILL-RECRUIT",
+      "name": "Recruiting"
+    },
+    {
+      "id": "SKILL-LABOR",
+      "name": "Labour policy"
+    },
+    {
+      "id": "SKILL-ACCT",
+      "name": "Accounting"
+    },
+    {
+      "id": "SKILL-LEAD",
+      "name": "Team leadership"
+    },
+    {
+      "id": "SKILL-COMM",
+      "name": "Communication"
+    }
+  ],
+  "skill_relations": [
+    {
+      "skill": "SKILL-K8S",
+      "related": "SKILL-DOCKER",
+      "strength": "0.5"
+    },
+    {
+      "skill": "SKILL-FASTAPI",
+      "related": "SKILL-PY",
+      "strength": "0.4"
+    },
+    {
+      "skill": "SKILL-REACT",
+      "related": "SKILL-TS",
+      "strength": "0.6"
+    },
+    {
+      "skill": "SKILL-DATA",
+      "related": "SKILL-SQL",
+      "strength": "0.5"
+    }
+  ],
+  "kpis": [
+    {
+      "id": "KPI-TTH",
+      "name": "Time to hire",
+      "unit": "days",
+      "owner": "talent",
+      "direction": "lower_is_better"
+    },
+    {
+      "id": "KPI-MTTR",
+      "name": "Mean time to restore",
+      "unit": "hours",
+      "owner": "journey",
+      "direction": "lower_is_better"
+    },
+    {
+      "id": "KPI-RAMP",
+      "name": "Days to full productivity",
+      "unit": "days",
+      "owner": "journey",
+      "direction": "lower_is_better"
+    },
+    {
+      "id": "KPI-90D",
+      "name": "90-day new-hire retention",
+      "unit": "%",
+      "owner": "journey",
+      "direction": "higher_is_better"
+    },
+    {
+      "id": "KPI-COST",
+      "name": "People cost against budget",
+      "unit": "%",
+      "owner": "finance",
+      "direction": "lower_is_better"
+    },
+    {
+      "id": "KPI-OVERTIME",
+      "name": "Team overtime",
+      "unit": "hours",
+      "owner": "workforce",
+      "direction": "lower_is_better"
+    }
+  ],
+  "employees": [
+    {
+      "id": "EMP-001",
+      "name": "Salma Gharbi",
+      "org_unit": "ORG-HR",
+      "position": "POS-CEO",
+      "manager": null,
+      "email": "salma.gharbi.emp-001@cds.example.test",
+      "start_date": "2023-05-01"
+    },
+    {
+      "id": "EMP-002",
+      "name": "Karim Mansour",
+      "org_unit": "ORG-ENG",
+      "position": "POS-MGR",
+      "manager": "EMP-001",
+      "email": "karim.mansour.emp-002@cds.example.test",
+      "start_date": "2019-12-01"
+    },
+    {
+      "id": "EMP-003",
+      "name": "Ines Ben Salah",
+      "org_unit": "ORG-PRD",
+      "position": "POS-PM",
+      "manager": "EMP-001",
+      "email": "ines.ben.salah.emp-003@cds.example.test",
+      "start_date": "2022-08-01"
+    },
+    {
+      "id": "EMP-004",
+      "name": "Walid Jebali",
+      "org_unit": "ORG-SAL",
+      "position": "POS-MGR",
+      "manager": "EMP-001",
+      "email": "walid.jebali.emp-004@cds.example.test",
+      "start_date": "2025-02-01"
+    },
+    {
+      "id": "EMP-005",
+      "name": "Rim Chaabane",
+      "org_unit": "ORG-OPS",
+      "position": "POS-MGR",
+      "manager": "EMP-001",
+      "email": "rim.chaabane.emp-005@cds.example.test",
+      "start_date": "2025-10-01"
+    },
+    {
+      "id": "EMP-006",
+      "name": "Leila Haddad",
+      "org_unit": "ORG-HR",
+      "position": "POS-HRBP",
+      "manager": "EMP-001",
+      "email": "leila.haddad.emp-006@cds.example.test",
+      "start_date": "2018-10-01"
+    },
+    {
+      "id": "EMP-007",
+      "name": "Sami Ferchichi",
+      "org_unit": "ORG-FIN",
+      "position": "POS-ACC",
+      "manager": "EMP-001",
+      "email": "sami.ferchichi.emp-007@cds.example.test",
+      "start_date": "2022-04-01"
+    },
+    {
+      "id": "EMP-008",
+      "name": "Nadia Bouzid",
+      "org_unit": "ORG-HR",
+      "position": "POS-REC",
+      "manager": "EMP-006",
+      "email": "nadia.bouzid.emp-008@cds.example.test",
+      "start_date": "2024-04-01"
+    },
+    {
+      "id": "EMP-009",
+      "name": "Mehdi Sassi",
+      "org_unit": "ORG-ENG",
+      "position": "POS-BE",
+      "manager": "EMP-002",
+      "email": "mehdi.sassi.emp-009@cds.example.test",
+      "start_date": "2022-11-01"
+    },
+    {
+      "id": "EMP-010",
+      "name": "Amel Mansouri",
+      "org_unit": "ORG-SAL",
+      "position": "POS-AE",
+      "manager": "EMP-004",
+      "email": "amel.mansouri.emp-010@cds.example.test",
+      "start_date": "2024-06-01"
+    },
+    {
+      "id": "EMP-011",
+      "name": "Khalil Riahi",
+      "org_unit": "ORG-OPS",
+      "position": "POS-SUP",
+      "manager": "EMP-005",
+      "email": "khalil.riahi.emp-011@cds.example.test",
+      "start_date": "2020-10-01"
+    },
+    {
+      "id": "EMP-012",
+      "name": "Ines Mejri",
+      "org_unit": "ORG-ENG",
+      "position": "POS-BE",
+      "manager": "EMP-002",
+      "email": "ines.mejri.emp-012@cds.example.test",
+      "start_date": "2023-04-01"
+    },
+    {
+      "id": "EMP-013",
+      "name": "Ghaith Gharbi",
+      "org_unit": "ORG-ENG",
+      "position": "POS-FE",
+      "manager": "EMP-002",
+      "email": "ghaith.gharbi.emp-013@cds.example.test",
+      "start_date": "2020-02-01"
+    },
+    {
+      "id": "EMP-014",
+      "name": "Amel Zouari",
+      "org_unit": "ORG-ENG",
+      "position": "POS-DATA",
+      "manager": "EMP-002",
+      "email": "amel.zouari.emp-014@cds.example.test",
+      "start_date": "2018-11-01"
+    },
+    {
+      "id": "EMP-015",
+      "name": "Amine Ben Ali",
+      "org_unit": "ORG-PRD",
+      "position": "POS-DES",
+      "manager": "EMP-003",
+      "email": "amine.ben.ali.emp-015@cds.example.test",
+      "start_date": "2023-05-01"
+    },
+    {
+      "id": "EMP-016",
+      "name": "Aziz Ayari",
+      "org_unit": "ORG-SAL",
+      "position": "POS-AE",
+      "manager": "EMP-004",
+      "email": "aziz.ayari.emp-016@cds.example.test",
+      "start_date": "2018-09-01"
+    },
+    {
+      "id": "EMP-017",
+      "name": "Wael Hammami",
+      "org_unit": "ORG-OPS",
+      "position": "POS-SUP",
+      "manager": "EMP-005",
+      "email": "wael.hammami.emp-017@cds.example.test",
+      "start_date": "2022-06-01"
+    },
+    {
+      "id": "EMP-018",
+      "name": "Youssef Ayari",
+      "org_unit": "ORG-ENG",
+      "position": "POS-BE",
+      "manager": "EMP-002",
+      "email": "youssef.ayari.emp-018@cds.example.test",
+      "start_date": "2019-12-01"
+    },
+    {
+      "id": "EMP-019",
+      "name": "Ghaith Chebbi",
+      "org_unit": "ORG-ENG",
+      "position": "POS-FE",
+      "manager": "EMP-002",
+      "email": "ghaith.chebbi.emp-019@cds.example.test",
+      "start_date": "2024-07-01"
+    },
+    {
+      "id": "EMP-020",
+      "name": "Khalil Mansouri",
+      "org_unit": "ORG-ENG",
+      "position": "POS-DATA",
+      "manager": "EMP-002",
+      "email": "khalil.mansouri.emp-020@cds.example.test",
+      "start_date": "2022-12-01"
+    },
+    {
+      "id": "EMP-021",
+      "name": "Marwan Bouazizi",
+      "org_unit": "ORG-PRD",
+      "position": "POS-DES",
+      "manager": "EMP-003",
+      "email": "marwan.bouazizi.emp-021@cds.example.test",
+      "start_date": "2020-07-01"
+    },
+    {
+      "id": "EMP-022",
+      "name": "Marwan Bouazizi",
+      "org_unit": "ORG-SAL",
+      "position": "POS-AE",
+      "manager": "EMP-004",
+      "email": "marwan.bouazizi.emp-022@cds.example.test",
+      "start_date": "2020-02-01"
+    },
+    {
+      "id": "EMP-023",
+      "name": "Asma Mejri",
+      "org_unit": "ORG-OPS",
+      "position": "POS-SUP",
+      "manager": "EMP-005",
+      "email": "asma.mejri.emp-023@cds.example.test",
+      "start_date": "2024-07-01"
+    },
+    {
+      "id": "EMP-024",
+      "name": "Wael Sassi",
+      "org_unit": "ORG-ENG",
+      "position": "POS-BE",
+      "manager": "EMP-002",
+      "email": "wael.sassi.emp-024@cds.example.test",
+      "start_date": "2018-01-01"
+    },
+    {
+      "id": "EMP-025",
+      "name": "Malek Ben Ali",
+      "org_unit": "ORG-ENG",
+      "position": "POS-FE",
+      "manager": "EMP-002",
+      "email": "malek.ben.ali.emp-025@cds.example.test",
+      "start_date": "2025-05-01"
+    },
+    {
+      "id": "EMP-026",
+      "name": "Khalil Karoui",
+      "org_unit": "ORG-ENG",
+      "position": "POS-DATA",
+      "manager": "EMP-002",
+      "email": "khalil.karoui.emp-026@cds.example.test",
+      "start_date": "2019-06-01"
+    },
+    {
+      "id": "EMP-027",
+      "name": "Amine Trabelsi",
+      "org_unit": "ORG-PRD",
+      "position": "POS-DES",
+      "manager": "EMP-003",
+      "email": "amine.trabelsi.emp-027@cds.example.test",
+      "start_date": "2023-01-01"
+    },
+    {
+      "id": "EMP-028",
+      "name": "Youssef Ben Ali",
+      "org_unit": "ORG-SAL",
+      "position": "POS-AE",
+      "manager": "EMP-004",
+      "email": "youssef.ben.ali.emp-028@cds.example.test",
+      "start_date": "2021-01-01"
+    },
+    {
+      "id": "EMP-029",
+      "name": "Amel Ayari",
+      "org_unit": "ORG-OPS",
+      "position": "POS-SUP",
+      "manager": "EMP-005",
+      "email": "amel.ayari.emp-029@cds.example.test",
+      "start_date": "2021-01-01"
+    },
+    {
+      "id": "EMP-030",
+      "name": "Anis Trabelsi",
+      "org_unit": "ORG-ENG",
+      "position": "POS-BE",
+      "manager": "EMP-002",
+      "email": "anis.trabelsi.emp-030@cds.example.test",
+      "start_date": "2018-04-01"
+    },
+    {
+      "id": "EMP-031",
+      "name": "Skander Khelifi",
+      "org_unit": "ORG-ENG",
+      "position": "POS-FE",
+      "manager": "EMP-002",
+      "email": "skander.khelifi.emp-031@cds.example.test",
+      "start_date": "2020-03-01"
+    },
+    {
+      "id": "EMP-032",
+      "name": "Ines Bouazizi",
+      "org_unit": "ORG-ENG",
+      "position": "POS-DATA",
+      "manager": "EMP-002",
+      "email": "ines.bouazizi.emp-032@cds.example.test",
+      "start_date": "2020-07-01"
+    },
+    {
+      "id": "EMP-033",
+      "name": "Amine Trabelsi",
+      "org_unit": "ORG-PRD",
+      "position": "POS-DES",
+      "manager": "EMP-003",
+      "email": "amine.trabelsi.emp-033@cds.example.test",
+      "start_date": "2019-12-01"
+    },
+    {
+      "id": "EMP-034",
+      "name": "Khalil Sassi",
+      "org_unit": "ORG-SAL",
+      "position": "POS-AE",
+      "manager": "EMP-004",
+      "email": "khalil.sassi.emp-034@cds.example.test",
+      "start_date": "2020-08-01"
+    },
+    {
+      "id": "EMP-035",
+      "name": "Mariem Karoui",
+      "org_unit": "ORG-OPS",
+      "position": "POS-SUP",
+      "manager": "EMP-005",
+      "email": "mariem.karoui.emp-035@cds.example.test",
+      "start_date": "2025-10-01"
+    },
+    {
+      "id": "EMP-036",
+      "name": "Lina Ferjani",
+      "org_unit": "ORG-ENG",
+      "position": "POS-BE",
+      "manager": "EMP-002",
+      "email": "lina.ferjani.emp-036@cds.example.test",
+      "start_date": "2022-01-01"
+    },
+    {
+      "id": "EMP-037",
+      "name": "Tarek Ayari",
+      "org_unit": "ORG-ENG",
+      "position": "POS-FE",
+      "manager": "EMP-002",
+      "email": "tarek.ayari.emp-037@cds.example.test",
+      "start_date": "2019-10-01"
+    },
+    {
+      "id": "EMP-038",
+      "name": "Marwan Ferjani",
+      "org_unit": "ORG-ENG",
+      "position": "POS-DATA",
+      "manager": "EMP-002",
+      "email": "marwan.ferjani.emp-038@cds.example.test",
+      "start_date": "2018-09-01"
+    },
+    {
+      "id": "EMP-039",
+      "name": "Ons Ayari",
+      "org_unit": "ORG-PRD",
+      "position": "POS-DES",
+      "manager": "EMP-003",
+      "email": "ons.ayari.emp-039@cds.example.test",
+      "start_date": "2020-01-01"
+    },
+    {
+      "id": "EMP-040",
+      "name": "Dorra Mejri",
+      "org_unit": "ORG-SAL",
+      "position": "POS-AE",
+      "manager": "EMP-004",
+      "email": "dorra.mejri.emp-040@cds.example.test",
+      "start_date": "2018-12-01"
+    }
+  ],
+  "users": [
+    {
+      "email": "nadia@cds.example.test",
+      "employee": "EMP-008",
+      "name": "Nadia Bouzid",
+      "roles": [
+        "recruiter"
+      ]
+    },
+    {
+      "email": "leila@cds.example.test",
+      "employee": "EMP-006",
+      "name": "Leila Haddad",
+      "roles": [
+        "hr"
+      ]
+    },
+    {
+      "email": "karim@cds.example.test",
+      "employee": "EMP-002",
+      "name": "Karim Mansour",
+      "roles": [
+        "manager"
+      ],
+      "scope": [
+        "org_unit",
+        "ORG-ENG"
+      ]
+    },
+    {
+      "email": "sami@cds.example.test",
+      "employee": "EMP-007",
+      "name": "Sami Ferchichi",
+      "roles": [
+        "finance"
+      ]
+    },
+    {
+      "email": "audit@cds.example.test",
+      "name": "Audit Office",
+      "roles": [
+        "auditor"
+      ]
+    },
+    {
+      "email": "admin@cds.example.test",
+      "name": "Platform Admin",
+      "roles": [
+        "admin"
+      ]
+    },
+    {
+      "email": "mehdi@cds.example.test",
+      "employee": "EMP-009",
+      "name": "Mehdi Sassi",
+      "roles": [
+        "employee"
+      ]
+    }
+  ],
+  "jobs": [
+    {
+      "id": "JOB-BE-01",
+      "title": "Backend Engineer",
+      "org_unit": "ORG-ENG",
+      "description": "Build and run the Python APIs behind our products. You will design services with FastAPI, model data in PostgreSQL, ship with Docker and Kubernetes, and keep production healthy with good observability.",
+      "criteria": [
+        {
+          "id": "python",
+          "label": "Python",
+          "skill": "SKILL-PY",
+          "weight": "0.25",
+          "must_have": true,
+          "required_years": 3,
+          "keywords": [
+            "python"
+          ],
+          "description": "Building production services in Python."
+        },
+        {
+          "id": "sql",
+          "label": "SQL databases",
+          "skill": "SKILL-SQL",
+          "weight": "0.15",
+          "must_have": true,
+          "required_years": 2,
+          "keywords": [
+            "sql",
+            "postgresql",
+            "postgres",
+            "mysql"
+          ],
+          "description": "Modelling and querying relational databases."
+        },
+        {
+          "id": "fastapi",
+          "label": "FastAPI",
+          "skill": "SKILL-FASTAPI",
+          "weight": "0.15",
+          "must_have": false,
+          "required_years": 2,
+          "keywords": [
+            "fastapi"
+          ],
+          "description": "Building HTTP APIs with FastAPI or a similar Python web framework."
+        },
+        {
+          "id": "docker",
+          "label": "Docker",
+          "skill": "SKILL-DOCKER",
+          "weight": "0.10",
+          "must_have": false,
+          "required_years": 1,
+          "keywords": [
+            "docker"
+          ],
+          "description": "Packaging and shipping services with containers."
+        },
+        {
+          "id": "kubernetes",
+          "label": "Kubernetes",
+          "skill": "SKILL-K8S",
+          "weight": "0.10",
+          "must_have": false,
+          "required_years": 1,
+          "keywords": [
+            "kubernetes",
+            "k8s"
+          ],
+          "description": "Running services on Kubernetes."
+        },
+        {
+          "id": "observability",
+          "label": "Observability",
+          "skill": "SKILL-OBS",
+          "weight": "0.10",
+          "must_have": false,
+          "required_years": 1,
+          "keywords": [
+            "opentelemetry",
+            "grafana",
+            "prometheus",
+            "observability"
+          ],
+          "description": "Traces, metrics and dashboards for production systems."
+        },
+        {
+          "id": "api_design",
+          "label": "API design",
+          "weight": "0.10",
+          "must_have": false,
+          "required_years": 0,
+          "keywords": [],
+          "description": "Designing reliable REST APIs used by other teams and services."
+        },
+        {
+          "id": "mentoring",
+          "label": "Collaboration and mentoring",
+          "weight": "0.05",
+          "must_have": false,
+          "required_years": 0,
+          "keywords": [],
+          "description": "Working with other teams and mentoring junior engineers."
+        }
+      ]
+    },
+    {
+      "id": "JOB-AE-01",
+      "title": "Account Executive",
+      "org_unit": "ORG-SAL",
+      "description": "Sell our software to mid-size companies in Tunisia and North Africa. You will run deals end to end, negotiate contracts and keep the CRM accurate.",
+      "criteria": [
+        {
+          "id": "sales",
+          "label": "B2B sales",
+          "weight": "0.40",
+          "must_have": true,
+          "required_years": 2,
+          "keywords": [
+            "b2b",
+            "sales",
+            "commercial"
+          ],
+          "description": "Selling to companies and owning a quota."
+        },
+        {
+          "id": "negotiation",
+          "label": "Negotiation",
+          "skill": "SKILL-NEG",
+          "weight": "0.30",
+          "must_have": false,
+          "required_years": 2,
+          "keywords": [
+            "negotiation",
+            "négociation"
+          ],
+          "description": "Negotiating contracts and closing deals."
+        },
+        {
+          "id": "crm",
+          "label": "CRM",
+          "skill": "SKILL-CRM",
+          "weight": "0.30",
+          "must_have": false,
+          "required_years": 1,
+          "keywords": [
+            "crm",
+            "salesforce"
+          ],
+          "description": "Keeping customer records accurate in a CRM."
+        }
+      ]
+    }
+  ]
+}
