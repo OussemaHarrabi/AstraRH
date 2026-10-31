@@ -173,4 +173,3 @@ def test_dossier_counts_evidence_and_missing_items_without_salary():
     assert result["verified_skills"] == [{"skill_id": "SKILL-K8S", "level": 2}]
     assert "salary" not in result
     assert "rating" not in result
-

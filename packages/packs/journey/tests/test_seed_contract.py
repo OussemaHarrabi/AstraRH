@@ -170,4 +170,3 @@ def test_scenarios_cover_the_pack_contract():
         assert token in text, token
     for token in ("payload", "audit", "no evidence", "cross-tenant", "fail closed"):
         assert token.lower() in text.lower(), token
-
