@@ -103,6 +103,15 @@ Committed in small steps. Each step below is one commit.
    - Demo data: `data/demo/emails.json` (22 fictional emails, written by `tools/generate_demo_data.py`) and `data/demo/policies/` (leave, remote, expenses, conduct, and salary bands restricted to hr/admin/finance). Loaded by `astra.py seed`.
    - Migrations, with RLS in their own revisions: `ae38104e4ebd`, `kernel_0003_comms_calendar_rules`, `b83efbe1d77d`, `kernel_0005_knowledge_rules`.
    - API: `GET/POST /comms/digest`, `GET /comms/threads/{id}`, `POST/GET /knowledge/questions`, `GET /knowledge/questions/{id}`, `GET /knowledge/tickets`.
+3. **Talent: replies, follow-ups and interview booking** (`packs/talent/communications.py`).
+   - `reply_drafter` (on `comms.message.classified.v1`): finds the candidate by sender address, gives the model only that candidate's file, and proposes `kernel.email.send` (R2) with a DecisionRecord. Before anyone sees a draft, deterministic checks reject promises only a person can make and any other candidate's name or email. The name is filled in after the model, so the model never sees it. No draft for spam, internal or policy questions.
+   - `followup`: `due_followups` is deterministic. Every 3 days, at most 2 reminders, only in applied/shortlisted/interview, and it stops when the candidate replies or is rejected or hired. Unique `(application_id, sequence)`, so a reminder can't be sent twice. Runs as a durable Procrastinate periodic job every 30 minutes (`talent.followups.sweep`). The daily digest runs at 07:00 (`comms.digest.daily`).
+   - `scheduler`: proposes 3 real free slots from the recruiter's and interviewer's calendars and drafts the email. `talent.interview.book` (R2, internal) re-checks the slot at booking with the row locked, then proposes the confirmation email.
+   - Decision: booking is an internal action run by the worker, not an executor adapter, because the calendar is our own tables. It becomes an executor adapter once a real external calendar is connected.
+   - Models: `talent.followup`, `talent.interview` (migrations `5d85161ca2dc`, `talent_0004_security`). Events: `talent.followup.due.v1`, `talent.interview.requested.v1`, `talent.interview.booked.v1`.
+   - API: `POST /packs/talent/applications/{id}/interviews` (request slots), `GET /packs/talent/jobs/{id}/interviews`, `POST /packs/talent/interviews/{id}/book`, `POST /packs/talent/followups/check`.
+   - `astra.py seed` now also loads policies and emails. `astra.py evals` runs both evals.
+   - **Verified:** `astra.py check tests/test_communications.py` ruff clean, **43 passed**. Real Haiku evals (`docs/evals/communications.json`): inbox type 18/20, needs-a-person caught 8/8 with 0/12 false alarms; policy answers 8/8 from the right document, 6/6 correctly passed to a person, 0 restricted-document leaks. Screening re-run unchanged: NDCG@10 1.0, hard set 0.9994, 42/42 replayed, 170/170 quotes found in source, $0.017 a run.
 
 ### Screening, web shell and two-layer ranking: 2026-10-31
 

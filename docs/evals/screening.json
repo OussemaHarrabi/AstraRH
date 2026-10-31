@@ -151,12 +151,12 @@
   "llm_calls": 71,
   "llm_cache_hits": 33,
   "llm_input_tokens": 95211,
-  "llm_output_tokens": 15635,
-  "llm_cost_usd_one_full_run": "0.017344",
+  "llm_output_tokens": 15713,
+  "llm_cost_usd_one_full_run": "0.017381",
   "models": [
     "claude-haiku-5-5"
   ],
-  "seconds_to_read_all_cvs": 27.4,
+  "seconds_to_read_all_cvs": 35.2,
   "scorer": "talent.rubric@2",
-  "total_seconds": 113.6
+  "total_seconds": 133.5
 }

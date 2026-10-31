@@ -25,6 +25,13 @@ actions:
     approver_roles: [admin, hr, recruiter]
     view_roles: [admin, hr, recruiter, auditor]
     description: Move the top candidates to the shortlist.
+  - id: talent.interview.book
+    risk: R2
+    channel: internal
+    handler: packs.talent.communications:book_interview
+    approver_roles: [admin, hr, recruiter]
+    view_roles: [admin, hr, recruiter, auditor]
+    description: Book an interview slot, after checking it is still free.
   - id: talent.application.reject
     risk: R3
     channel: internal
@@ -49,6 +56,21 @@ agents:
     events: [talent.ranking.requested.v1]
     entry: packs.talent.agents.ranking:build
     description: Scores by formula, explains each result, and proposes a shortlist.
+  - id: reply_drafter
+    title: Draft replies
+    events: [comms.message.classified.v1]
+    entry: packs.talent.communications:build_reply_drafter
+    description: Drafts a reply from that candidate's own file. A person approves every one.
+  - id: followup
+    title: Prepare follow-ups
+    events: [talent.followup.due.v1]
+    entry: packs.talent.communications:build_followup
+    description: Prepares reminders for candidates who went quiet, up to a limit.
+  - id: scheduler
+    title: Propose interview times
+    events: [talent.interview.requested.v1]
+    entry: packs.talent.communications:build_scheduler
+    description: Finds real free times in the calendars and prepares the email.
 
 publishes:
   - talent.job.created.v1

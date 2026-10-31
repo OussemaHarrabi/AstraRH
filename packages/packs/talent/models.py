@@ -202,3 +202,29 @@ class CriterionOverride(TenantMixin, Base):
     value: Mapped[Decimal] = mapped_column(Numeric(6, 4), nullable=False)
     reason: Mapped[str] = mapped_column(Text, nullable=False)
     actor_id: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)
+
+
+class Followup(TenantMixin, Base):
+    __tablename__ = "followup"
+    __table_args__ = (UniqueConstraint("application_id", "sequence"), {"schema": "talent"})
+
+    application_id: Mapped[UUID] = mapped_column(
+        UUID_TYPE, ForeignKey("talent.application.id"), nullable=False
+    )
+    sequence: Mapped[int] = mapped_column(Integer, nullable=False)
+    proposal_id: Mapped[UUID | None] = mapped_column(UUID_TYPE)
+
+
+class Interview(TenantMixin, Base):
+    __tablename__ = "interview"
+    __table_args__ = {"schema": "talent"}
+
+    application_id: Mapped[UUID] = mapped_column(
+        UUID_TYPE, ForeignKey("talent.application.id"), nullable=False, index=True
+    )
+    participants: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="requested")
+    slots: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    booking_id: Mapped[UUID | None] = mapped_column(UUID_TYPE)
+    starts_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
