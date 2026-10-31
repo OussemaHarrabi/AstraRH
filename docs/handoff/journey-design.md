@@ -770,7 +770,7 @@ Location: `seed/journey/`. Fictional, deterministic, committed as JSON/CSV.
 
 **Hero story (locked):** `CAND-001` Yasmine Trabelsi is hired as `POS-BE` in `ORG-ENG`, manager `EMP-002`, buddy `EMP-009`, start date fixed in seed. Screening found **Kubernetes** (`SKILL-K8S`) and **observability** (`SKILL-OBS`) gaps. She is **`EMP-041`** on hire — emitted by `talent` (decision 1). Plan approved by `EMP-006`. Recommendation `CRS-K8S-01`, 6 h, 0 TND internal, KPI `KPI-MTTR`, mentor alternative `EMP-009`.
 
-**Volumes:** 8 journeys | 10 submitted check-ins | 3 open support flags + 1 resolved doc-feedback | **9 background confirmed K8s gaps in Engineering** | 2 hero gaps (1 confirmed, 1 proposed) | 1 closed training gap | 2 recommendations (1 proposed, 1 completed+verified) | 1 impact measure with comparison group n=5 | 1 dossier with 21 of 22 tasks evidenced | 0 sentiment fields.
+**Volumes:** 8 journeys (1 draft with a pending activation proposal) | 10 submitted check-ins | 3 open support flags + 1 resolved doc-feedback | **9 background confirmed K8s gaps in Engineering** | 2 hero gaps (1 confirmed, 1 proposed) | 1 closed training gap | 2 recommendations (1 proposed, 1 completed+verified) | 1 impact measure with comparison group n=5 | 1 dossier with 21 of 22 tasks evidenced | 0 sentiment fields.
 
 **20-second demo beat:** open Yasmine's journey -> attention card: "Day-7 pulse: staging access not ready; first task blocked" with facts -> gap card: "Kubernetes required 3, evidence 1 — 14 PRs touched manifests, zero deployment ownership" -> recommendation: `CRS-K8S-01` (6 h, 0 TND, should move `KPI-MTTR`) plus `EMP-009` as mentor -> approve.
 
@@ -830,9 +830,9 @@ AstraRH's demo is recruitment-first (3:00), ecosystem (1:15), proof (0:45). Jour
 | Time | Beat | Screen |
 |---|---|---|
 | 3:00 | "Hire" is clicked on Yasmine | Agent Mesh animates `talent -> journey` |
-| 3:05 | Draft 30/60/90 with owners, evidence, and the **K8s/OBS gaps inherited from screening** | Approval card + diff |
-| 3:10 | HR **edits one milestone**; the approval is void (hash changed); re-approve; tasks + `EMP-009` buddy appear | Approval card -> Journey detail |
-| 3:22 | Portal: "today: 3 things"; D7 pulse: "staging access not ready" -> attention card with facts, no score | Portal -> Journey detail |
+| 3:05 | A pending 30/60/90 proposal for Amine (`EMP-010`) waits in the Approval Center | Approval card + diff |
+| 3:10 | HR **edits one milestone**; the approval is void (hash changed); re-approve; tasks + buddy appear | Approval card -> Journey detail |
+| 3:22 | Switch to Yasmine's active plan: "today: 3 things"; D7 pulse: "staging access not ready" -> attention card with facts, no score | Portal -> Journey detail |
 | 3:34 | Gap: required 3, evidence 1, 14 PRs, no deployment ownership; `<WhyPanel>`; `CRS-K8S-01` 6 h, 0 TND, should move `KPI-MTTR`; mentor `EMP-009` | Gaps -> Training |
 | 3:50 | Dossier: "one missing milestone; the rest have evidence" -> manager decides | Dossier |
 | 4:00 | **Audit verify** in the shared Trust Center after the journey actions; the chain verifies | Trust Center |
