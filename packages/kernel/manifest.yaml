@@ -17,6 +17,12 @@ actions:
   - id: kernel.email.digest
     risk: R0
     description: Build the daily inbox digest.
+  - id: kernel.email.handle
+    risk: R1
+    description: Mark a conversation as dealt with, or reopen it.
+  - id: kernel.email.correct
+    risk: R1
+    description: Correct how the assistant sorted an email.
   - id: kernel.question.answer
     risk: R0
     description: Answer an employee's question from company documents, with citations.

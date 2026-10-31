@@ -32,7 +32,7 @@
 | P2 Kernel | **Done** |
 | P3 `platform-v0` | Web shell and seed **done**. Team tooling (`_example`, CI, prompts) moved to the end |
 | P4 Screening | **Done** |
-| P5 Communication | **In progress**: inbox, replies, follow-ups, booking, slot holds, invites and cancel/reschedule built and tested. Inbox listing API and UI pass left |
+| P5 Communication | **In progress**: inbox, replies, follow-ups, booking, slot holds, invites, cancel/reschedule and inbox listing/handled/corrections built and tested. Backend done; UI pass left |
 | P6 Knowledge | **In progress**: cited answers, refusal, ticket handling, answer feedback and policy versions built and tested. UI pass left |
 | P7 AstraGraph | Not started |
 | P8 Integration and proof | Not started |
@@ -135,6 +135,12 @@ Committed in small steps. Each step below is one commit.
    - Migration `4d6882bacaaa`. Manifest adds `kernel.document.publish` (R1).
    - API: `GET /knowledge/tickets?status=active|open|claimed|answered|closed|all&mine=`, `GET /knowledge/tickets/{id}`, `POST /knowledge/tickets/{id}/claim|release|answer|close`, `POST /knowledge/questions/{id}/feedback`, `GET /knowledge/stats` (HR), `GET /knowledge/documents` (readable to the caller only), `GET /knowledge/documents/{id}` (sections), `POST /knowledge/documents` (HR, 202).
    - **Verified:** ruff clean. New `tests/test_knowledge_api.py` over real HTTP plus `tests/test_communications.py`: **63 passed**. Covers claim conflicts, HR-only queue, closing, one ticket per unhelpful answer, feedback only after an answer, new version replacing the old in search, the database refusing two active versions, and HR publishing with the worker indexing and role filtering the listing.
+8. **Inbox listing, handled state and sorting corrections** (2026-11-01).
+   - Threads are `open` or `handled`, with who handled them, when, and a note. An approved reply sent from the thread marks it handled ("Approved reply sent"). A new inbound email reopens it, so nothing falls silently out of the queue.
+   - A person can correct the assistant's sorting of a message (type, urgency, needs a person, reason). The model's first values are kept in `model_values`, so the correction rate is measurable. Each correction publishes `comms.classification.corrected.v1` and writes an audit entry. Digest items show `corrected` and `thread_status`.
+   - New actions `kernel.email.handle` and `kernel.email.correct` (both R1). Migration `40a1419fcb48`. The type and urgency vocabulary moved to `kernel/comms/vocabulary.py`, so the API does not import LangGraph (the API image does not install it; this broke API start-up once).
+   - API: `GET /comms/threads?status=open|handled|all&needs_human=&type=&q=&before=&limit=` (newest first, cursor paging, `q` escaped for LIKE), `GET /comms/threads/{id}` (each message carries its sorting), `POST /comms/threads/{id}/handled` and `/reopen` (409 if already in that state), `PUT /comms/messages/{id}/sorting`, `GET /comms/stats` (open, handled, needing a person, by type, flagged, correction count).
+   - **Verified:** ruff clean. New `tests/test_inbox_api.py` covers filters, LIKE escaping, paging, handled/reopen with audit, corrections keeping model values, role checks and cross-tenant 404s. **Full suite: 322 passed, 2 skipped.**
 
 ### Screening, web shell and two-layer ranking: 2026-10-31
 

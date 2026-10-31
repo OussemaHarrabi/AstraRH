@@ -2,7 +2,18 @@ from datetime import date, datetime
 from uuid import UUID
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import (
+    Boolean,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    text,
+)
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
@@ -20,7 +31,17 @@ class Document(TenantMixin, Base):
     same external_id is active), or failed. Only active documents can be cited."""
 
     __tablename__ = "document"
-    __table_args__ = {"schema": "knowledge"}
+    __table_args__ = (
+        # The database allows one active version per policy (migration 4d6882bacaaa).
+        Index(
+            "one_active_version",
+            "tenant_id",
+            "external_id",
+            unique=True,
+            postgresql_where=text("status = 'active'"),
+        ),
+        {"schema": "knowledge"},
+    )
 
     title: Mapped[str] = mapped_column(Text, nullable=False)
     external_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)

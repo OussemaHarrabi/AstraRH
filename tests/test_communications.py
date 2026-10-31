@@ -16,7 +16,7 @@ from kernel.ai.gateway import Gateway
 from kernel.ai.graphs import run_agent_graph
 from kernel.ai.providers import LlmResponse
 from kernel.comms import agents as comms_agents
-from kernel.comms.models import Classification, Message
+from kernel.comms.models import Classification, Message, Thread
 from kernel.db import tenant_session, utcnow
 from kernel.knowledge.agents import Cited, PolicyAnswer, check_answer
 from kernel.knowledge.agents import build as build_policy
@@ -320,6 +320,11 @@ def test_sent_reply_is_recorded_in_the_thread(tenant):
             select(Message.direction).where(Message.thread_id == message.thread_id)
         ).all()
     assert sorted(directions) == ["in", "out"]
+    with tenant_session(tenant) as session:
+        assert session.get(Thread, message.thread_id).status == "handled"
+    receive(tenant, CANDIDATE, "Re: Availability", "Actually Tuesday is better.")
+    with tenant_session(tenant) as session:
+        assert session.get(Thread, message.thread_id).status == "open"
 
 
 # ----- Follow-ups -----
