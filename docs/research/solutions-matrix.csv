@@ -1,0 +1,74 @@
+category,name,license,stack,score,axis1_screening,axis2_email_digest,axis3_auto_reply,axis4_followup,axis5_scheduling,axis6_policy_qa,hitl,security,extensibility,best_for,url
+System of record,Odoo 20 Community,LGPL-3.0,Python/PostgreSQL/OWL,80.0,P,P,N,P,P,N,Stage/activities,ACL/record rules,Addons + JSON-2 API,ERP-grade HR + recruitment,https://github.com/odoo/odoo
+System of record,Frappe HR,GPL-3.0,Python/Frappe/MariaDB/Vue,83.0,P,P,P,P,P,N,Workflow/docstatus,"Framework RBAC, audit","DocTypes, REST, webhooks, site-per-tenant",Long-term HR platform,https://github.com/frappe/hrms
+System of record,Horilla,LGPL-2.1,Django/PostgreSQL/DRF,80.5,P,P,P,P,P,P,Audit + approvals,"Axes, auditlog, perm baseline","Django apps, DRF+JWT+Swagger",Fastest real HR base,https://github.com/horilla/horilla-hr
+System of record,MintHCM,AGPL-3.0,PHP/MySQL/SuiteCRM/Vue,71.5,P,P,P,P,P,P,MCP consent + tools,MCP OAuth2/PKCE/CSRF,"MCP/A2A, modular HCM",AI-native HCM experiment,https://github.com/minthcm/minthcm
+System of record,AureusERP,MIT,Laravel/Filament/Livewire,63.5,P,N,N,P,P,N,Filament actions,Filament Shield,"Plugins, no HTTP API",License-friendly admin,https://github.com/aureuserp/aureuserp
+System of record,OrangeHRM Starter,GPL-3.0,PHP/Symfony/MySQL,60.5,P,N,P,N,P,N,Status emails,OAuth2 API,Symfony plugins,Legacy enterprise HR,https://github.com/orangehrm/orangehrm
+System of record,OpenCATS,MPL-2.0,PHP/MySQL,40.5,P,N,N,P,N,N,Inherent,Session auth,"Hooks, no REST",ATS domain depth,https://github.com/opencats/OpenCATS
+Inbox/helpdesk,Zammad,AGPL-3.0,Ruby/Rails/PostgreSQL/Vue,72.5,N,F,F,P,N,P,Human sends,REST/triggers/webhooks,"Triggers, API",Inbox triage + reply UI,https://github.com/zammad/zammad
+Inbox/helpdesk,Chatwoot,MIT core + EE,Rails/Vue/PostgreSQL,71.0,N,P,F,P,N,P,Agent edits/sends,"Audit paid, RBAC","API/webhooks, multi-tenant",Polished shared inbox,https://github.com/chatwoot/chatwoot
+Inbox/helpdesk,Frappe Helpdesk,AGPL-3.0,Frappe/Python/MariaDB,66.0,N,P,P,P,N,P,Manual send,Field-level perms,"REST/webhooks, site-per-tenant",Ticket store for Q&A escalation,https://github.com/frappe/helpdesk
+AI reference,recruit-ai-platform,Apache-2.0,Fastify/PostgreSQL/pgvector,,F,N,N,N,F,N,Recruiter review,"CodeQL, secret scan","Monorepo, fixtures",Evidence-first screening skeleton,https://github.com/JingjieXiong/recruit-ai-platform
+AI reference,hr-agent,Apache-2.0,Next 15/AI SDK/Drizzle/PostgreSQL,,N,N,N,P,P,F,Manager approvals,"RBAC, audit, citations","Agent tools, RAG",Policy Q&A + HR cases base,https://github.com/amxv/hr-agent
+AI reference,AIBF (bias firewall),Apache-2.0,FastAPI/SHAP,69.0,P,N,N,N,N,N,Review feed,Explainable attributions,Drop-in API,Bias audit sidecar,https://github.com/jbarach2012/AIBF_API
+AI reference,candisift,No license,FastAPI/SQLModel/Agno,,F,N,N,N,N,N,Accept/reject + audit,"PII strip, injection fence",Hexagonal ports,Borrow patterns only,https://github.com/confused-ai/candisift
+AI reference,resume-job-matcher,No license,TypeScript CLI,,F,N,P,N,N,N,Human reads output,None,Gates + anchored scoring,Borrow scoring code only,https://github.com/sliday/resume-job-matcher
+AI reference,inbox-zero,AGPL-3.0,Next.js/Prisma/PostgreSQL,,N,P,P,P,N,N,Drafts only,OAuth scopes,Rules + background jobs,Borrow drafting UX,https://github.com/elie222/inbox-zero
+Agent layer,LangGraph,MIT,Python,96.5,N,N,N,N,N,N,"interrupt/resume, checkpoints",Tool scoping by graph,Postgres checkpointer,Best HITL + durability,https://github.com/langchain-ai/langgraph
+Agent layer,Trigger.dev,Apache-2.0,TypeScript/PostgreSQL,90.0,N,N,N,F,N,N,Waitpoints/approval links,"Idempotency, retries",Durable tasks,Approval-gated sends,https://github.com/triggerdotdev/trigger.dev
+Agent layer,PydanticAI,MIT,Python,88.0,N,N,N,N,N,N,requires_approval/deferred tools,Typed tools,Model-agnostic,Small typed agent service,https://github.com/pydantic/pydantic-ai
+Agent layer,OpenAI Agents SDK,MIT,Python,86.0,N,N,N,N,N,N,needs_approval/interruptions,"RunState, fail-closed",Tracing,Clean approval API,https://github.com/openai/openai-agents-python
+Agent layer,Temporal,MIT,Go,77.0,N,N,N,F,N,N,Signals/updates (build UI),Durable history,Workflows/activities,Enterprise reliability,https://github.com/temporalio/temporal
+Agent layer,Dify,Modified Apache-2.0,Python/TS,80.5,N,N,N,N,N,N,Human Input node,"Guardrails, budgets",Visual workflows,"Fast demo, license caveat",https://github.com/langgenius/dify
+Agent layer,n8n,Sustainable Use License,TypeScript,83.0,N,N,N,N,N,N,HITL tool nodes,"Credentials, audit",400+ integrations,"Glue, license caveat",https://github.com/n8n-io/n8n
+Agent layer,Flowable,Apache-2.0,Java,80.0,N,N,N,F,N,N,BPMN user tasks,"Roles, audit",BPMN engine,Clean OSS approval engine,https://github.com/flowable/flowable-engine
+Retrieval,RAGFlow,Apache-2.0,Python/Go/Elasticsearch,81.0,P,N,N,N,N,F,None,"Citations, dataset isolation",REST/OpenAI-compatible,Policy Q&A with citations,https://github.com/infiniflow/ragflow
+Retrieval,Onyx,MIT core + EE,Python/Next/Postgres/Vespa,80.0,P,N,N,N,N,F,None,Permission sync (paid),"Connectors, agents",Enterprise policy search,https://github.com/onyx-dot-app/onyx
+Documents,Docling,MIT,Python/PyTorch,82.5,N,N,N,N,N,N,n/a,Local/air-gapped,REST/MCP,Resume/document parsing,https://github.com/docling-project/docling
+Documents,Unstructured,Apache-2.0,Python,71.0,N,N,N,N,N,N,n/a,Local,Python API,Prose extraction,https://github.com/Unstructured-IO/unstructured
+Gateway,LiteLLM,MIT + EE,Python/Rust,89.5,N,N,N,N,N,N,n/a,"Budgets, guardrails, redaction",100+ providers,Model routing/security,https://github.com/BerriAI/litellm
+Security,Presidio,MIT,Python,87.5,N,N,N,N,N,N,n/a,PII detection/anonymization,Container/lib,PII redaction,https://github.com/microsoft/presidio
+Security,NeMo Guardrails,Apache-2.0,Python,83.5,N,N,N,N,N,N,n/a,Input/retrieval/execution/output rails,Colang,Layered guardrails,https://github.com/NVIDIA-NeMo/Guardrails
+Security,Guardrails AI,Apache-2.0,Python,83.0,N,N,N,N,N,N,n/a,Fail-closed validators,Validators,Output schema/grounding,https://github.com/guardrails-ai/guardrails
+Security,Keycloak,Apache-2.0,Java,93.0,N,N,N,N,N,N,n/a,"OIDC/SAML, token exchange",SSO/RBAC,Identity,https://github.com/keycloak/keycloak
+Security,OpenFGA,Apache-2.0,Go,88.0,N,N,N,N,N,N,n/a,ReBAC,Fine-grained authz,https://github.com/openfga/openfga
+Security,OPA,Apache-2.0,Go,90.5,N,N,N,N,N,N,n/a,Policy as code,Action/retrieval policy,https://github.com/open-policy-agent/opa
+Observability,Langfuse,MIT + EE,TypeScript,81.5,N,N,N,N,N,N,Annotation queues,Masking,Tracing/evals,https://github.com/langfuse/langfuse
+Security testing,promptfoo,MIT,TypeScript,81.0,N,N,N,N,N,N,n/a,Injection/red-team suites,CI,https://github.com/promptfoo/promptfoo
+Scheduling,Cal.diy,MIT,Next.js/PostgreSQL,61.5,N,N,N,N,F,N,Booking approval,No EE SSO/teams,API v2 (verify),Demo booking only,https://github.com/calcom/cal.diy
+Scheduling,Easy!Appointments,GPL-3.0,PHP/MySQL,63.0,N,N,N,P,F,N,Confirmation,Session auth,REST/webhooks,Fast slot engine,https://github.com/alextselegidis/easyappointments
+E-sign,DocuSeal,AGPL-3.0,Ruby/Rails,72.5,N,N,P,P,N,N,Signature/consent,Audit trail,REST/webhooks,Offer letters,https://github.com/docusealco/docuseal
+Notifications,Novu,MIT core + EE,TypeScript,69.5,N,F,P,F,N,N,Digest/approval notices,Delivery logs,Workflows,Digest cadence,https://github.com/novuhq/novu
+Closed suite,"Workday (+HiredScore, Paradox)",Proprietary,SaaS,98.0,F,P,P,P,F,P,ASOR + two-key auth,SOC2/ISO (verify),Tenant-only agents,Benchmark #1,https://www.workday.com
+Closed suite,Oracle Fusion HCM AI agents,Proprietary,SaaS,94.5,F,N,F,P,F,F,Policy-as-code auto-reply,Role-scoped agents,"Agent Studio, no standalone API",Benchmark guardrails,https://docs.oracle.com/en/cloud/saas/fusion-ai/aiafl/ai-hcm.html
+Closed suite,ServiceNow Otto (HRSD),Proprietary,SaaS,94.5,N,P,P,P,N,F,Approval gates + AI Control Tower,Vault/Guardian,350+ connectors,Benchmark employee service,https://www.servicenow.com
+Closed suite,"SAP SuccessFactors (+Joule, SmartRecruiters)",Proprietary,SaaS,92.5,F,P,P,P,F,F,Approvals/roles,"Consent, fraud detection",Connected agents,Benchmark HXM suite,https://www.sap.com
+Closed suite,Ashby,Proprietary,SaaS,83.5,F,N,P,F,P,N,Confirm-on-write,SOC2,Public API,Best ATS agent-write UX,https://www.ashbyhq.com
+Closed suite,Moveworks,Proprietary,SaaS,83.5,N,P,P,P,P,F,Approval Queue,Audit on request,Connectors,Approval queue pattern,https://docs.moveworks.com
+Closed suite,Microsoft 365 Copilot / Gemini,Proprietary,SaaS,81.5,N,F,F,P,F,P,Human send,Enterprise security,Graph/Workspace APIs,Email/calendar baseline,https://www.microsoft.com/microsoft-365/copilot
+Closed suite,Greenhouse,Proprietary,SaaS,78.5,F,N,P,P,N,N,Human owns stages,"SOC2, subprocessor table",Harvest API,Structured hiring benchmark,https://www.greenhouse.io
+Closed suite,Eightfold AI,Proprietary,SaaS,78.0,F,N,P,P,N,P,Recruiter-in-loop,Public API,Skills graph,Talent intelligence benchmark,https://eightfold.ai
+Closed suite,Phenom,Proprietary,SaaS,77.5,P,N,P,P,F,P,Manager override,Fraud detection,Orchestration engine,Agent governance benchmark,https://www.phenom.com
+Closed suite,Leena AI,Proprietary,SaaS,76.0,N,P,P,P,P,F,Durable approvals,200+ connectors,HR agents,Durable HR agent benchmark,https://leena.ai
+Closed suite,Glean,Proprietary,SaaS,75.5,N,P,P,P,N,F,Agent governance,Permission-aware RAG,MCP/connectors,Permission-aware search,https://www.glean.com
+Closed suite,SmartRecruiters,Proprietary,SaaS,74.5,F,N,P,P,P,N,Human stages,API/marketplace,ATS + Winston,High-volume ATS,https://www.smartrecruiters.com
+Closed suite,iCIMS,Proprietary,SaaS,72.0,F,N,P,P,P,N,Manager action,Enterprise controls,Teams agent,Enterprise ATS,https://www.icims.com
+Closed suite,Lever,Proprietary,SaaS,71.0,P,N,P,P,N,N,Recruiter chooses,SOC2,API,ATS+CRM,https://www.lever.co
+Closed suite,Beamery,Proprietary,SaaS,70.0,P,N,P,P,N,N,Recruiter-in-loop,Enterprise,Talent CRM,Talent CRM benchmark,https://beamery.com
+Closed suite,Gloat,Proprietary,SaaS,62.0,N,N,P,P,N,P,Human decisions,Enterprise,Talent marketplace,Internal mobility,https://gloat.com
+Closed suite,Paradox (Olivia),Proprietary,SaaS,68.0,P,N,P,F,F,P,Recruiter texting,TCPA/consent,Conversational ATS,High-volume hourly hiring,https://www.paradox.ai
+Closed specialist,Intercom Fin,Proprietary,SaaS,,N,P,P,P,P,P,Handoff,Outcome pricing,Support AI,Outcome-based pricing,https://www.intercom.com/fin
+Closed specialist,Zendesk AI,Proprietary,SaaS,,N,F,F,P,P,P,Agent handoff,Enterprise,Ticketing API,Email triage benchmark,https://www.zendesk.com
+Closed specialist,Front,Proprietary,SaaS,,N,F,F,P,P,P,Human send,Shared inbox,API/webhooks,Shared inbox UX,https://front.com
+Closed specialist,HireVue,Proprietary,SaaS,,F,N,N,N,N,N,Human decides,Explainability statement,Assessments,Interview assessment benchmark,https://www.hirevue.com
+Closed specialist,GoodTime (Cori),Proprietary,SaaS,,N,N,N,N,F,N,Coordinator approves,Enterprise,Workday app,Panel scheduling,https://goodtime.io
+Closed specialist,Calendly,Proprietary,SaaS,,N,N,N,N,F,N,Human books,SOC2,v2 API/webhooks,Scheduling API,https://developer.calendly.com
+Closed specialist,Textkernel (Sovren),Proprietary,API/SDK,,F,N,N,N,N,N,n/a,Enterprise,Parse/Search API,CV parsing benchmark,https://www.textkernel.com
+Closed specialist,Affinda,Proprietary,API/self-host,,F,N,N,N,N,N,n/a,"Self-host, no training",API,Privacy-first parsing,https://www.affinda.com
+Closed specialist,RChilli,Proprietary,API,,F,N,N,N,N,N,n/a,Enterprise,API/taxonomy,Budget parsing,https://www.rchilli.com
+Closed specialist,Checkr,Proprietary,API,,N,N,N,N,N,N,n/a,FCRA/SOC2,Background API,Background checks,https://checkr.com
+Closed specialist,Check Point AI Guardrails (Lakera),Proprietary,API,,N,N,N,N,N,N,n/a,DLP/agent defense,Runtime firewall,AI security benchmark,https://www.checkpoint.com
+Closed specialist,Credo AI,Proprietary,SaaS,,N,N,N,N,N,N,Human review,EU AI Act/ISO 42001,Governance,AI governance,https://www.credo.ai
+Closed specialist,Optro (FairNow),Proprietary,SaaS,,N,N,N,N,N,N,Accept/dismiss,LL144 audit heritage,Governance,Bias audit benchmark,https://optro.ai
+Closed specialist,Metaview,Proprietary,SaaS,,P,N,N,P,N,N,Interviewer edits,Not disclosed,ATS integrations,Interview notes,https://www.metaview.ai

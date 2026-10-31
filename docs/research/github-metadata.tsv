@@ -1,0 +1,103 @@
+repo	stars	forks	license	lang	pushed	archived	desc	url	error
+frappe/hrms	8995	2856	GPL-3.0	Python	2026-10-30	False	Open Source HR and Payroll Software	https://github.com/frappe/hrms	
+odoo/odoo	55445	34167	NOASSERTION	Python	2026-10-31	False	Odoo. Open Source Apps To Grow Your Business.	https://github.com/odoo/odoo	
+horilla-opensource/horilla	1480	964	LGPL-2.1	HTML	2026-10-31	False	Horilla is a free and open source HR software.	https://github.com/horilla/horilla-hr	
+orangehrm/orangehrm	1160	764	GPL-3.0	PHP	2026-06-28	False	OrangeHRM is a comprehensive Human Resource Management (HRM) System that captures  all the essential	https://github.com/orangehrm/orangehrm	
+opencats/OpenCATS	772	329	NOASSERTION	PHP	2026-10-30	False	Open-source applicant tracking system (ATS) and recruitment CRM for staffing agencies and hiring tea	https://github.com/opencats/OpenCATS	
+sentrifugo/sentrifugo	8	8	GPL-3.0	PHP	2017-10-30	False	Sentrifugo is a FREE and powerful Human Resource Management System(HRMS) that can be easily configur	https://github.com/Sentrifugo/sentrifugo	
+icehrm/icehrm									HTTP Error 404: Not Found
+srbhr/Resume-Matcher	28989	5114	Apache-2.0	Python	2026-10-30	False	The #1 AI Harness for Building Resumes, PDFs, Cover Letters & more, locally with 100+ LLMs support.	https://github.com/srbhr/Resume-Matcher	
+docling-project/docling	69919	5225	MIT	Python	2026-10-31	False	Get your documents ready for gen AI	https://github.com/docling-project/docling	
+Unstructured-IO/unstructured	15652	1377	Apache-2.0	HTML	2026-10-30	False	Convert documents to structured data effortlessly. Unstructured is open-source ETL solution for tran	https://github.com/Unstructured-IO/unstructured	
+OmkarPathak/pyresparser	958	441	GPL-3.0	Python	2023-09-13	False	A simple resume parser used for extracting information from resumes	https://github.com/OmkarPathak/pyresparser	
+UKPLab/sentence-transformers	19240	3000	Apache-2.0	Python	2026-10-30	False	State-of-the-Art Embeddings, Retrieval, and Reranking	https://github.com/huggingface/sentence-transformers	
+FlagOpen/FlagEmbedding	12289	944	MIT	Python	2026-10-27	False	Retrieval and Retrieval-augmented LLMs	https://github.com/FlagOpen/FlagEmbedding	
+qdrant/qdrant	35348	2787	Apache-2.0	Rust	2026-10-31	False	Qdrant - High-performance, massive-scale Vector Database and Vector Search Engine for the next gener	https://github.com/qdrant/qdrant	
+milvus-io/milvus	46541	4323	Apache-2.0	Go	2026-10-31	False	Milvus is a high-performance, cloud-native vector database built for scalable vector ANN search	https://github.com/milvus-io/milvus	
+weaviate/weaviate	16933	1432	NOASSERTION	Go	2026-10-31	False	Weaviate is an open-source vector database that stores both objects and vectors, allowing for the co	https://github.com/weaviate/weaviate	
+facebookresearch/faiss	41241	4582	MIT	C++	2026-10-31	False	A library for efficient similarity search and clustering of dense vectors.	https://github.com/facebookresearch/faiss	
+pgvector/pgvector	23544	1375	NOASSERTION	C	2026-10-30	False	Open-source vector similarity search for Postgres	https://github.com/pgvector/pgvector	
+567-labs/instructor	14085	1346	MIT	Python	2026-10-26	False	structured outputs for llms 	https://github.com/567-labs/instructor	
+dottxt-ai/outlines	15988	908	Apache-2.0	Python	2026-09-21	False	Structured Outputs	https://github.com/dottxt-ai/outlines	
+langchain-ai/langgraph	44220	7609	MIT	Python	2026-10-31	False	Build resilient agents.	https://github.com/langchain-ai/langgraph	
+crewAIInc/crewAI	60341	8985	MIT	Python	2026-10-30	False	Framework for orchestrating role-playing, autonomous AI agents. By fostering collaborative intellige	https://github.com/crewAIInc/crewAI	
+microsoft/autogen	61649	9341	CC-BY-4.0	Python	2026-10-28	False	A programming framework for agentic AI	https://github.com/microsoft/autogen	
+openai/openai-agents-python	30417	4965	MIT	Python	2026-10-30	False	A lightweight, powerful framework for multi-agent workflows	https://github.com/openai/openai-agents-python	
+pydantic/pydantic-ai	20968	3075	MIT	Python	2026-10-31	False	How Python does AI. Agents, realtime voice, image generation, embeddings. Every model, every interfa	https://github.com/pydantic/pydantic-ai	
+google/adk-python	22061	4275	Apache-2.0	Python	2026-10-31	False	An open-source, code-first Python toolkit for building, evaluating, and deploying sophisticated AI a	https://github.com/google/adk-python	
+mastra-ai/mastra	29231	3064	NOASSERTION	TypeScript	2026-10-31	False	Mastra is the modern TypeScript framework for AI-powered applications and agents.	https://github.com/mastra-ai/mastra	
+letta-ai/letta	25306	2664	Apache-2.0		2026-10-18	False	Platform for stateful agents: AI with advanced memory that can learn and self-improve over time.	https://github.com/letta-ai/letta	
+huggingface/smolagents	30155	3173	Apache-2.0	Python	2026-10-29	False	🤗 smolagents: a barebones library for agents that think in code.	https://github.com/huggingface/smolagents	
+langgenius/dify	160090	25301	NOASSERTION	Python	2026-10-31	False	Build Agentic workflows, RAG pipelines, with rich AI model and tool support on one collaborative wor	https://github.com/langgenius/dify	
+FlowiseAI/Flowise	55536	25092	NOASSERTION	TypeScript	2026-08-13	True	Build AI Agents, Visually	https://github.com/FlowiseAI/Flowise	
+langflow-ai/langflow	156192	10292	MIT	Python	2026-10-31	False	Langflow is a powerful tool for building and deploying AI-powered agents and workflows.	https://github.com/langflow-ai/langflow	
+n8n-io/n8n	209200	61335	NOASSERTION	TypeScript	2026-10-31	False	Fair-code workflow automation platform with native AI capabilities. Combine visual building with cus	https://github.com/n8n-io/n8n	
+activepieces/activepieces	25309	4414	NOASSERTION	TypeScript	2026-10-31	False	AI Agents & MCPs & AI Workflow Automation • (~400 MCP servers for AI agents) • AI Automation / AI Ag	https://github.com/activepieces/activepieces	
+windmill-labs/windmill	18335	1133	NOASSERTION	Rust	2026-10-30	False	Code-first platform for workflows, apps and AI agents, on the fastest self-hostable orchestrator (be	https://github.com/windmill-labs/windmill	
+kestra-io/kestra	30094	3493	Apache-2.0	Java	2026-10-30	False	Orchestrate everything, everywhere. The open-source control plane for workflows across data, infrast	https://github.com/kestra-io/kestra	
+temporalio/temporal	24103	2063	MIT	Go	2026-10-31	False	Temporal service	https://github.com/temporalio/temporal	
+inngest/inngest	6005	385	NOASSERTION	Go	2026-10-31	False	The leading workflow orchestration platform.  Run stateful step functions and AI workflows on server	https://github.com/inngest/inngest	
+restatedev/restate	4631	231	NOASSERTION	Rust	2026-10-30	False	Restate is the platform for building resilient applications that tolerate all infrastructure faults 	https://github.com/restatedev/restate	
+dbos-inc/dbos-transact-py	1659	115	MIT	Python	2026-10-30	False	Database-Backed Durable Python Workflows	https://github.com/dbos-inc/dbos-transact-py	
+flowable/flowable-engine	9632	2901	Apache-2.0	Java	2026-10-18	False	A compact and highly efficient workflow and Business Process Management (BPM) platform for developer	https://github.com/flowable/flowable-engine	
+camunda/camunda-bpm-platform	4264	1725	Apache-2.0	Java	2025-11-04	True	Camunda 7 CE is End of Life (EoL). Please check out Camunda 8 instead (https://github.com/camunda/ca	https://github.com/camunda/camunda-bpm-platform	
+BerriAI/litellm	62439	12874	NOASSERTION	Python	2026-10-31	False	The fastest, litest AI Gateway. Rust core with Python SDK. Call 100+ LLM APIs in OpenAI (or native) 	https://github.com/BerriAI/litellm	
+Portkey-AI/gateway	13298	1362	MIT	TypeScript	2026-05-25	False	A blazing fast AI Gateway with integrated guardrails. Route to 1,600+ LLMs, 50+ AI Guardrails with 1	https://github.com/Portkey-AI/gateway	
+Kong/kong	44334	5236	Apache-2.0	Lua	2026-10-19	False	🦍 The API and AI Gateway	https://github.com/Kong/kong	
+Helicone/helicone	6248	697	Apache-2.0	TypeScript	2026-10-28	False	🧊 Open source LLM observability platform. One line of code to monitor, evaluate, and experiment. YC 	https://github.com/Helicone/helicone	
+guardrails-ai/guardrails	7574	732	Apache-2.0	Python	2026-10-31	False	Adding guardrails to large language models.	https://github.com/guardrails-ai/guardrails	
+NVIDIA/NeMo-Guardrails	7401	889	NOASSERTION	Python	2026-10-30	False	NeMo Guardrails is an open-source toolkit for easily adding programmable guardrails to LLM-based con	https://github.com/NVIDIA-NeMo/Guardrails	
+protectai/llm-guard	3220	472	MIT	Python	2026-07-08	True	The Security Toolkit for LLM Interactions	https://github.com/protectai/llm-guard	
+microsoft/presidio	11609	1399	MIT	Python	2026-10-31	False	An open-source framework for detecting, redacting, masking, and anonymizing sensitive data (PII) acr	https://github.com/data-privacy-stack/presidio	
+NVIDIA/garak	9813	1429	Apache-2.0	Python	2026-10-27	False	the LLM vulnerability scanner	https://github.com/NVIDIA/garak	
+Azure/PyRIT	123	34	MIT		2026-03-25	True	The Python Risk Identification Tool for generative AI (PyRIT) is an open source framework built to e	https://github.com/Azure/PyRIT	
+promptfoo/promptfoo	26669	2621	MIT	TypeScript	2026-10-31	False	Test your prompts, agents, and RAGs. Red teaming/pentesting/vulnerability scanning for AI. Compare p	https://github.com/promptfoo/promptfoo	
+explodinggradients/ragas	16193	1787	Apache-2.0	Python	2026-02-24	False	Supercharge Your LLM Application Evaluations 🚀	https://github.com/vibrantlabsai/ragas	
+confident-ai/deepeval	19213	2157	Apache-2.0	Python	2026-10-29	False	The LLM Evaluation Framework	https://github.com/confident-ai/deepeval	
+langfuse/langfuse	36795	4130	NOASSERTION	TypeScript	2026-10-31	False	🪢 Open source agent evals & observability: Trace, evaluate, and improve LLM applications with one op	https://github.com/langfuse/langfuse	
+Arize-ai/phoenix	12083	1254	NOASSERTION	Python	2026-10-31	False	AI Observability & Evaluation	https://github.com/Arize-ai/phoenix	
+keycloak/keycloak	37619	9121	Apache-2.0	Java	2026-10-31	False	Open Source Identity and Access Management For Modern Applications and Services	https://github.com/keycloak/keycloak	
+openfga/openfga	6067	543	Apache-2.0	Go	2026-10-30	False	A high-performance and flexible authorization/permission engine built for developers and inspired by	https://github.com/openfga/openfga	
+open-policy-agent/opa	12418	1705	Apache-2.0	Go	2026-10-31	False	Open Policy Agent (OPA) is an open source, general-purpose policy engine.	https://github.com/open-policy-agent/opa	
+ory/ory	95	7	Apache-2.0	Shell	2026-09-30	False	Ory runs a global end-to-end security infrastructure for humans, robots, and servers. We build and u	https://github.com/ory/network	
+infisical/infisical	30188	2404	NOASSERTION	TypeScript	2026-10-31	False	Infisical is the open-source platform for securing secrets, certificates, access, and AI Agents.	https://github.com/Infisical/infisical	
+openbao/openbao	8801	658	MPL-2.0	Go	2026-10-30	False	OpenBao is a software solution to manage, store, and distribute sensitive data including secrets, ce	https://github.com/openbao/openbao	
+semgrep/semgrep	17380	1136	LGPL-2.1	C	2026-10-30	False	Lightweight static analysis for many languages. Find bug variants with patterns that look like sourc	https://github.com/semgrep/semgrep	
+aquasecurity/trivy	38876	811	Apache-2.0	Go	2026-10-30	False	Find vulnerabilities, misconfigurations, secrets, SBOM in containers, Kubernetes, code repositories,	https://github.com/aquasecurity/trivy	
+zaproxy/zaproxy	16078	2688	Apache-2.0	Java	2026-10-30	False	The ZAP by Checkmarx Core project	https://github.com/zaproxy/zaproxy	
+DependencyTrack/dependency-track	4391	850	Apache-2.0	Java	2026-10-31	False	Dependency-Track is an intelligent Component Analysis platform that allows organizations to identify	https://github.com/DependencyTrack/dependency-track	
+renovatebot/renovate	22971	3418	AGPL-3.0	TypeScript	2026-10-30	False	Home of the Renovate CLI: Cross-platform Dependency Automation by Mend.io	https://github.com/renovatebot/renovate	
+zammad/zammad	6060	1090	AGPL-3.0	Ruby	2026-10-31	False	Zammad is a web based open source helpdesk/customer support system.	https://github.com/zammad/zammad	
+chatwoot/chatwoot	38673	9411	NOASSERTION	Ruby	2026-10-31	False	Open-source live-chat, email support, omni-channel desk. An alternative to Intercom, Zendesk, Salesf	https://github.com/chatwoot/chatwoot	
+frappe/helpdesk	3465	993	AGPL-3.0	Vue	2026-10-31	False	Modern, Streamlined, Free and Open Source Customer Service Software	https://github.com/frappe/helpdesk	
+RAGFlow/ragflow	23	4	Apache-2.0		2024-09-12	False	RAGFlow is an open-source RAG (Retrieval-Augmented Generation) engine based on deep document underst	https://github.com/ragflow/ragflow	
+onyx-dot-app/onyx	33122	4680	NOASSERTION	Python	2026-10-31	False	Open Source AI Platform - AI Chat with advanced features that works with every LLM	https://github.com/onyx-dot-app/onyx	
+open-webui/open-webui	157372	22884	NOASSERTION	Python	2026-10-31	False	User-friendly AI Interface (Supports Ollama, OpenAI API, ...)	https://github.com/open-webui/open-webui	
+danny-avila/LibreChat	46562	9574	MIT	TypeScript	2026-10-31	False	Enhanced ChatGPT Clone: Features Agents, MCP, Skills, DeepSeek, Anthropic, AWS, OpenAI, Responses AP	https://github.com/LibreChat-AI/LibreChat	
+Mintplex-Labs/anything-llm	67789	7632	MIT	JavaScript	2026-10-30	False	Stop renting your intelligence. Own it with AnythingLLM. Everything you need for a powerful local-fi	https://github.com/Mintplex-Labs/anything-llm	
+run-llama/llama_index	52763	8489	MIT	Python	2026-10-26	False	LlamaIndex is the document processing platform for AI	https://github.com/run-llama/llama_index	
+deepset-ai/haystack	26895	3371	Apache-2.0	Python	2026-10-31	False	Open-source AI orchestration framework for building context-engineered, production-ready LLM applica	https://github.com/deepset-ai/haystack	
+calcom/cal.com	49585	15499	MIT	TypeScript	2026-10-30	False	Scheduling infrastructure for absolutely everyone.	https://github.com/calcom/cal.diy	
+alextselegidis/easyappointments	4467	1584	GPL-3.0	PHP	2026-10-26	False	:date: Easy!Appointments - Self Hosted Appointment Scheduler	https://github.com/alextselegidis/easyappointments	
+lukevella/rallly	5334	585	AGPL-3.0	TypeScript	2026-10-31	False	Rallly is an open-source scheduling and collaboration tool designed to make organizing events and me	https://github.com/lukevella/rallly	
+docusealco/docuseal	18960	1924	AGPL-3.0	Ruby	2026-10-26	False	Open source DocuSign alternative. Create, fill, and sign digital documents ✍️	https://github.com/docusealco/docuseal	
+documenso/documenso	15620	3425	AGPL-3.0	TypeScript	2026-10-31	False	The Open Source DocuSign Alternative.	https://github.com/documenso/documenso	
+paperless-ngx/paperless-ngx	47442	3315	GPL-3.0	Python	2026-10-31	False	A community-supported supercharged document management system: scan, index and archive all your docu	https://github.com/paperless-ngx/paperless-ngx	
+axllent/mailpit	10804	372	MIT	Go	2026-10-31	False	An email and SMTP testing tool with API for developers	https://github.com/axllent/mailpit	
+postalserver/postal	16912	1318	MIT	Ruby	2026-10-30	False	📮 A fully featured open source mail delivery platform for incoming & outgoing e-mail	https://github.com/postalserver/postal	
+mailu/mailu	7593	1025	NOASSERTION	Python	2026-10-31	False	Insular email distribution - mail server as Docker images	https://github.com/Mailu/Mailu	
+postalsys/imapflow	579	86	NOASSERTION	TypeScript	2026-10-29	False	IMAP Client library for EmailEngine Email API (https://emailengine.app)	https://github.com/postalsys/imapflow	
+nodemailer/mailparser	1673	289	NOASSERTION	TypeScript	2026-10-29	False	Decode mime formatted e-mails	https://github.com/nodemailer/mailparser	
+freescout-help-desk/freescout	4627	741	AGPL-3.0	PHP	2026-10-31	False	FreeScout — Free self-hosted omnichannel AI-powered helpdesk & shared mailbox	https://github.com/freescout-help-desk/freescout	
+novuhq/novu	40244	4524	NOASSERTION	TypeScript	2026-10-31	False	The open-source communication infrastructure for agents and products	https://github.com/novuhq/novu	
+caronc/apprise	17683	692	BSD-2-Clause	Python	2026-10-31	False	Apprise - Push Notifications that work with just about every platform!	https://github.com/caronc/apprise	
+microsoft/semantic-kernel	28724	4849	MIT	C#	2026-10-31	False	Integrate cutting-edge LLM technology quickly and easily into your apps	https://github.com/microsoft/semantic-kernel	
+geekan/MetaGPT	71104	9076	MIT	Python	2026-01-21	False	🌟 The Multi-Agent Framework: First AI Software Company, Towards Natural Language Programming	https://github.com/FoundationAgents/MetaGPT	
+modelcontextprotocol/servers	91714	11894	NOASSERTION	TypeScript	2026-10-29	False	Model Context Protocol Servers	https://github.com/modelcontextprotocol/servers	
+punkpeye/awesome-mcp-servers	97119	18892	MIT		2026-10-23	False	A collection of MCP servers.	https://github.com/punkpeye/awesome-mcp-servers	
+e2b-dev/E2B	14630	1146	Apache-2.0	Python	2026-10-30	False	Open-source, secure environment with real-world tools for enterprise-grade agents.	https://github.com/e2b-dev/E2B	
+browser-use/browser-use	119648	13324	MIT	Python	2026-10-31	False	Open-source Python library for AI browser agents, plus Browser Use Cloud: stealth browsers and a hos	https://github.com/browser-use/browser-use	
+unclecode/crawl4ai	86643	9016	Apache-2.0	Python	2026-10-30	False	Open-source web crawler and scraper for LLMs and AI agents: any website into clean, LLM-ready Markdo	https://github.com/unclecode/crawl4ai	
+microsoft/markitdown	193200	14470	MIT	Python	2026-10-28	False	Python tool for converting files and office documents to Markdown.	https://github.com/microsoft/markitdown	
+opendatalab/MinerU	82879	6859	NOASSERTION	Python	2026-10-31	False	Transforms complex documents like PDFs and Office docs into LLM-ready markdown/JSON for your Agentic	https://github.com/opendatalab/MinerU	
+VikParuchuri/marker	40735	2943	Apache-2.0	Python	2026-10-29	False	Convert PDF to markdown + JSON quickly with high accuracy	https://github.com/datalab-to/marker	
