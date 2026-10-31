@@ -1,6 +1,6 @@
 # Why this scope — `journey` (Wassim)
 
-**The what is `docs/handoff/journey-design.md` v3.1. This file is the why.** The scope is frozen; there are no open questions. The branch is synced with `main`'s P1 infra + P2 kernel; P3 `_example` and the stub packs are next. If you need the schema, events, routes, hours or conflict rules, read the v3 doc. If you want the argument in five minutes, read this.
+**The what is `docs/handoff/journey-design.md` v3.2. This file is the why.** The scope is frozen; there are no open questions. The branch is synced with `main`'s P1 infra + P2 kernel; P3 `_example` and the stub packs are next. If you need the schema, events, routes, hours or conflict rules, read the v3 doc. If you want the argument in five minutes, read this.
 
 **My one sentence:** I own the `journey` pack — onboarding, follow-up, skill gaps and training tied to KPIs — inside the AstraRH kernel. I do not own a second RAG, a second approval service, a second mailer or a second scheduler.
 
@@ -38,6 +38,18 @@ If this works end to end, the pack is done. Four half-built modules is the failu
 | 6 | **Impact measured, not assumed** | Before/after on the same cohort, a comparison group where possible, cost per closed gap, and the caveat. |
 
 Two supporting stories: the **team gap heatmap** (the Horizon lane, read-only, `k >= 5`) and the **deliberate no**: no sentiment, no ranking, no flight-risk score.
+
+---
+
+## What actually wins
+
+The judges are not scoring code volume; everyone will have AI-written code. They score **security, system design, reliability and human-in-the-loop**. So:
+
+- We demo the **mechanism**, not a CRUD tour: edit voids the approval, `<WhyPanel>`, audit verify.
+- We show **one failure mode**: a poisoned check-in note does not move the plan or the gap.
+- We put the **numbers in the README**: red-team pass rate, journey tests, RLS/cross-tenant tests — from a run, never invented.
+- If time is short, **cut Tier 2 features; never cut the proof moments**.
+- We say the legal line out loud: no sentiment, no ranking, no flight-risk score, no R3 decision.
 
 ---
 
@@ -116,7 +128,7 @@ Then the dossier: **"Day 90: 14 of 15 milestones with evidence; 1 missing"** —
 | H10–H11 | impact + D90 event + dossier |
 | H11–H12 | heatmap + WhyPanel/evidence drawer + doc feedback + evals |
 | H12 | freeze; record backup |
-| H12–H15 | demo blockers only, README, rehearsal, buffer |
+| H12–H15 | proof pack (failure drills, audit verify), demo blockers, README, rehearsal, buffer |
 
 **Cut order:** D5 briefing -> D8 accessibility -> D1 dossier polish -> D6 doc feedback -> D2 first-win variants -> D3 heatmap -> J10 impact. **Never cut:** J1/J2/J7/J8, approval/audit, no-sentiment, seed, offline demo.
 
