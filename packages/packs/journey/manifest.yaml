@@ -1,0 +1,94 @@
+id: journey
+name: Journey
+owner: wassim
+status: preview
+description: Onboarding, follow-up, skill gaps and training tied to KPIs, with a human deciding about people.
+models: packs.journey.models
+
+ui:
+  route: /journey
+  nav_label: Journey
+  roles: [admin, hr, manager, employee, auditor]
+
+actions:
+  - id: journey.plan.activate
+    risk: R2
+    channel: internal
+    handler: packs.journey.handlers:activate_plan
+    approver_roles: [hr]
+    view_roles: [hr, manager, employee]
+    description: Activate an approved 30/60/90 plan and create its tasks and buddy.
+  - id: journey.task.reassign
+    risk: R2
+    channel: internal
+    handler: packs.journey.handlers:reassign_task
+    approver_roles: [manager]
+    view_roles: [manager, hr, employee]
+    description: Reassign an onboarding task to another owner.
+  - id: journey.buddy.assign
+    risk: R2
+    channel: internal
+    handler: packs.journey.handlers:assign_buddy
+    approver_roles: [manager]
+    view_roles: [manager, hr]
+    description: Assign a buddy and a contact cadence.
+  - id: journey.checkin.schedule
+    risk: R1
+    description: Schedule the day 7/30/60/90 check-ins from the approved plan.
+  - id: journey.checkin.notify
+    risk: R2
+    channel: external
+    adapter: email.send
+    approver_roles: [manager]
+    view_roles: [manager, hr, employee]
+    description: Send an approved check-in email to the new hire.
+  - id: journey.support_flag.create
+    risk: R1
+    description: Record a factual support flag for the manager or HR.
+  - id: journey.support_flag.notify
+    risk: R2
+    channel: external
+    adapter: email.send
+    approver_roles: [hr]
+    view_roles: [hr, manager]
+    description: Notify HR about an open support flag.
+  - id: journey.gap.confirm
+    risk: R2
+    channel: internal
+    handler: packs.journey.handlers:confirm_gap
+    approver_roles: [manager]
+    view_roles: [manager, hr, employee]
+    description: Confirm a proposed skill gap after reviewing its evidence.
+  - id: journey.training.assign
+    risk: R2
+    channel: internal
+    handler: packs.journey.handlers:assign_training
+    approver_roles: [manager]
+    view_roles: [manager, hr, employee]
+    description: Assign a training recommendation to close a confirmed gap.
+  - id: journey.training.verify
+    risk: R2
+    channel: internal
+    handler: packs.journey.handlers:verify_training
+    approver_roles: [manager]
+    view_roles: [manager, hr, employee]
+    description: Record a verified level change after assessment or applied evidence.
+  - id: journey.impact.record
+    risk: R1
+    description: Record an observed before/after measure with its caveat.
+  - id: journey.dossier.export
+    risk: R0
+    description: Assemble the Day-90 review pack. It never records a decision.
+
+publishes:
+  - journey.plan.activated.v1
+  - journey.checkin.due.v1
+  - journey.pulse.submitted.v1
+  - journey.evidence.recorded.v1
+  - journey.skill_gap.confirmed.v1
+  - journey.training.completed.v1
+  - journey.onboarding.completed.v1
+
+consumes:
+  - talent.candidate.hired.v1
+  - trust.action.executed.v1
