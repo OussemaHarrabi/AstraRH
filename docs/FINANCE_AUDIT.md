@@ -89,4 +89,4 @@ Audit of everything built so far on `finance-v0` and `finance-v1`, plus the unco
 | K8 (update) | The macOS init bug was fixed on request, verified identical | Runbook section 3 |
 | P4 | Message to the kernel owner rewritten to lead with K9 and K8. **It still has to be sent by a person** | `FINANCE_PAYMENT_DESIGN.md` section 8 |
 
-**Result after the fixes:** `python3 astra.py check` gives **374 passed, 2 skipped, 1 expected failure** (the K9 test), ruff clean, migrations `3e65e32a7d91`, `finance_0002` and `finance_0003` applied.
+**Result after the fixes:** `python3 astra.py check` gave **374 passed, 2 skipped, 1 expected failure** (the K9 test), ruff clean, migrations `3e65e32a7d91`, `finance_0002` and `finance_0003` applied. After the rebase onto the latest `main` on 2026-11-01 the same suite, now including the kernel owner's new tests, gives **420 passed, 2 skipped, 1 expected failure**.

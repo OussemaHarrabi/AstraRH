@@ -2,7 +2,7 @@
 
 How the finance pack is built and how it fits AstraRH. What it does is in [FINANCE_FEATURES.md](FINANCE_FEATURES.md) and [FINANCE_USE_CASES.md](FINANCE_USE_CASES.md). Decisions and rules are in [FINANCE_PLAN.md](FINANCE_PLAN.md). Platform background is in [ARCHITECTURE.md](ARCHITECTURE.md).
 
-Everything here is **design, not yet built**. Items marked **[kernel]** need a change or confirmation from the kernel owner. Items marked **[verify]** depend on a legal value that is not verified.
+Most of this is **design**; sections 4.1 and 8.1 list what is built. As of 2026-11-01 the kernel also has `comms`, `calendar` and `knowledge` modules (from `main`). Items marked **[kernel]** need a change or confirmation from the kernel owner. Items marked **[verify]** depend on a legal value that is not verified.
 
 ## 1. Context
 

@@ -40,13 +40,14 @@ python3 astra.py up
 
 or, if the database holds nothing you need, `python3 astra.py down --wipe` then `python3 astra.py up`. **`--wipe` deletes all local data.**
 
-## 4. Baseline observed on 2026-10-31
+## 4. Baseline observed on 2026-10-31 (first run) and 2026-11-01 (after rebasing onto the latest `main`)
 
 | Check | Result |
 |---|---|
 | `python3 astra.py up` | All services healthy after the workaround |
 | `python3 astra.py smoke` | All pass except **"worker holds an LLM key"**, which fails only because the keys are empty. This is expected while AI is paused |
-| `python3 astra.py check` | **288 passed, 2 skipped** (the platform's 253 plus 35 finance calculation tests) |
+| `python3 astra.py check` | First run, 2026-10-31: **288 passed, 2 skipped** (the platform's 253 plus 35 finance calculation tests). After the finance work and the rebase onto `main` `63529ca`, 2026-11-01: **420 passed, 2 skipped, 1 expected failure** (the K9 test) |
+| Migrations | Database at `kernel_0006`, `talent_0004`, `finance_0003` |
 
 ## 5. Running only the finance calculation tests
 

@@ -157,6 +157,23 @@ Fallback if K4 is declined: a stateless simulator inside the adapter that derive
 | **K12** | Optional kernel document-checklist helper | The spec has a document stage | Keep `document_ref` inside finance |
 | **K6** | Publish `trust.action.executed.v1` equivalents for `failed` and `unknown` outcomes, or confirm the sweep job approach | Avoids polling the proposal table | Sweep job (section 5) |
 
+### 8.1 Status of each request against `main` (checked 2026-11-01, after rebasing onto `63529ca`)
+
+| Request | Status on `main` | Note |
+|---|---|---|
+| K1 hire event | Open | No `talent.candidate.hired.v1` anywhere in the code |
+| K2 look up `unknown` executions | Open | `trust` and the executor are unchanged |
+| K3 executor poll hook | Open | Unchanged |
+| K4 sandbox bank and adapter | Open | Unchanged |
+| K5 `finance` queue | Open | `WORKER_QUEUES` is still `["default", "agents"]` |
+| K6 events for failed or unknown executions | Open | Unchanged. The sweep job is the default |
+| K7 pack event consumers | **Open, with a known pattern** | Packs are wired by importing their module in `apps/worker/main.py` (`talent` does it, and the kernel does it through `install_kernel_consumers`). Finance can do the same with one import line there, which is a kernel-owner file. The manifest `consumers:` section is still the cleaner fix |
+| K8 macOS init script | **Fixed on `finance-v2`** | `main` still has `01-init.sh`. Needs review and merge by the kernel owner |
+| K9 API cannot insert proposals | Open | Verified again: `has_table_privilege('astra_api','trust.proposal','INSERT')` is false |
+| K10 to K12 | Open | Small confirmations |
+
+New on `main` that finance can reuse: periodic worker tasks (the daily digest and the talent sweep run as scheduled Procrastinate tasks in `apps/worker/main.py`), which is the pattern for finance's `ending_soon` and failed-payment sweep jobs, and the new kernel `comms`, `calendar` and `knowledge` modules.
+
 **Message for the kernel owner (ready to send):**
 
 > Finance needs a few kernel changes. Two are bugs that affect more than finance.
