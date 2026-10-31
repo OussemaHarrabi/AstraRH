@@ -101,7 +101,7 @@ Columns by table (types shortened):
 | `engagement` | `employee_id` (core.employee), `type` CDI/CDD/CIVP, `status`, `starts_on`, `ends_on`, `job_title`, `work_location`, `weekly_hours`, `cdd_reason_code`, `external_request_id` **unique per tenant**, `source_event_id` unique, `linked_engagement_id` (CIVP to CDI) |
 | `engagement_amendment` | `engagement_id`, `field`, `old_value`, `new_value`, `effective_from`, `actor_id`, `reason`, `proposal_id` |
 | `pay_item` | `engagement_id`, `code`, `amount`, `currency`, `frequency`, `valid_from`, `valid_to`. Non-overlapping per code |
-| `document_ref` | `employee_id`, `engagement_id`, `doc_type`, `file_id` (core.file_object), `verification_status`, `verified_by`, `verified_at` |
+| `document_ref` | `employee_id`, `engagement_id`, `doc_type`, `file_key` (the MinIO key from `kernel.files`, no foreign key), `verification_status`, `verified_by`, `verified_at` |
 | `validation_issue` | `entity_type`, `entity_id`, `code`, `severity`, `field`, `message`, `next_action`, `owner_role`, `resolved_by`, `resolved_at`, `resolution_reason` |
 | `civp_placement` | `engagement_id`, `aneti_reference`, `approval_status`, `participant_category`, `starts_on`, `ends_on`, `training_hours_limit` (nullable), `status` |
 | `civp_ledger_entry` | `placement_id`, `month`, `payer` aneti/employer, `due_amount`, `paid_amount`, `status`, `payment_ref`. Unique `(placement_id, month, payer)` |
@@ -122,6 +122,27 @@ Columns by table (types shortened):
 | `ai_suggestion` | `task`, `document_ref_id`, `field`, `value`, `confidence`, `evidence`, `status`, `confirmed_by`, `confirmed_at` |
 
 **Integrity rules enforced in the database where possible:** unique idempotency keys, non-overlapping validity periods (exclusion constraints), `payment_status_event` and `payslip_line` insert-only, closed runs immutable (trigger), and RLS on every table with a follow-up revision that enables it (a test fails otherwise).
+
+### 4.1 What is built (2026-10-31)
+
+Migrations on the `finance` branch: `3e65e32a7d91` (20 tables) and `finance_0002` (security). Models are in `packages/packs/finance/models.py`. Tests are in `tests/test_finance_schema.py`.
+
+| Built | Detail |
+|---|---|
+| 20 tables | `employer_profile`, `engagement`, `engagement_amendment`, `pay_item`, `document_ref`, `validation_issue`, `civp_placement`, `civp_ledger_entry`, `civp_training`, `civp_extension_request`, `rule_set`, `payroll_input_batch`, `payroll_input`, `payroll_run`, `payslip`, `payslip_line`, `adjustment`, `payment_batch`, `payment_line`, `payment_status_event` |
+| Row-level security | On all 20, enforced by the shared `enable_rls` policy. A test compares the database's own list with the models |
+| Role permissions | The executor has no access to the schema. The API can only read payslips, payment batches, lines and bank statuses, and can draft but not change a rule set. Only the worker writes bank statuses, insert and read only |
+| Append-only | `payment_status_event` rejects update and delete, even from the owner role (trigger) |
+| Frozen when submitted | Once a run is `approval_pending`, `approved`, `payment_pending`, `paid` or `closed`, its payslip figures and lines cannot change or be deleted. Rejecting returns it to `draft` first |
+| Closed runs | A `closed` run cannot be updated, and only a `draft` run can be deleted |
+| Uniqueness | `external_request_id` and `source_event_id` per tenant on engagements, `source_event_id` on inputs, one ledger row per placement, month and payer, one payment line per payslip, unique idempotency key, unique execution per payment batch |
+
+Differences from the design above, and why:
+- **No exclusion constraints.** Overlap checks for pay items and rule sets need the `btree_gist` extension, which the database does not install. They are enforced in the service layer and tested there instead. `pay_item` has a unique key on engagement, code and start date.
+- **`document_ref` stores a `file_key`**, the MinIO key, because the kernel has no file table to reference.
+- **Not built yet:** `ai_suggestion` (AI is paused, decision D14), `salary_advance`, `incentive` and the cost-intelligence tables (slice S5 and S4).
+- **Family data lives on the engagement** (`head_of_family`, `children`) until the kernel holds it on the employee, so payroll has what the formula needs.
+- **Column-level limits** such as "only the worker may set an engagement's status to active" are enforced in the application and its tests, not by database grants.
 
 ## 5. State machines
 

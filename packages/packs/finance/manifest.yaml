@@ -1,0 +1,26 @@
+id: finance
+name: Finance
+owner: moetaz
+status: preview
+description: Tunisian payroll, CIVP placements, payment and reconciliation, with every figure replayable.
+models: packs.finance.models
+
+publishes:
+  - finance.engagement.validated.v1
+  - finance.engagement.activated.v1
+  - finance.engagement.amended.v1
+  - finance.engagement.ending_soon.v1
+  - finance.civp.activated.v1
+  - finance.civp.payment_due.v1
+  - finance.civp.payment_reconciled.v1
+  - finance.civp.completed.v1
+  - finance.payroll.calculated.v1
+  - finance.payroll.approved.v1
+  - finance.payroll.rejected.v1
+  - finance.payroll.closed.v1
+  - finance.payment.submitted.v1
+  - finance.payment.reconciled.v1
+
+consumes:
+  - talent.application.stage_changed.v1
+  - trust.action.executed.v1

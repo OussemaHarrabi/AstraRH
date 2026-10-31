@@ -78,7 +78,7 @@ Schema `finance`. Every table: `id` (uuid7), `tenant_id`, `created_at`, RLS on. 
 - `engagement`: `employee_id` (to `core.employee`), `type` (CDI, CDD, CIVP), `status`, `starts_on`, `ends_on`, `job_title`, `work_location`, `weekly_hours`, `cdd_reason_code`, `external_request_id`, `source_event_id`.
 - `engagement_amendment`: effective-dated change records (field, old, new, `effective_from`, actor, reason). Amendments never overwrite history.
 - `pay_item`: `engagement_id`, `code` (BASE_SALARY, ALLOWANCE, BONUS, REIMBURSEMENT...), `amount`, `currency`, `frequency`, `valid_from`, `valid_to`. Effective-dated.
-- `document_ref`: `employee_id`, `engagement_id`, `doc_type`, `file_id` (to `core.file_object`), `verification_status`, `verified_by`, `verified_at`. No file bytes here.
+- `document_ref`: `employee_id`, `engagement_id`, `doc_type`, `file_key` (the MinIO key from `kernel.files`, no foreign key), `verification_status`, `verified_by`, `verified_at`. No file bytes here.
 - `validation_issue`: `entity_type`, `entity_id`, `code`, `severity` (info, warning, review, blocking), `field`, `message`, `next_action`, `owner_role`, `resolved_by`, `resolved_at`.
 
 **CIVP**

@@ -149,6 +149,7 @@ Fallback if K4 is declined: a stateless simulator inside the adapter that derive
 | **K3** | Add an adapter `poll` hook to the executor loop that publishes returned events | The worker cannot reach the bank | Manual status entry by finance (weaker, loses the live demo) |
 | **K4** | Add the sandbox bank container, network and allowlist to `ops/compose*.yaml`, and register adapter `payment.release` in `kernel/adapters/__init__.py` | The bank adapter must live in the kernel adapters folder, outbound access is the executor's only | Stateless in-adapter simulator (see section 7) |
 | **K5** | Add a `finance` queue to `kernel.jobs.WORKER_QUEUES` | Calculation and the sweep job run on a durable queue | Run on `default` |
+| **K8** | Make the Postgres init step work on Docker Desktop for Mac, where the mounted `01-init.sh` is treated as executable and fails with `bad interpreter: Permission denied` (see [FINANCE_RUNBOOK.md](FINANCE_RUNBOOK.md) section 3) | A fresh clone on macOS cannot start without a manual step | Feed the script through standard input as the runbook describes |
 | **K6** | Publish `trust.action.executed.v1` equivalents for `failed` and `unknown` outcomes, or confirm the sweep job approach | Avoids polling the proposal table | Sweep job (section 5) |
 
 **Message for the kernel owner (ready to send):**
