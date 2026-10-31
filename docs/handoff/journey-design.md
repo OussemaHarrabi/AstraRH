@@ -1,6 +1,6 @@
 # AstraRH · `journey` pack — implementation reference (Onward v3.0)
 
-**Status:** v3.0 — **scope frozen for implementation**. No open questions remain; every contract decision is made in §19.
+**Status:** v3.1 — **scope frozen for implementation**. Synced with `origin/main` @ `75f8eb4` (P1 infra + P2 kernel); the pack contracts are verified against the real code. No open questions remain; every contract decision is made in §19.
 **Owner:** Wassim
 **Supersedes:** v2.0 (`docs/handoff/journey-design.md`, earlier commit) and v1.0 (`docs/wassim_doc.md`, kept as history)
 **Read with:** `docs/ARCHITECTURE.md` · `docs/PLAN.md` · `docs/handoff/journey.md` · `docs/handoff/DEMO_WORLD.md`
@@ -28,6 +28,8 @@
 | 4 | No coding backlog | **WBS with hours, dependencies and done criteria** (§20) |
 | 5 | Risks scattered | **Conflict register** with causes, early signals, pre-agreed resolutions (§22) |
 | 6 | "New ideas" in a separate file | The six new ideas are now **Tier 2 features** with data, UI and acceptance tests |
+
+**v3.1 — platform sync.** Merged `origin/main` @ `75f8eb4` (P1 compose stack + P2 trust kernel) and checked every contract against the code: pack routes are `/packs/journey` behind Caddy's `/api`; the manifest uses `api: "journey.api:router"` and `models: "journey.models"`; actions need `channel` + `handler`/`adapter` + roles; `trust.propose` and `explain.record` have fixed signatures; **only `payload` is hash-bound**; jobs are Procrastinate tasks; RLS uses `core.current_tenant()`; migrations run through `python astra.py makemigration journey`. See §9.1.
 
 ---
 
@@ -314,34 +316,45 @@ Keep the design material for later: attendance != adoption; compare course / wor
 ### 7.2 Proposal lifecycle
 
 ```
-agent run (kernel.ai)
+agent run (kernel.ai AgentContext)
   -> deterministic service computes facts
-  -> DecisionRecord via kernel.explain.record(...)
-  -> trust.propose(action_type, target, payload, evidence, risk_class)
-  -> approval (human; payload hash bound)
-  -> executor re-validates (hash, approver, policy, idempotency, destination)
-  -> execution + audit_event (hash-chained)
-  -> trust.action.executed.v1 resumes the next step
+  -> explain.record(session, tenant_id, DecisionDraft(...)) -> decision_id
+  -> trust.propose(session, tenant_id, action_id, payload, summary,
+                   decision_record_id, idempotency_key, target=..., agent_run_id=...)
+  -> approval (human; trust.approve)
+  -> trust.edit(session, actor, proposal_id, payload, reason) voids the approval
+  -> worker (internal) or executor (external) calls trust.execute(...)
+  -> audit_event + trust.action.executed.v1
 ```
 
-Agents **end** by creating a proposal. They do not pause inside a LangGraph `interrupt()`, and an approval outlives a deploy.
+- Risk comes from the manifest action catalogue; `propose` refuses an undeclared action.
+- `decision_record_id` is mandatory. **No explanation, no proposal.**
+- **`payload` is the only hash-bound content.** Anything that changes what happens (tasks, recipient, course, level) must be inside `payload`; `summary` and `target` are display metadata. The shared card reads `payload.before/after`.
+- `trust.edit` replaces the payload and voids active approvals; a database trigger also rejects an approval whose hash no longer matches.
+- Agents end at the proposal. No `interrupt()`, no waiting inside a graph.
 
 ### 7.3 Journey action register (declare in `manifest.yaml`)
 
-| `action_type` | Class | Executed by | Approver |
-|---|---|---|---|
-| `journey.plan.activate` | R2 | executor | HR (`EMP-006`) |
-| `journey.task.reassign` | R2 | executor | manager |
-| `journey.buddy.assign` | R2 | executor | manager (`EMP-002`) |
-| `journey.checkin.schedule` | R1 | worker | — (inside approved plan) |
-| `journey.checkin.notify` | R2 | executor | manager/HR |
-| `journey.support_flag.create` | R1 | worker | — (logged) |
-| `journey.support_flag.notify` | R2 | executor | HR |
-| `journey.gap.confirm` | R2 | executor | manager/HR |
-| `journey.training.assign` | R2 | executor | manager/L&D |
-| `journey.training.verify` | R2 | executor | manager |
-| `journey.impact.record` | R1 | worker | — (derived) |
-| `journey.dossier.export` | R0 | read | — |
+| `action_type` | Risk | Channel | Handler / adapter | `approver_roles` | `view_roles` |
+|---|---|---|---|---|---|
+| `journey.plan.activate` | R2 | internal | `journey.handlers:activate_plan` | `[hr]` | `[hr, manager, employee]` |
+| `journey.task.reassign` | R2 | internal | `journey.handlers:reassign_task` | `[manager]` | `[manager, hr, employee]` |
+| `journey.buddy.assign` | R2 | internal | `journey.handlers:assign_buddy` | `[manager]` | `[manager, hr]` |
+| `journey.checkin.schedule` | R1 | none | — (`trust.log_action`) | — | — |
+| `journey.checkin.notify` | R2 | external | `email.send` | `[manager]` | `[manager, hr, employee]` |
+| `journey.support_flag.create` | R1 | none | — (`trust.log_action`) | — | — |
+| `journey.support_flag.notify` | R2 | external | `email.send` | `[hr]` | `[hr, manager]` |
+| `journey.gap.confirm` | R2 | internal | `journey.handlers:confirm_gap` | `[manager]` | `[manager, hr, employee]` |
+| `journey.training.assign` | R2 | internal | `journey.handlers:assign_training` | `[manager]` | `[manager, hr, employee]` |
+| `journey.training.verify` | R2 | internal | `journey.handlers:verify_training` | `[manager]` | `[manager, hr, employee]` |
+| `journey.impact.record` | R1 | none | — (`trust.log_action`) | — | — |
+| `journey.dossier.export` | R0 | none | — (read / `trust.log_action`) | — | — |
+
+**ActionSpec rules (enforced by `kernel.registry`):** R2/R3 need a non-`none` `channel`, `approver_roles` and `view_roles`; an `external` action needs an `adapter` (`email.send` is the kernel's only one today); an `internal` action needs a `handler` (`module:function`). Action ids must start with `journey.`. The catalogue is synced on migrate; an undeclared action cannot run.
+
+**Role names are the kernel's, not the PLAN's:** `admin`, `hr`, `recruiter`, `manager`, `finance`, `employee`, `auditor`, `mediator`. There is no `hr_admin` or `ld_admin`. `EMP-006` is the demo person with role `hr`; `EMP-002` has `manager`. The two-key check is `view_roles` **and** `approver_roles` on the target scope.
+
+The executor's `email.send` adapter accepts `to`, `subject`, `body` and only allowlisted domains (`cds.example.test`, `mail.example.test`, `example.test`). That is why the demo addresses are safe; the pack never imports the adapter.
 
 **No R3 action exists.** The most sensitive decision in this pack (probation) is assembled, never decided by the agent. Say that on stage.
 
@@ -349,32 +362,50 @@ Agents **end** by creating a proposal. They do not pause inside a LangGraph `int
 
 ### 7.4 DecisionRecord minimum
 
-Every R2 proposal carries: question and outcome; factors that sum to the computed value; evidence with document/ID references; counterfactuals ("if K8s were level 3, gap would be 0"); **not considered** (name, gender, age, nationality, photo); limits ("no evidence found"); versions/hashes (`prompt_hash`, `model_version`, `input_hash`, `output_hash`, `policy_version`, `trace_id`); and the human decision with overrides and old/new values.
+`explain.record(session, tenant_id, draft: DecisionDraft)` is the real API. The draft carries:
 
-- **Plan:** factors are coverage facts (each role requirement -> task or gap), never a person score.
-- **Gap:** factors are evidence signals + the arithmetic.
+| Field | Rule |
+|---|---|
+| `kind`, `question`, `outcome`, `subject` | What was decided, for whom; `outcome` is displayable JSON |
+| `rationale`, `narrative` | Optional prose; a narrative's numbers and citations are validated against the record |
+| `score` | Optional. If set with factors, the contributions must sum **exactly** to it (`Decimal`, no float) |
+| `factors[]` | `key`, `label`, `weight`, `value`, `contribution`; **`weight * value == contribution`** |
+| `evidence[]` | `ref`, `factor_key` (must exist), `source_type`, `source_id`, `quote`, `locator` |
+| `counterfactuals[]` | description, change, outcome |
+| `not_considered[]`, `limits[]` | Name, gender, age, nationality, photo; "no evidence found" |
+| `scorer`, `scorer_version`, `inputs` | If a scorer is set, `explain.verify` re-scores and must match; register it with `register_scorer` |
+| `versions` | `prompt_hash`, `model`, and any other version you used |
+| `view_roles` | Required, at least one role |
+
+- **Plan:** factors are coverage facts (requirement -> task or gap), or no score with rationale/evidence. Never a person score.
+- **Gap:** `score = severity_score`; factors decompose it exactly; evidence per signal. The scorer is registered so replay works.
 - **Training:** skill match, ordering, cost, hours, KPI hypothesis.
 - **Impact:** baseline/post/method/comparison size, with the causal caveat.
 
 ### 7.5 Approval envelope (frozen for the shared card)
 
-Every journey proposal payload uses one shape; no HTML:
+Every journey proposal uses one shape; no HTML. **Only `payload` is hashed** by `trust.propose`:
 
 ```json
 {
   "summary": "Activate the 30/60/90 plan for Yasmine Trabelsi (POS-BE, ORG-ENG)",
   "target": { "type": "employee", "id": "EMP-041" },
-  "before": null,
-  "after": { "tasks": [ { "id": "...", "title": "...", "owner_role": "manager", "due_at": "..." } ],
-             "buddy": "EMP-009" },
-  "evidence": [ { "type": "role_profile", "id": "POS-BE" },
-                { "type": "hired_gap", "id": "SKILL-K8S" } ],
-  "alternatives": [],
-  "decision_record_id": "..."
+  "payload": {
+    "before": null,
+    "after": {
+      "tasks": [ { "id": "...", "title": "...", "owner_role": "manager", "due_at": "..." } ],
+      "buddy": "EMP-009"
+    },
+    "evidence": [ { "type": "role_profile", "id": "POS-BE" },
+                  { "type": "hired_gap", "id": "SKILL-K8S" } ],
+    "alternatives": []
+  }
 }
 ```
 
-The shared card diffs `before`/`after` arrays keyed by `id` (fallback `title`), renders evidence chips and alternatives. Edit-then-approve re-hashes the payload; the old approval is void.
+`decision_record_id` is a separate `trust.propose` argument, not part of the payload. The shared card diffs `payload.before/after` arrays keyed by `id` (fallback `title`), renders evidence chips and alternatives. `trust.edit` replaces `payload` and voids the approval; the database trigger rejects a stale hash. **Anything that changes what happens goes inside `payload`** — including a recipient, subject and body for an email, or a course id for an assignment.
+
+`target` also carries the scope fields the approver's role is limited by (`org_unit_id`, `manager_id`); otherwise `can_approve` will not match a scoped `manager` grant.
 
 ---
 
@@ -386,7 +417,7 @@ Process separation (`api`/`worker`/`executor`/`ml`), per-role DB access, RLS wit
 
 ### 8.2 Journey must do
 
-1. **Never import a mail/calendar adapter.** `tests/test_no_direct_send.py` stays green.
+1. **Never import a mail/calendar adapter.** `tests/test_architecture.py::test_only_the_executor_can_send` stays green.
 2. **Never concatenate untrusted text into a system prompt.** Check-in free text, manager notes, CSV cells, course descriptions, `candidate.hired` strings are DATA. If an LLM reads them: `fast` tier, **no tools**, strict JSON schema, delimited as untrusted, validated. A failed validator means no proposal.
 3. **Never infer sentiment, emotion, mood or "engagement"** from text, behaviour, message volume or latency. Pulse answers are structured self-report; optional free text is stored for a human, not scored.
 4. **Never produce an individual risk score** or a person-to-person relationship map. Attention is factual and explains itself.
@@ -420,7 +451,7 @@ Process separation (`api`/`worker`/`executor`/`ml`), per-role DB access, RLS wit
 
 ```
 packages/packs/journey/
-  manifest.yaml          # status, actions + R-class, events, agents, prompts, projections, route_prefix
+  manifest.yaml          # id, status, actions (risk + channel + handler), agents, graph, ui, api, models, publishes, consumes
   models.py              # 15 tables, SQLAlchemy 2
   api.py                 # routes; no business logic
   contracts.py           # public DTOs other packs may import
@@ -446,28 +477,106 @@ apps/web/src/modules/journey/
 - Graph: projects `Course`, `TEACHES`, `INFLUENCES` only.
 - KPI: reads `core.kpi_definition`; `KPI-MTTR`, `KPI-RAMP`, `KPI-90D` are journey-owned definitions.
 
-**Routes (DECIDED — API `/api/journey`, pages `/journey`)**
+**Routes (verified against the kernel)**
+
+FastAPI mounts the pack router at `/packs/journey` (`registry.mount_pack_routers`). Caddy's `handle_path /api/*` strips `/api`, so the public URL is **`/api/packs/journey/...`**. The manifest declares `api: "journey.api:router"`; the pages are `ui.route: "/journey"`. There is no `route_prefix` field.
 
 ```
-GET  /api/journey/plans              GET  /api/journey/plans/{id}
-POST /api/journey/plans/{id}/tasks/{task_id}/complete
-POST /api/journey/plans/{id}/checkins/{checkin_id}/submit
-GET  /api/journey/plans/{id}/attention
-GET  /api/journey/plans/{id}/dossier
-GET  /api/journey/gaps               GET  /api/journey/gaps/{id}
-GET  /api/journey/recommendations    GET  /api/journey/recommendations/{id}
-POST /api/journey/enrollments/{id}/verify
-GET  /api/journey/impact
-GET  /api/journey/heatmap?org_unit_id=&skill_id=
+GET  /api/packs/journey/plans              GET  /api/packs/journey/plans/{id}
+POST /api/packs/journey/plans/{id}/tasks/{task_id}/complete
+POST /api/packs/journey/plans/{id}/checkins/{checkin_id}/submit
+GET  /api/packs/journey/plans/{id}/attention
+GET  /api/packs/journey/plans/{id}/dossier
+GET  /api/packs/journey/gaps               GET  /api/packs/journey/gaps/{id}
+GET  /api/packs/journey/recommendations    GET  /api/packs/journey/recommendations/{id}
+POST /api/packs/journey/enrollments/{id}/verify
+GET  /api/packs/journey/impact
+GET  /api/packs/journey/heatmap?org_unit_id=&skill_id=
 ```
 
-Approvals are **not** journey routes: they go through `trust`. Ask is **not** a journey route: it is the shared knowledge surface. The manifest declares `route_prefix: /api/journey`; the web pages stay under `/journey`.
+The journey UI also calls the kernel surfaces directly: `/api/trust/proposals` (list, approve, edit, reject), `/api/explain/{id}` and `/api/explain/{id}/verify`, `/api/registry/packs`, `/api/people/employees`, `/api/people/org`, `/api/ai/runs`. Approvals are **not** journey routes. Ask is **not** a journey route: it is the shared knowledge surface.
+
+### 9.1 How the platform is wired (read before creating files)
+
+> As of `origin/main` @ `75f8eb4`, P1 infra + P2 kernel are on main. **P3 `platform-v0` is next**: `_example`, the four stub packs, `astra.py seed`, the web shell and CI are not in the repo yet. Do not create a competing pack scaffold; copy `_example` when it lands. `seed/journey/` is unblocked today.
+
+**Root tree (actual):**
+
+```
+apps/
+  api/main.py        FastAPI app; web.install(app) + registry.mount_pack_routers(app)
+  worker/main.py     agents, event relay, internal actions, Procrastinate worker
+  executor/main.py   approved external proposals only; mail adapter; no LLM
+  ml/main.py         parsing/embeddings; no network
+  web/               Next.js 16 app (src/app); P3 adds the shell
+packages/
+  kernel/            identity, authz, people, trust, explain, events, jobs, ai, graph,
+                     registry, migrations, adapters, web, obs, db, rls
+  packs/             # NOT YET PRESENT; P3 adds _example + talent/journey/finance/workforce
+ops/
+  compose.yaml       caddy, web, api, worker, executor, ml, postgres, neo4j, minio, mailpit, otel-lgtm, migrate
+  compose.dev.yaml   live reload + loopback tool ports
+  postgres/init/     roles + ten schemas (including journey)
+  caddy/Caddyfile    /api/* -> api:8000 (prefix stripped); everything else -> web:3000
+tests/               kernel tests + architecture/boundary tests
+astra.py             task runner (no make)
+```
+
+**Docker and ports (dev):** AstraRH `http://127.0.0.1:8080`; Grafana `3001`; Mailpit `8025`; Neo4j `7474`; MinIO `9001`; Postgres `55432`, database `astra`. Services: `caddy`, `web`, `api`, `worker`, `executor`, `ml`, `postgres` (pgvector/pg17), `neo4j`, `minio`, `mailpit`, `otel-lgtm`, one-shot `migrate`. Networks are `internal` except `edge_public`, `telemetry_ui` and `worker`'s `llm_egress`: `api` cannot reach the internet or hold an LLM key; `worker` holds the LLM key and cannot reach mail; `executor` can reach mail and nothing else external; `ml` cannot reach Postgres.
+
+**Commands (actual):**
+
+| Command | Does |
+|---|---|
+| `python astra.py init` | Create `.env` with generated secrets |
+| `python astra.py up [--secure]` | Build and start; `--secure` closes dev ports and builds production web |
+| `python astra.py check` | `ruff` + `pytest` (this is the "lint and test" gate; there is no `astra.py evals` yet) |
+| `python astra.py smoke` | Health, isolation, permissions, telemetry, one real end-to-end flow |
+| `python astra.py makemigration journey "message"` | Create the pack's Alembic revision (first one gets `depends_on=kernel@head`, branch label `journey`) |
+| `python astra.py graph-rebuild` | Rebuild Neo4j from the event log |
+| `python astra.py down [--wipe]` / `ps` / `logs` | Stop (and delete data), status, logs |
+
+**Pack manifest (actual schema):** `id`, `name`, `owner`, `status` (`live|preview|off`), `description`, `actions[]`, `agents[]`, `graph[]`, `ui{route,nav_label,roles}`, `api` (`"module:router"`), `models` (`"module"`), `publishes[]`, `consumes[]`. The registry loads `packages/packs/*/manifest.yaml`; a broken pack degrades to `unavailable`, never takes the platform down. `sync_catalogue()` runs on migrate and writes `trust.action_type` + a policy hash; an action not in a manifest cannot run. `pack_listing()` is the dashboard source.
+
+**Trust/explain contracts (actual):**
+
+```python
+trust.propose(session, tenant_id, action_id, payload, summary,
+              decision_record_id, idempotency_key,
+              target=None, agent_run_id=None, requested_by=None, expires_in=...)
+trust.approve(session, actor, proposal_id, reason)
+trust.edit(session, actor, proposal_id, payload, reason)   # voids active approvals
+trust.reject(session, actor, proposal_id, reason)
+trust.execute(tenant_id, proposal_id, runner, channel="internal"|"external")
+trust.log_action(...)                                      # R0/R1 only
+explain.record(session, tenant_id, DecisionDraft(...))
+explain.verify(session, record_id) / explain.why(session, actor, record_id)
+```
+
+`trust.propose` refuses an undeclared action, an R0/R1 (use `log_action`), or a missing `DecisionRecord`. It stores `payload_hash = payload_hash(payload)` and the database trigger rejects an approval whose hash differs.
+
+**Jobs (actual):** `kernel.jobs.get_job_app()` returns the Procrastinate app. Define `@app.task(name="journey.checkin.due")` and defer with `configure(schedule_in={"days": 7}).defer(...)` inside `with app.open():`. The worker serves `WORKER_QUEUES = ["default", "agents"]`; do not add a queue without a kernel change. Keep the job id to cancel; if cancellation is unavailable, mark the check-in `cancelled` and make the task a no-op. There is no generic `kernel.jobs.enqueue` API.
+
+**Events (actual):** `@event_type("journey.training.completed.v1")` on a Pydantic model, `publish(session, tenant_id, event)`, `@subscribe("talent.candidate.hired.v1", "journey.on_hired")`. Consumers register when their module is imported; the worker imports agent entries via `registry.wire_agents`. Follow `_example` for the import path, and make sure `journey.events` is imported in the worker process. If it is not, escalate (C19).
+
+**Models and RLS (actual):** subclass `kernel.db.TenantMixin, Base`; it supplies `id` (uuid7), `tenant_id` FK to `core.tenant`, and `created_at`. The `journey` schema already exists from `ops/postgres/init/01-init.sh`. Every table needs:
+
+```sql
+ALTER TABLE journey.<table> ENABLE ROW LEVEL SECURITY;
+ALTER TABLE journey.<table> FORCE ROW LEVEL SECURITY;
+CREATE POLICY tenant_isolation ON journey.<table>
+  USING (tenant_id = core.current_tenant());
+```
+
+`tests/test_architecture.py` fails if any table in `journey` lacks `tenant_id` or forced RLS. Migrations live in `packages/packs/journey/migrations/versions/`; `kernel.migrate` discovers them and sets `ALEMBIC_SCOPE=journey`, so autogenerate only sees the `journey` schema.
+
+**Agents (actual):** declare `agents: [{id, on: [...], entry: "journey.agents.onboarding_planner:run"}]`; the entry is `def run(ctx: AgentContext, event: EventOutbox | None) -> None`. `ctx.llm(tier, prompt, facts, Schema)` for trusted facts; `ctx.read_untrusted(...)` for raw text; `ctx.record_decision(DecisionDraft(...))`; `ctx.propose(action_id, payload, summary, decision_id, key, target=...)`. `run_agent` records the run and emits `ai.agent_run.completed.v1`; a failure is recorded, not retried.
 
 ---
 
 ## 10. Data model — schema `journey` (15 frozen tables)
 
-Every table: `id uuid` (uuid7 generated in the app), `tenant_id`, `created_at`, RLS enabled. FKs point only into `core` or within `journey`; **never into another pack**. No new tables in the MVP; columns inside these tables are pack-owned.
+Every table subclasses `TenantMixin, Base`: `id` (uuid7), `tenant_id` FK to `core.tenant`, `created_at`. Every table has **forced RLS** using `core.current_tenant()` (see §9.1). FKs point only into `core` or within `journey`; **never into another pack**. No new tables in the MVP; columns inside these tables are pack-owned. The `journey` schema is already created by `ops/postgres/init/01-init.sh`.
 
 | Table | Purpose | Key columns |
 |---|---|---|
@@ -491,11 +600,13 @@ Every table: `id uuid` (uuid7 generated in the app), `tenant_id`, `created_at`, 
 
 **Indexes:** `(tenant_id, plan_id)`, `(tenant_id, employee_id, status)`, partial `skill_gap WHERE status='proposed'`, `(tenant_id, due_at, status)` on tasks, `(tenant_id, recommendation_id)` on enrollments, `(tenant_id, org_unit_id, skill_id)` for the heatmap read.
 
-**Rules:** `Decimal` for money, never float. Every migration has a downgrade. One Alembic branch. No `SELECT *`. Level check `BETWEEN 1 AND 4`.
+**Rules:** `Decimal` for money, never float. Every migration has a downgrade. One Alembic branch created with `python astra.py makemigration journey "..."`; the first revision depends on `kernel@head`. No `SELECT *`. Level check `BETWEEN 1 AND 4`. `tests/test_architecture.py` requires `tenant_id` and forced RLS on every table in `journey`.
 
 ---
 
 ## 11. Events and I/O shapes
+
+Events are declared with `@event_type("journey.training.completed.v1")` on a Pydantic model and published with `publish(session, tenant_id, event)`. Subscribe with `@subscribe("talent.candidate.hired.v1", "journey.on_hired")`. Only catalogued events can be published. Consumers register when their module is imported, so `journey.events` must be imported in the worker process; follow `_example` (see C19).
 
 ### 11.1 Consumed
 
@@ -540,24 +651,26 @@ If `hired_gaps` is absent, re-derive from `core` evidence with confidence `<= 0.
 
 ### 11.3 Proposal payloads
 
-Use the frozen envelope in §7.5 for every action. Two concrete examples:
+Use the frozen envelope in §7.5. The whole `payload` is hashed; `decision_record_id` is a separate `trust.propose` argument, not part of the payload.
 
 ```json
 // plan activation
 { "summary":"Activate the 30/60/90 plan for Yasmine Trabelsi (POS-BE, ORG-ENG)",
   "target":{"type":"employee","id":"EMP-041"},
-  "before":null,
-  "after":{"tasks":[{"id":"...","title":"...","owner_role":"manager","due_at":"..."}],"buddy":"EMP-009"},
-  "evidence":[{"type":"role_profile","id":"POS-BE"},{"type":"hired_gap","id":"SKILL-K8S"}],
-  "alternatives":[], "decision_record_id":"..." }
+  "payload":{
+    "before":null,
+    "after":{"tasks":[{"id":"...","title":"...","owner_role":"manager","due_at":"..."}],"buddy":"EMP-009"},
+    "evidence":[{"type":"role_profile","id":"POS-BE"},{"type":"hired_gap","id":"SKILL-K8S"}],
+    "alternatives":[] } }
 
 // training assignment
 { "summary":"Assign CRS-K8S-01 to close the Kubernetes gap",
   "target":{"type":"employee","id":"EMP-041"},
-  "before":null,
-  "after":{"course_id":"CRS-K8S-01","cost_tnd":"0.000","hours":6,"kpi_id":"KPI-MTTR"},
-  "alternatives":[{"kind":"mentor","employee_id":"EMP-009","cost_tnd":"0.000"}],
-  "evidence":[{"type":"gap","id":"..."}], "decision_record_id":"..." }
+  "payload":{
+    "before":null,
+    "after":{"course_id":"CRS-K8S-01","cost_tnd":"0.000","hours":6,"kpi_id":"KPI-MTTR"},
+    "alternatives":[{"kind":"mentor","employee_id":"EMP-009","cost_tnd":"0.000"}],
+    "evidence":[{"type":"gap","id":"..."}] } }
 ```
 
 ---
@@ -572,6 +685,8 @@ Use the frozen envelope in §7.5 for every action. Two concrete examples:
 | **Training recommender** | confirmed gap | courses, core evidence holders | ordered path + alternatives + cost/hours/KPI + rationale (LLM narrates numbers) | R1 -> R2 |
 
 The recommender is a **deterministic service**, not a fourth registered agent; if Oussema prefers it registered, it is a manifest addition, not a new runtime.
+
+**Runtime (actual):** the entry is `def run(ctx: AgentContext, event: EventOutbox | None) -> None`. Use `ctx.llm(tier, prompt, facts, Schema)` only for trusted, already-validated facts; `ctx.read_untrusted(raw_text, prompt, Schema, source_type, source_id)` for raw text (no tools, strict schema); `ctx.record_decision(DecisionDraft(...))`; `ctx.propose(action_id, payload, summary, decision_id, key, target=...)`. `run_agent` records the run, publishes `ai.agent_run.completed.v1`, and records a failure without retrying. Load prompts with `load_prompt(__file__, "name")`; there are no inline prompts and no arbitrary tools — the context methods plus declared DB reads are the whole surface.
 
 **Prompts** (versioned, owner, changelog, eval IDs): `onboarding_planner.md`, `plan_rationale.md`, `checkin_briefing.md`, `gap_explain.md`, `training_rationale.md`, `manager_briefing.md`. No prompt in business code. Every narrative is validated against the computed numbers; a mismatch drops the sentence and fails the eval.
 
@@ -698,7 +813,7 @@ AstraRH's demo is recruitment-first (3:00), ecosystem (1:15), proof (0:45). Jour
 - [ ] Duplicate hire event / duplicate timer -> one plan / one check-in.
 - [ ] Dossier exports with evidence and missing items, no salary or rating.
 - [ ] Team heatmap suppresses cells with `n < 5` and never shows an individual ranking.
-- [ ] `python astra.py up` + seed reproduces the journey demo offline.
+- [ ] `python astra.py up` + the pack seed reproduces the journey demo offline (P3 adds `astra.py seed`; until then, the pack seed script).
 
 **Negative / security**
 
@@ -707,13 +822,15 @@ AstraRH's demo is recruitment-first (3:00), ecosystem (1:15), proof (0:45). Jour
 - [ ] Audit row tampered -> verify fails.
 - [ ] Cross-tenant plan/gap/enrollment read -> zero rows.
 - [ ] Injection in check-in text, manager note, course description, CSV cell -> no change to plan, gap or path.
-- [ ] `grep` proves no sentiment/emotion endpoint, field or prompt.
-- [ ] `test_no_direct_send.py` green: journey imports no mail/calendar adapter.
+- [ ] There is no `sentiment`/`emotion`/`flight_risk` field, endpoint or prompt (`grep` test).
+- [ ] `tests/test_architecture.py` green: journey imports no outbound module and no LLM SDK; only the executor sends.
 - [ ] Manager B cannot read manager A's plan; employee reads only their own.
 
 **Contract**
 
-- [ ] Manifest actions all carry an R-class; the contract test passes.
+- [ ] Every `journey` table has `tenant_id` and forced RLS; `test_architecture` passes.
+- [ ] Every action id starts with `journey.`; every R2 has a non-`none` channel, `approver_roles`, `view_roles`, and a handler/adapter; the manifest contract test passes.
+- [ ] `python astra.py check` is green (ruff + pytest).
 - [ ] Only `kernel.*` public APIs and other packs' `contracts.py` are imported.
 - [ ] Graph projections contain only `Course`, `TEACHES`, `INFLUENCES`; no person-to-person edges.
 - [ ] OpenAPI typed client builds; event schemas validate.
@@ -722,22 +839,22 @@ AstraRH's demo is recruitment-first (3:00), ecosystem (1:15), proof (0:45). Jour
 
 ## 19. Contract decisions — FINAL (no open questions)
 
-These were the 12 open questions in v2.0. Each is now decided. If a fallback is needed, it is written here so nobody invents a workaround.
+These were the 12 open questions in v2.0. Each is now decided **and verified against `origin/main` @ `75f8eb4`**: the signatures and paths below are from the code, not assumptions. If a fallback is needed, it is written here so nobody invents a workaround.
 
 | # | Question | DECISION | Why | Fallback if the kernel/talent disagrees | Notify |
 |---|---|---|---|---|---|
 | 1 | `talent.candidate.hired.v1` shape and `CAND-001` employee ID | **Require `employee_id` and `hired_gaps[]` in the event. `CAND-001 -> EMP-041`.** The gaps carry `skill_id`, `required_level`, `evidence` | The wedge is "gaps from hiring seed the plan"; without gaps in the event the cascade is weaker. One clean new ID avoids collisions | Re-derive requirements from `core` evidence, confidence `<= 0.5`, label "inherited from evidence". Never invent a level | Oussema + talent |
-| 2 | Pack route convention | **API `/api/journey/*`, pages `/journey/*`. Manifest declares `route_prefix: /api/journey`** | `/journey` is a Next.js page; `/api/*` is one proxy rule and no collision | If the kernel mounts all packs at root, keep the handler names and change only the prefix in the manifest | Oussema |
-| 3 | `trust.propose` / `explain.record` signatures | **Copy `_example` exactly. One adapter module `services/kernel.py`; no scattered calls; never fork the runtime** | One adapter isolates a late contract; the kernel remains the only trust path | If signatures differ, adapt inside the adapter only; no second approval path | Oussema |
-| 4 | `kernel.jobs` enqueue/cancel API | **Use kernel jobs only.** Register `journey.checkin.due` and `journey.attention.sweep`; enqueue with `idempotency_key`; cancel on plan change | A second scheduler is the classic conflict; Procrastinate already exists | Manual "run due check-ins" admin action from the plan detail; timer feature marked `preview`; **never** a cron side-channel | Oussema |
-| 5 | Approval card payload/diff contract | **Frozen envelope** `{summary,target,before,after,evidence,alternatives,decision_record_id}`; no HTML; arrays diffed by `id`, fallback `title` | The card renders any pack; the plan diff is the hardest case and defines the contract | Journey renders a read-only diff inside its own module; no fork of the shared design system | Workforce + Oussema |
+| 2 | Pack route convention | **Pack router is mounted at `/packs/journey`; Caddy's `/api/*` strips the prefix, so the public URL is `/api/packs/journey/*`. Manifest: `api: "journey.api:router"`; page: `ui.route: "/journey"`. There is no `route_prefix` field.** | The kernel already mounts every pack at `/packs/{id}`; the web route stays `/journey` | If the edge rule changes, update only the base path in the web client; the pack router path stays `/packs/journey` | Oussema |
+| 3 | `trust.propose` / `explain.record` signatures | **Use the real calls:** `decision = explain.record(session, tenant_id, DecisionDraft(...))`; `trust.propose(session, tenant_id, action_id, payload, summary, decision.id, idempotency_key, target=..., agent_run_id=...)`. One adapter `services/kernel.py`; no fork | One adapter isolates the trust path; the kernel remains the only approval service | If a signature changes, adapt inside the adapter only; no second approval path | Oussema |
+| 4 | `kernel.jobs` timers | **Use Procrastinate through `kernel.jobs.get_job_app()`.** Define `@app.task(name="journey.checkin.due")` and defer with `configure(schedule_in=...).defer(...)` inside `with app.open():`. The worker serves `WORKER_QUEUES = ["default", "agents"]`; no new queue without a kernel change. Keep the job id; if cancellation is unavailable, mark the check-in `cancelled` and make the task a no-op | A second scheduler is the classic conflict; Procrastinate already exists | Manual "run due check-ins" admin action from the plan detail; timer feature marked `preview`; **never** a cron side-channel | Oussema |
+| 5 | Approval card payload/diff contract | **Envelope `{summary,target,payload:{before,after,evidence,alternatives}}`.** Only `payload` is hashed by `trust.propose`; `decision_record_id` is a separate argument. No HTML; arrays diffed by `id`, fallback `title` | The card renders any pack; the plan diff is the hardest case. Anything that changes the action must be inside `payload` | Journey renders a read-only diff inside its own module; no fork of the shared design system | Workforce + Oussema |
 | 6 | May journey add columns to its own tables? | **Yes — columns are pack-owned.** The frozen contract is the table list, event names and folder ownership. No new tables | Otherwise the pack cannot implement its own features; the boundary rule is about cross-pack contracts | If the kernel requires a migration review, document the column in §10 and open the PR early | Oussema |
 | 7 | Horizon lane in scope? | **Campaigns are out of the MVP. Ship the read-only team gap heatmap (`k >= 5`).** Keep the 3-table path documented | Frozen schema + 15 h + depth. The heatmap gives the workforce-wide story without fake tables | Revisit only at H10 with Oussema; if approved, add exactly `campaign`, `campaign_cohort`, `adoption_metric` in one contract issue | All |
-| 8 | KPI read/write | **Read `core.kpi_definition`; publish `journey.training.completed.v1`; never write `core.kpi_observation`** | One writer for KPI observations; finance owns ROI | If a kernel KPI API exists, call it; the event remains the contract | Finance + Oussema |
+| 8 | KPI read/write | **Read `core.kpi_definition` (the `kernel.people` module exposes `KpiDefinition`/`KpiObservation`); publish `journey.training.completed.v1`; finance calls `kernel.people.record_kpi`.** Journey never writes `core.kpi_observation` | One writer for KPI observations; finance owns ROI | If a kernel KPI API exists, call it; the event remains the contract | Finance + Oussema |
 | 9 | Level scale | **1–4:** 1 awareness, 2 guided, 3 independent, 4 leads/teaches. **Unknown is not 0** | Matches `journey.md`; "no evidence" must not look like a low score | If core uses 0–5, convert at the adapter boundary and document the mapping; never mix scales in one table | All |
-| 10 | Check-in notification channel | **In-app is primary (R1). Email is optional (R2).** One approval covers a **series** payload (template hash + dates + recipient); any change voids it | No executor dependency for the core loop; the human approves the content once; nothing is sent silently | If the executor cannot bind a series, one per-send approval and one demo email; in-app stays the default | Oussema |
+| 10 | Check-in notification channel | **In-app is the portal/check-in row (no send). Email is optional R2 via the executor's `email.send` adapter.** One approval covers a **series** payload (template hash + dates + recipient); any change voids it. The pack imports no mail code | No executor dependency for the core loop; the human approves the content once; nothing is sent silently | If the executor cannot bind a series, one per-send approval and one demo email; in-app stays the default | Oussema |
 | 11 | `core.skill_relation` directed prerequisite? | **No assumption.** Order courses by `level_gained -> hours -> cost_tnd`. Use `skill_relation` only for related-skill hints | The repo has related pairs, not a prerequisite DAG; inventing one is a correctness bug | If the kernel adds `relation_type='prereq'` and `strength`, enable ordering behind a flag; no schema change on our side | Oussema |
-| 12 | `platform-v0` timing | **Do not block.** H0–H2 is seed + scenarios + skeleton against `_example`. If the tag slips past H3, escalate and cut Tier 2. Never create a parallel kernel | Seed and deterministic services are the only unblocked work; the kernel is the one spine | If H3 passes with no scaffold, keep writing seed + services + tests against the documented contracts; integrate when the tag lands | Oussema |
+| 12 | `platform-v0` timing | **P3 is not tagged; `_example` and the four stub packs are not in the repo yet.** H0–H2 is seed + scenarios + deterministic services/tests against this document. Do not create a competing pack scaffold; copy `_example` when it lands. If the tag slips past H3, escalate and cut Tier 2. Never create a parallel kernel | Seed and deterministic services are the only unblocked work; the kernel is the one spine | If H3 passes with no scaffold, keep writing seed + services + tests against the documented contracts; integrate when the tag lands | Oussema |
 
 ### 19.1 Additional implementation decisions
 
@@ -745,11 +862,11 @@ These were the 12 open questions in v2.0. Each is now decided. If a fallback is 
 |---|---|---|
 | A1 | **Working calendar:** Monday–Friday + a seeded Tunisian holiday list; no dependency on `kernel.calendar` for due dates | The calendar module is for booking; onboarding dates need a simple deterministic function |
 | A2 | **Evidence review:** the manager verifies role milestones, HR verifies admin tasks, HR can override; verification is R2 | "Completed" needs a human for the milestones that matter; audit trail |
-| A3 | **Notifications:** in-app first; email only through `executor` under R2 | No external dependency for the demo; no direct send |
+| A3 | **Notifications:** in-app is a journey row; email only through the executor's `email.send` adapter under R2 | No external dependency for the demo; no direct send |
 | A4 | **No R3 action.** The dossier is an export (R0). Probation outcomes are not built | The golden rule: the agent assembles, the human decides |
 | A5 | **PII:** journey stores employee IDs and evidence references only; no names, emails, salaries or national IDs | `core` owns people; keeps RLS and retention simple |
 | A6 | **Retention:** 12 months default, configurable; purge/anonymise is a P2 job | GDPR/INPDP hygiene; documented, not silently ignored |
-| A7 | **Seed ownership:** workforce owns `employees.csv`; journey owns `seed/journey/*`; `EMP-041` reserved for the hero; `CRS-K8S-01` is journey's | Prevents duplicate people and courses across packs |
+| A7 | **Seed ownership:** workforce owns `employees.csv`; journey owns `seed/journey/*`; `EMP-041` reserved for the hero; `CRS-K8S-01` is journey's. P3 adds `astra.py seed`; until then, commit the files and load them from the pack seed script | Prevents duplicate people and courses across packs |
 | A8 | **Late UI card:** if the shared approval card cannot diff by H4, journey ships a read-only diff in its own module | Protects the demo without forking the design system |
 | A9 | **Missing `hired_gaps`:** re-derive and label the source; confidence `<= 0.5` | Honest confidence; never invent a level |
 | A10 | **Late jobs:** manual "run due check-ins" admin action; timers marked `preview` | No second scheduler, no silent fallback |
@@ -764,12 +881,12 @@ Nominal 15.0 h. `P0` is the spine; `P1` is a Tier 2 differentiator that is cheap
 
 | ID | Task | Priority | Hours | Depends on | Done when |
 |---|---|---|---|---|---|
-| W0.1 | Read `_example`, contracts, ARCHITECTURE, DEMO_WORLD | P0 | 0.25 | — | Notes on the actual kernel signatures |
+| W0.1 | Read the kernel contracts, ARCHITECTURE, DEMO_WORLD; note that `_example` arrives in P3 | P0 | 0.25 | — | Notes on the actual signatures; no invented kernel call |
 | W0.2 | `onboarding_templates.json` for POS-BE and POS-AE (15+ tasks, preboarding, first-win, manager prep) | P0 | 0.5 | W0.1 | Template loads; every task has owner + due day + evidence |
 | W0.3 | `skill_requirements.csv`, `employee_skills.csv`, `courses.csv` (incl. `CRS-K8S-01`) | P0 | 0.75 | W0.1 | Hero gaps and the mentor holder exist |
 | W0.4 | `pulse_survey.json`, `plans.json`, `scenarios.md` | P0 | 0.5 | W0.2–W0.3 | 8 journeys; scenarios reviewed |
-| W1.1 | Pack skeleton from `_example`; `manifest.yaml`; models; migration | P0 | 1.0 | `platform-v0` | `python astra.py check` green; migration applies |
-| W1.2 | Kernel adapter (`trust`, `explain`, `events`, `jobs`) + contract test | P0 | 0.5 | W1.1 | One adapter; no direct kernel calls elsewhere |
+| W1.1 | Pack skeleton from `_example`; `manifest.yaml` (`api: journey.api:router`, `models: journey.models`, actions with channel/handler/roles); models; `python astra.py makemigration journey "journey tables"`; RLS policies | P0 | 1.0 | `platform-v0` | `python astra.py check` green; migration applies; `test_architecture` RLS passes |
+| W1.2 | Kernel adapter (`trust.propose`, `explain.record`, events, `get_job_app`) + contract test | P0 | 0.5 | W1.1 | One adapter; no direct kernel calls elsewhere |
 | W2.1 | Plan generator: template -> tasks, working-day due dates, evidence | P0 | 0.75 | W1.1 | Hand-checked dates; 15+ tasks |
 | W2.2 | Onboarding Planner agent + prompt + DecisionRecord | P0 | 0.75 | W2.1 | Proposal created; record has coverage factors |
 | W2.3 | Plan proposal -> approval -> activation -> tasks + buddy | P0 | 0.75 | W1.2, W2.2 | Browser: approve -> tasks + `EMP-009`; edit voids hash |
@@ -778,7 +895,7 @@ Nominal 15.0 h. `P0` is the spine; `P1` is a Tier 2 differentiator that is cheap
 | W3.3 | Task completion + manager verification | P0 | 0.5 | W3.2 | Verify is R2; audit row written |
 | W4.1 | Check-ins + structured pulse (in-app) | P0 | 0.75 | W2.3 | D7/30/60/90; answers stored; no sentiment field |
 | W4.2 | Attention flags + notification proposal + doc-feedback flag kind | P0 | 0.5 | W4.1 | Flag has facts + reason; notify is R2; doc feedback stored |
-| W4.3 | Jobs/manual trigger + idempotency | P0 | 0.5 | W1.2 | Timer fires once; duplicate event -> one plan |
+| W4.3 | Procrastinate tasks (`journey.checkin.due`, `journey.attention.sweep`) + manual trigger + idempotency | P0 | 0.5 | W1.2 | Timer fires once; duplicate event -> one plan; no second scheduler |
 | W5.1 | Gap service: severity, confidence, evidence, "No evidence found" | P0 | 0.75 | W0.3 | Hand-checked math; no negative inference |
 | W5.2 | Gap proposal + human confirm + DecisionRecord | P0 | 0.5 | W5.1 | Confirm is R2; event published |
 | W5.3 | Team gap heatmap (aggregate, `k >= 5`, suppress small cells) | P1 | 0.5 | W5.1 | 9-of-14 cell; `n<5` hidden |
@@ -786,7 +903,7 @@ Nominal 15.0 h. `P0` is the spine; `P1` is a Tier 2 differentiator that is cheap
 | W6.2 | Assign -> enroll -> complete -> verify -> level proposal | P0 | 0.5 | W6.1 | Level changes only after human confirm; event |
 | W7.1 | Impact measure + cost per closed gap + caveat | P0 | 0.5 | W6.2 | Decimal math; comparison warning at n<5 |
 | W7.2 | Dossier export + D90 completion event | P0 | 0.5 | W3.2, W7.1 | Dossier has evidence + missing items; event has verified skills |
-| W8.1 | Evals: injection, gap math, no-sentiment, idempotency, heatmap suppression | P0 | 0.5 | W5–W7 | `python astra.py evals` reports; red-team green |
+| W8.1 | Evals: injection, gap math, no-sentiment, idempotency, heatmap suppression, RLS | P0 | 0.5 | W5–W7 | `python astra.py check` green (ruff + pytest); red-team cases pass |
 | W8.2 | UI polish: FR/EN copy, accessibility, states | P1 | 0.5 | W3–W7 | Text + colour; keyboard; no new dep |
 | W8.3 | README section + demo rehearsal + backup recording | P0 | 0.5 | all | 5-minute run under 5:00; offline replay |
 | **Total** | | | **15.0** | | |
@@ -812,9 +929,10 @@ Nominal 15.0 h. `P0` is the spine; `P1` is a Tier 2 differentiator that is cheap
 | 11 | No R3 action; dossier is an export, not a decision | Golden rule |
 | 12 | `CRS-K8S-01` is the demo recommendation; `KPI-MTTR` the hypothesis | Hero story |
 | 13 | In-app check-ins primary; email optional R2 series | No executor dependency for the core loop |
-| 14 | Route prefix `/api/journey`; pages `/journey` | No collision with the web route |
+| 14 | Pack router `/packs/journey`; public `/api/packs/journey`; page `/journey` | Matches `registry.mount_pack_routers` and Caddy's prefix strip |
 | 15 | Team heatmap is read-only and suppresses `n < 5` | The Horizon story without campaign tables or individual ranking |
 | 16 | Cut order fixed before coding | Protect the demo |
+| 17 | P1 infra + P2 kernel are on main; P3 `_example`/stubs are next | The branch now has the platform; the pack scaffold comes from `_example` |
 
 ---
 
@@ -882,6 +1000,10 @@ This is kept at the end on purpose. It is the list of places where the journey p
 | **C16** | Working-day calendar / holidays | No holiday service is specified | Due dates land on weekends or Tunisian holidays | Deterministic Mon–Fri + a seeded Tunisian holiday list in journey. No dependency on `kernel.calendar` for due dates | Wassim |
 | **C17** | Hire event arrives after the start date | Talent may emit at offer or at day 0 | Preboarding tasks are already overdue | Anchor the plan at `start_date`; mark past preboarding tasks `skipped`; no retroactive emails; notify HR. Never backdate a send | Oussema + Wassim |
 | **C18** | i18n dependency | FR/EN/some Arabic; no i18n library is specified | `package.json` adds `next-intl` or similar | Static copy dictionaries in the journey module; no new dependency without approval. Arabic is P2 | Workforce + Oussema |
+| **C19** | Event consumers are not registered in the worker | `@subscribe` registers only when its module is imported; the worker imports agent entries, not every pack module | An event is routed but the delivery dead-letters with "consumer not registered" | Import `journey.events` from the agent entry (or `journey/__init__.py`) so the worker sees it; follow `_example`. Never build a second relay. Escalate if there is no import hook | Oussema + Wassim |
+| **C20** | The `kernel.people` read surface is narrow | Journey needs employee, position, skill and evidence reads; `people` exports models plus a few functions, not a generic query API | A pack imports `kernel.people.models` directly or copies people data into `journey` | Use the exported models/functions the `_example` uses; request a read contract for anything missing; **never duplicate people records**. Owner: Oussema | Oussema + Wassim |
+| **C21** | Action catalogue / policy version drift | An R2 action without channel/roles/handler fails `ActionSpec`; changing a manifest changes the policy hash and re-evaluates pending approvals | Pack loads `unavailable`; `propose` raises `undeclared_action`; a pending approval stops matching | Declare every R2 field; keep action ids stable; run migrate after a manifest change; re-approve after a policy change | Wassim + Oussema |
+| **C22** | Payload hash looks weaker than it is | `trust.propose` hashes only `payload`; `summary`/`target` are metadata | The UI changes a recipient or task without voiding the approval | **All executable content goes in `payload`** (recipient, subject, body, task diff, course id); test that editing it voids; summary/target are display only | Wassim |
 
 **Two more that are not conflicts, but must be said out loud:**
 

@@ -1,6 +1,6 @@
 # Why this scope — `journey` (Wassim)
 
-**The what is `docs/handoff/journey-design.md` v3.0. This file is the why.** The scope is frozen; there are no open questions. If you need the schema, events, routes, hours or conflict rules, read the v3 doc. If you want the argument in five minutes, read this.
+**The what is `docs/handoff/journey-design.md` v3.1. This file is the why.** The scope is frozen; there are no open questions. The branch is synced with `main`'s P1 infra + P2 kernel; P3 `_example` and the stub packs are next. If you need the schema, events, routes, hours or conflict rules, read the v3 doc. If you want the argument in five minutes, read this.
 
 **My one sentence:** I own the `journey` pack — onboarding, follow-up, skill gaps and training tied to KPIs — inside the AstraRH kernel. I do not own a second RAG, a second approval service, a second mailer or a second scheduler.
 
@@ -87,7 +87,7 @@ None of them changes a frozen table, event or folder. All of them are inside `pa
 The 12 questions from v2 are decided in §19 of the v3 doc, with a fallback for each. The three that matter most:
 
 1. **`candidate.hired` must carry `employee_id` and `hired_gaps[]`; `CAND-001 -> EMP-041`.** If the event has no gaps, we re-derive from `core` evidence with confidence `<= 0.5` and label the source.
-2. **API is `/api/journey`, pages are `/journey`.** One adapter module `services/kernel.py`; copy `_example`; never fork trust/explain.
+2. **API is `/api/packs/journey`, pages are `/journey`.** The pack router is mounted at `/packs/journey`; Caddy strips `/api`. One adapter module `services/kernel.py`; never fork trust/explain.
 3. **Kernel jobs only for D7/30/60/90.** If timers are late, a manual "run due check-ins" action keeps the demo; timers go `preview`. No second scheduler.
 
 The rest: in-app check-ins primary, email optional R2 series; levels 1–4; no prerequisite DAG; KPI read + event, no direct write; columns pack-owned, no new tables; Horizon campaigns cut, heatmap ships.
