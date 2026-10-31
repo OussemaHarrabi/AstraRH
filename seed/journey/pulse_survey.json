@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "note": "Structured self-report only. No sentiment inference. Free text is stored for a human to read.",
+  "scale": {
+    "min": 1,
+    "max": 5,
+    "labels": ["1 - not yet", "2 - partially", "3 - mostly", "4 - yes", "5 - fully"]
+  },
+  "surveys": [
+    {
+      "kind": "day7",
+      "questions": [
+        {"id": "role_clarity", "type": "scale", "text": "I know what my role is expected to deliver in the first 30 days."},
+        {"id": "access_ready", "type": "scale", "text": "I have the accounts and tools I need to do my work."},
+        {"id": "buddy_contact", "type": "scale", "text": "I know who my buddy is and how to reach them."},
+        {"id": "first_week_tasks", "type": "scale", "text": "I know which tasks are due this week."},
+        {"id": "blockers_text", "type": "text", "required": false, "text": "What is blocking you right now?"}
+      ]
+    },
+    {
+      "kind": "day30",
+      "questions": [
+        {"id": "role_clarity", "type": "scale", "text": "I know what my role is expected to deliver by day 60."},
+        {"id": "first_contribution", "type": "scale", "text": "I have completed a first contribution with evidence."},
+        {"id": "manager_feedback", "type": "scale", "text": "I have received specific feedback from my manager."},
+        {"id": "team_context", "type": "scale", "text": "I know who to ask for each part of my work."},
+        {"id": "blockers_text", "type": "text", "required": false, "text": "What is blocking you right now?"}
+      ]
+    },
+    {
+      "kind": "day60",
+      "questions": [
+        {"id": "independent_work", "type": "scale", "text": "I can complete my core tasks without step-by-step help."},
+        {"id": "wider_context", "type": "scale", "text": "I understand how my work affects other teams."},
+        {"id": "learning_progress", "type": "scale", "text": "I have made progress on the gaps in my role profile."},
+        {"id": "manager_support", "type": "scale", "text": "I have a useful 1:1 cadence with my manager."},
+        {"id": "blockers_text", "type": "text", "required": false, "text": "What is blocking you right now?"}
+      ]
+    },
+    {
+      "kind": "day90",
+      "questions": [
+        {"id": "role_readiness", "type": "scale", "text": "I have what I need to do my role independently."},
+        {"id": "contribution", "type": "scale", "text": "I have delivered work that the team uses."},
+        {"id": "training_application", "type": "scale", "text": "I have applied at least one thing from my training at work."},
+        {"id": "team_integration", "type": "scale", "text": "I know who to ask and how decisions are made."},
+        {"id": "blockers_text", "type": "text", "required": false, "text": "What is blocking you right now?"}
+      ]
+    }
+  ]
+}
