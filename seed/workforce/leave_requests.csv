@@ -1,0 +1,31 @@
+leave_request_id,employee_id,leave_type_id,start_date,end_date,status,note
+LR-001,EMP-010,LT-VAC,2026-11-16,2026-11-20,requested,Family trip
+LR-002,EMP-011,LT-VAC,2026-11-18,2026-11-24,requested,Vacation
+LR-003,EMP-012,LT-VAC,2026-12-01,2026-12-05,requested,Holiday week
+LR-004,EMP-013,LT-VAC,2026-12-02,2026-12-08,requested,Travel
+LR-005,EMP-009,LT-PERS,2026-11-03,2026-11-03,approved,Personal appointment
+LR-006,EMP-014,LT-SICK,2026-10-20,2026-10-22,approved,Flu
+LR-007,EMP-015,LT-VAC,2026-11-26,2026-11-30,requested,Short break
+LR-008,EMP-016,LT-VAC,2026-12-15,2026-12-19,requested,Year-end leave
+LR-009,EMP-017,LT-PERS,2026-11-10,2026-11-10,approved,Family matter
+LR-010,EMP-018,LT-VAC,2026-11-09,2026-11-13,approved,Vacation
+LR-011,EMP-019,LT-SICK,2026-10-27,2026-10-28,approved,Migraine
+LR-012,EMP-020,LT-VAC,2026-12-21,2026-12-31,requested,End of year
+LR-013,EMP-021,LT-PERS,2026-11-17,2026-11-17,approved,Appointment
+LR-014,EMP-022,LT-VAC,2026-11-02,2026-11-06,approved,Vacation
+LR-015,EMP-023,LT-VAC,2026-11-23,2026-11-27,requested,Trip
+LR-016,EMP-024,LT-SICK,2026-10-19,2026-10-21,approved,Cold
+LR-017,EMP-025,LT-VAC,2026-12-07,2026-12-11,requested,Holiday
+LR-018,EMP-026,LT-PERS,2026-11-12,2026-11-12,approved,Personal day
+LR-019,EMP-027,LT-VAC,2026-11-16,2026-11-20,approved,Vacation
+LR-020,EMP-028,LT-VAC,2026-12-14,2026-12-18,requested,Travel
+LR-021,EMP-029,LT-SICK,2026-10-26,2026-10-27,approved,Fever
+LR-022,EMP-030,LT-PERS,2026-11-05,2026-11-05,approved,Appointment
+LR-023,EMP-031,LT-VAC,2026-11-30,2026-12-04,requested,Break
+LR-024,EMP-032,LT-VAC,2026-12-22,2026-12-26,requested,Holidays
+LR-025,EMP-034,LT-VAC,2026-11-09,2026-11-13,approved,Vacation
+LR-026,EMP-035,LT-SICK,2026-10-29,2026-10-30,approved,Cold
+LR-027,EMP-036,LT-VAC,2026-11-23,2026-11-27,requested,Trip
+LR-028,EMP-037,LT-PERS,2026-11-19,2026-11-19,approved,Personal day
+LR-029,EMP-038,LT-VAC,2026-12-07,2026-12-11,requested,Holiday
+LR-030,EMP-039,LT-VAC,2026-12-21,2026-12-24,requested,Year-end

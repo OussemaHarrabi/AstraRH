@@ -1,0 +1,43 @@
+{
+  "_comment": "Fictional, non-graphic workplace cases for Carthage Demo Systems. All names map to seed/workforce/employees.csv. Cases are confidential: visible only to parties and the assigned mediator. Cases never enter the graph database.",
+  "cases": [
+    {
+      "case_id": "CASE-001",
+      "org_unit_id": "ORG-ENG",
+      "type": "workload",
+      "status": "opened",
+      "opened_by": "EMP-013",
+      "parties": ["EMP-013", "EMP-012"],
+      "mediator": "EMP-006",
+      "visible_to": ["EMP-013", "EMP-012", "EMP-006"],
+      "opened_at": "2026-10-28",
+      "intake_text": "I feel the backend tickets are not shared fairly on our squad. For the last three sprints most of the on-call and urgent fixes have landed on me while similar work gets reassigned away from a colleague. I have raised it in stand-up but nothing changed. I would like a neutral review of how tickets are distributed before the next sprint planning."
+    },
+    {
+      "case_id": "CASE-002",
+      "org_unit_id": "ORG-PRD",
+      "type": "communication",
+      "status": "in_mediation",
+      "opened_by": "EMP-019",
+      "parties": ["EMP-019", "EMP-018"],
+      "mediator": "EMP-006",
+      "visible_to": ["EMP-019", "EMP-018", "EMP-006"],
+      "opened_at": "2026-10-20",
+      "intake_text": "Design feedback is reaching me very late in the cycle and often rewrites decisions we already agreed on. It makes planning hard and I end up redoing finished work. I am not questioning anyone's intentions, I just think we need a clearer feedback step and deadlines so we both know when input is final."
+    },
+    {
+      "case_id": "CASE-003",
+      "org_unit_id": "ORG-OPS",
+      "type": "scheduling",
+      "status": "resolved",
+      "opened_by": "EMP-031",
+      "parties": ["EMP-031", "EMP-005"],
+      "mediator": "EMP-034",
+      "visible_to": ["EMP-031", "EMP-005", "EMP-034"],
+      "opened_at": "2026-09-30",
+      "resolved_at": "2026-10-09",
+      "intake_text": "I keep getting the late evening support shifts far more often than the rest of the team, including two weekends in a row. I understand coverage is hard, but I would like the rotation to be reviewed so it is more even across everyone.",
+      "resolution": "A rotation review was run with the full Support team. The evening and weekend slots were rebalanced using a fixed rotation and shared with everyone. Both parties agreed to revisit in one month."
+    }
+  ]
+}

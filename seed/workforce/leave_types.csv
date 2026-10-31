@@ -1,0 +1,4 @@
+leave_type_id,code,name,needs_coverage
+LT-VAC,vacation,Vacation,true
+LT-SICK,sick,Sick leave,true
+LT-PERS,personal,Personal day,false
