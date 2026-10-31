@@ -359,9 +359,18 @@ def list_recommendations(
 def list_impact(request: Request) -> list[dict[str, Any]]:
     with request_context(request) as ctx:
         require_role(ctx.actor, PEOPLE_ROLES)
-        rows = ctx.session.scalars(
-            select(ImpactMeasure).order_by(ImpactMeasure.measured_at.desc())
-        ).all()
+        statement = (
+            select(ImpactMeasure)
+            .join(
+                TrainingRecommendation,
+                ImpactMeasure.recommendation_id == TrainingRecommendation.id,
+            )
+            .order_by(ImpactMeasure.measured_at.desc())
+        )
+        visible = _visible_employee_ids(ctx.session, ctx.actor)
+        if visible is not None:
+            statement = statement.where(TrainingRecommendation.employee_id.in_(visible))
+        rows = ctx.session.scalars(statement).all()
         return [_impact_json(item) for item in rows]
 
 
