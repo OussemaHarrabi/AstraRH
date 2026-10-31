@@ -8,6 +8,7 @@
 
 - **Current phase:** P0 complete and committed. Waiting for Oussema's go for P1.
 - **Exact next action:** on Oussema's go, start **P1 Infra**: create `ops/compose.yaml` (web, api, worker, executor, ml, postgres + pgvector, neo4j, minio, mailpit, otel-lgtm, caddy), separate Docker networks with `ml` on an `internal` network, per-process Postgres roles in `ops/postgres/`, `.env.example` with no values, and the `astra.py` task runner. Done when `python astra.py up` is healthy and a test trace reaches Grafana.
+- **Before P1:** Docker Desktop must be running. It was stopped at the end of P0.
 - **Working style Oussema asked for:** one phase at a time. At the end of each phase, report what was verified and **exactly what to send the team**, then wait for go. Keep this file detailed.
 
 ## Phase status
@@ -48,6 +49,7 @@ Plan decisions are in `docs/PLAN.md` §2. Changes and additions since approval:
 
 **Done**
 - `git init` on `main`, `.gitignore` covering secrets and generated files.
+- `.gitattributes`: LF everywhere for Linux containers, and PDFs and images marked binary. Added after Git's line-ending warning flagged the brief PDF as text, which could have corrupted it on checkout.
 - Moved the brief to `docs/brief/` and the research to `docs/research/`; removed the empty old folders.
 - Wrote `docs/PLAN.md`, `docs/ARCHITECTURE.md`.
 - Wrote team material in `docs/handoff/`: `00-SEND-NOW.md`, `DEMO_WORLD.md`, `journey.md`, `finance.md`, `workforce.md`.
