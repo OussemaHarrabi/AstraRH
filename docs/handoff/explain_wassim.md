@@ -120,13 +120,13 @@ Then the dossier: **"Day 90: 14 of 15 milestones with evidence; 1 missing"** —
 |---|---|
 | H0–H1 | `seed/journey/` complete; read kernel contracts |
 | H1–H2 | pack skeleton from `_example`; manifest; models; migration; seed |
-| H2–H4 | hire -> plan proposal -> approval -> tasks + buddy |
-| H4–H6 | portal + plan detail + evidence |
-| H6–H8 | check-ins + pulse + flags + timers |
-| H8–H9 | gaps + training + enrollment + verification |
-| H9–H10 | **integration gate:** real event, trust/executor/audit, knowledge |
-| H10–H11 | impact + D90 event + dossier |
-| H11–H12 | heatmap + WhyPanel/evidence drawer + doc feedback + evals |
+| H2–H4 | plan backend: hire -> proposal -> approval (API + shared card) |
+| H4–H6 | evidence + check-ins + flags backend |
+| H6–H8 | gaps + training + verification backend |
+| H8–H9 | impact + dossier + heatmap backend |
+| H9–H10 | **integration gate:** real event, trust/executor/audit, API-level end to end |
+| H10–H11 | **frontend last:** portal, plan detail, gaps, training, dossier, heatmap |
+| H11–H12 | UI polish + WhyPanel/evidence drawer + doc feedback + evals + proof |
 | H12 | freeze; record backup |
 | H12–H15 | proof pack (failure drills, audit verify), demo blockers, README, rehearsal, buffer |
 

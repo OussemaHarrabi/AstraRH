@@ -802,20 +802,22 @@ Rules: Server Components by default; `"use client"` only for interactive islands
 |---|---|---|
 | **H0–H1** | `seed/journey/*` complete; read kernel contracts and `_example` | hero data loads; `scenarios.md` reviewed |
 | **H1–H2** | pack skeleton from `_example`; manifest; models; migration; seed loader | `python astra.py check` green; migration applies |
-| **H2–H4** | J1/J2: hire -> plan proposal -> approval -> tasks + buddy | browser: proposal in approval inbox; approval creates tasks |
-| **H4–H6** | J3/J4: portal + plan detail + evidence + verification | new hire sees today's 3 things; evidence recorded |
-| **H6–H8** | J5/J6/J12: check-ins, pulse, flags, attention, timers | D7 check-in submits; flag shows facts; timer fires once |
-| **H8–H9** | J7/J8/J9: gaps, training, enrollment, verification | gap evidence -> approve -> enroll -> verify -> level proposal |
-| **H9–H10** | **integration gate:** real `candidate.hired`, trust/executor/audit, knowledge context | one browser run from hire to training, no stubs |
-| **H10–H11** | J10/J11: impact, D90 event, dossier | before/after + caveat; dossier export; event published |
-| **H11–H12** | D3/D4/D6: team heatmap, WhyPanel/evidence drawer, doc feedback; evals | heatmap suppresses `n<5`; red-team green; no-sentiment grep |
+| **H2–H4** | J1/J2 **backend**: hire -> plan proposal -> approval -> tasks + buddy; API + tests | API returns the proposal; the shared approval card creates tasks; tests green |
+| **H4–H6** | J4/J5/J6 **backend**: evidence, check-ins, pulse, flags, timers; API + tests | check-in submits; flag shows facts; timer fires once; no journey screen yet |
+| **H6–H8** | J7/J8/J9 **backend**: gaps, training, enrollment, verification; API + tests | gap evidence -> approve -> enroll -> verify -> level proposal; tests green |
+| **H8–H9** | J10/J11/J12/D1/D3 **backend**: impact, D90 event, attention, dossier, heatmap aggregate; API + tests | before/after + caveat; dossier export; `n<5` suppressed |
+| **H9–H10** | **integration gate:** real `candidate.hired`, trust/executor/audit, knowledge context; API + shared shell | one end-to-end run from hire to training, no stubs; audit verify |
+| **H10–H11** | **frontend last:** J3 portal, plan detail, gaps, training, dossier, heatmap screens | the screens read the APIs built above; no new backend |
+| **H11–H12** | D4/D6 UI polish + WhyPanel/evidence drawer + doc feedback; evals + proof pack | red-team green; no-sentiment grep; proof moments rehearsed |
 | **H12** | **freeze**; unfinished -> `preview`; record backup video | demo reproducible offline |
 | **H12–H14** | fix demo blockers only; README section; rehearse | 5-minute run under 5:00 |
 | **H14–H15** | buffer | — |
 
-**Cut order:** D5 manager briefing -> D8 accessibility -> D1 dossier polish -> D6 doc feedback -> D2 first-win variants -> D3 heatmap -> J10 impact. **Never cut:** J1/J2/J7/J8, approval/audit, no-sentiment, seed, offline demo.
+**UI-last rule:** no journey screen before H10. Until then, verify through the API, the shared approval card and tests. The only UI touched earlier is the shared shell/components owned by workforce. This is deliberate: the judges score security, system design and reliability, not screen count.
 
-**Dependencies on Oussema:** `trust`/`explain` (H3), `people`/`events` (H2), `jobs` (H6), `knowledge` (H9), `executor` (H9), shared UI (H2–H4), `platform-v0` tag (H2).
+**Cut order:** D5 manager briefing -> D8 accessibility -> D1 dossier polish -> D6 doc feedback -> D2 first-win variants -> D3 heatmap UI -> J10 impact. **Never cut:** J1/J2/J7/J8, approval/audit, no-sentiment, seed, offline demo, the proof pack.
+
+**Dependencies on Oussema:** `trust`/`explain` (H3), `people`/`events` (H2), `jobs` (H6), `knowledge` (H9), `executor` (H9), shared UI (H10–H12), `platform-v0` tag (H2).
 
 **Proof budget:** 0.5 h of the H14–H15 buffer is reserved for the proof pack (W8.4): six failure drills, audit verify, demo script, backup recording. If we are behind, cut Tier 2 before this. The security/reliability proof is not a feature; it is the score.
 
@@ -963,7 +965,7 @@ Nominal 15.5 h: 15.0 h of build + 0.5 h of proof funded by the H14–H15 buffer.
 | W8.4 | **Proof pack:** six failure drills (injection, hash swap, cross-tenant, duplicate, audit tamper, fail-closed), audit verify, demo script, backup | P0 | 0.5 | W8.1 | all six fail safely; the three proof moments are rehearsed |
 | **Total** | | | **15.5** | | |
 
-**How to use it:** work top to bottom. If a task is blocked by the kernel, do the next task whose dependency is ready (W0.x, W2.1, W5.1 are unblocked early). **Reliability-first:** W5.1 (gap math + severity/confidence + tests) and W2.1 (plan dates) are pure Python and fully testable offline; if the kernel or UI is late, build and test them before the screens. The judge-facing proof is the test, not the screen. At H9, if W2.3/W6.2 are not green, the integration gate is at risk — cut Tier 2 and protect the spine. D5 manager briefing is the only Tier 2 item not scheduled; it is the first cut. If H10 is green, it is a 0.5 h add.
+**How to use it:** work top to bottom. If a task is blocked by the kernel, do the next task whose dependency is ready (W0.x, W2.1, W5.1 are unblocked early). **Reliability-first:** W5.1 (gap math + severity/confidence + tests) and W2.1 (plan dates) are pure Python and fully testable offline; if the kernel or UI is late, build and test them before the screens. The judge-facing proof is the test, not the screen. **Frontend last:** W3.1, W3.2 and the UI half of W5.3/W7.2 are scheduled after H10. Until then, verify through the API, the shared approval card and tests. Do not build journey screens early; the only UI touched earlier is the shared shell owned by workforce. At H9, if W2.3/W6.2 are not green, the integration gate is at risk — cut Tier 2 and protect the spine. D5 manager briefing is the only Tier 2 item not scheduled; it is the first cut. If H10 is green, it is a 0.5 h add.
 
 ---
 
