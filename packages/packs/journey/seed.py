@@ -344,11 +344,39 @@ def _plan_proposal(
         view_roles=["admin", "hr", "manager", "employee"],
     )
     record = explain.record(session, tenant_id, draft)
+    tasks = session.scalars(
+        select(OnboardingTask)
+        .where(OnboardingTask.plan_id == plan.id)
+        .order_by(OnboardingTask.position)
+    ).all()
+    buddy = session.scalar(
+        select(BuddyAssignment).where(BuddyAssignment.plan_id == plan.id)
+    )
+    payload = {
+        "plan_id": str(plan.id),
+        "tasks": [
+            {
+                "position": task.position,
+                "phase": task.phase,
+                "title": task.title,
+                "task_kind": task.task_kind,
+                "owner_role": task.owner_role,
+                "owner_employee_id": str(task.owner_employee_id)
+                if task.owner_employee_id
+                else None,
+                "due_at": task.due_at.isoformat(),
+                "mandatory": task.mandatory,
+                "evidence_required": task.evidence_required,
+            }
+            for task in tasks
+        ],
+        "buddy_id": str(buddy.buddy_employee_id) if buddy else None,
+    }
     trust.propose(
         session,
         tenant_id,
         "journey.plan.activate",
-        {"plan_id": str(plan.id)},
+        payload,
         f"Activate the onboarding plan for {employee.display_name}",
         record.id,
         key,

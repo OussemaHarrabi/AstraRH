@@ -4,6 +4,7 @@ The worker calls these only after the trust gate has passed. An external action
 (email) stays in the executor; these are the internal writes.
 """
 
+from datetime import datetime
 from decimal import Decimal
 from typing import Any
 from uuid import UUID
@@ -32,9 +33,46 @@ def activate_plan(session: Session, tenant_id: UUID, payload: dict[str, Any], ke
     plan = session.get(OnboardingPlan, UUID(str(payload["plan_id"])), with_for_update=True)
     if plan is None:
         raise ValueError("plan not found")
+    for item in payload.get("tasks", []):
+        position = int(item["position"])
+        task = session.scalar(
+            select(OnboardingTask).where(
+                OnboardingTask.plan_id == plan.id,
+                OnboardingTask.position == position,
+            )
+        )
+        if task is None:
+            task = OnboardingTask(
+                tenant_id=tenant_id,
+                plan_id=plan.id,
+                position=position,
+                status="pending",
+            )
+            session.add(task)
+        task.phase = str(item.get("phase", "week1"))
+        task.title = str(item.get("title", "Onboarding task"))
+        task.task_kind = str(item.get("task_kind", "standard"))
+        task.owner_role = str(item.get("owner_role", "employee"))
+        task.owner_employee_id = _uuid(item.get("owner_employee_id"))
+        if item.get("due_at"):
+            task.due_at = datetime.fromisoformat(str(item["due_at"]))
+        task.mandatory = bool(item.get("mandatory", False))
+        task.evidence_required = str(item.get("evidence_required", "Evidence"))
+    buddy_id = _uuid(payload.get("buddy_id"))
+    if buddy_id is not None:
+        buddy = session.scalar(
+            select(BuddyAssignment).where(BuddyAssignment.plan_id == plan.id)
+        )
+        if buddy is None:
+            buddy = BuddyAssignment(tenant_id=tenant_id, plan_id=plan.id)
+            session.add(buddy)
+        buddy.buddy_employee_id = buddy_id
+        buddy.cadence = str(payload.get("buddy_cadence", "weekly"))
+        buddy.approval_id = _uuid(payload.get("approval_id"))
     plan.status = "in_progress"
     plan.phase = payload.get("phase", plan.phase)
     plan.approval_id = _uuid(payload.get("approval_id"))
+    session.flush()
     publish(
         session,
         tenant_id,
@@ -167,3 +205,4 @@ def verify_training(
         ),
     )
     return f"training_verified:{enrollment.id}"
+

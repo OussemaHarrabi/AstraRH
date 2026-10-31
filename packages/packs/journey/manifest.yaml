@@ -87,6 +87,12 @@ actions:
     risk: R0
     description: Assemble the Day-90 review pack. It never records a decision.
 
+agents:
+  - id: onboarding_planner
+    events: [talent.candidate.hired.v1]
+    entry: packs.journey.agents.onboarding_planner:run
+    description: Drafts a 30/60/90 plan from the role template and the hire's screening gaps.
+
 publishes:
   - journey.plan.activated.v1
   - journey.checkin.due.v1
