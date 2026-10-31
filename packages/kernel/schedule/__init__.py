@@ -1,4 +1,4 @@
-"""Calendars: real free slots, and booking with no double booking possible.
+"""Calendars: real free slots, holds on offered slots, and booking with no double booking possible.
 
 Slots are found by arithmetic on calendar data. No model is involved, so a slot can't be invented.
 """
@@ -9,15 +9,26 @@ from typing import Any
 from uuid import UUID
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from kernel.db import utcnow
-from kernel.schedule.models import Booking, BookingSeat, BusyBlock
+from kernel.schedule.models import Booking, BookingSeat, BusyBlock, Hold
 from kernel.trust import AdapterRejected
 
-__all__ = ["Booking", "BookingSeat", "BusyBlock", "Slot", "book", "find_slots", "free_slots"]
+__all__ = [
+    "Booking",
+    "BookingSeat",
+    "BusyBlock",
+    "Hold",
+    "Slot",
+    "book",
+    "find_slots",
+    "free_slots",
+    "hold",
+    "release",
+]
 
 TIMEZONE = ZoneInfo("Africa/Tunis")
 WORK_START = time(9, 0)
@@ -26,6 +37,8 @@ SLOT_STEP = timedelta(minutes=30)
 DEFAULT_DURATION = timedelta(minutes=45)
 SEARCH_DAYS = 14
 MINIMUM_NOTICE = timedelta(hours=24)
+# Long enough for a candidate to answer, short enough that a silent one doesn't block a calendar.
+HOLD_TTL = timedelta(hours=72)
 
 
 @dataclass(frozen=True)
@@ -65,7 +78,10 @@ def free_slots(
     return found
 
 
-def _busy_for(session: Session, participants: list[str]) -> list[tuple[datetime, datetime]]:
+def _busy_for(
+    session: Session, participants: list[str], ignore_owner: str | None = None
+) -> list[tuple[datetime, datetime]]:
+    """Busy time, bookings, and live holds. A holder's own holds don't block its own booking."""
     blocks = session.execute(
         select(BusyBlock.starts_at, BusyBlock.ends_at).where(
             BusyBlock.participant.in_(participants)
@@ -76,13 +92,53 @@ def _busy_for(session: Session, participants: list[str]) -> list[tuple[datetime,
             BookingSeat.participant.in_(participants)
         )
     ).all()
-    return [(row[0], row[1]) for row in [*blocks, *seats]]
+    holds_query = select(Hold.starts_at, Hold.ends_at).where(
+        Hold.participant.in_(participants), Hold.expires_at > utcnow()
+    )
+    if ignore_owner:
+        holds_query = holds_query.where(Hold.owner != ignore_owner)
+    holds = session.execute(holds_query).all()
+    return [(row[0], row[1]) for row in [*blocks, *seats, *holds]]
 
 
 def find_slots(
-    session: Session, participants: list[str], duration: timedelta = DEFAULT_DURATION
+    session: Session,
+    participants: list[str],
+    duration: timedelta = DEFAULT_DURATION,
+    ignore_owner: str | None = None,
 ) -> list[Slot]:
-    return free_slots(_busy_for(session, participants), utcnow(), duration)
+    return free_slots(_busy_for(session, participants, ignore_owner), utcnow(), duration)
+
+
+def hold(
+    session: Session,
+    tenant_id: UUID,
+    participants: list[str],
+    slots: list[Slot],
+    owner: str,
+    ttl: timedelta = HOLD_TTL,
+) -> datetime:
+    """Keep offered slots from being offered to someone else. Replaces the owner's older holds."""
+    release(session, owner)
+    expires_at = utcnow() + ttl
+    for slot in slots:
+        for participant in participants:
+            session.add(
+                Hold(
+                    tenant_id=tenant_id,
+                    owner=owner,
+                    participant=participant,
+                    starts_at=slot.starts_at,
+                    ends_at=slot.ends_at,
+                    expires_at=expires_at,
+                )
+            )
+    session.flush()
+    return expires_at
+
+
+def release(session: Session, owner: str) -> int:
+    return session.execute(delete(Hold).where(Hold.owner == owner)).rowcount
 
 
 def book(
@@ -93,9 +149,10 @@ def book(
     ends_at: datetime,
     title: str,
     ref: dict[str, Any] | None = None,
+    owner: str | None = None,
 ) -> Booking:
     """Re-checks at the last moment, because calendars change after slots are proposed."""
-    for busy_start, busy_end in _busy_for(session, participants):
+    for busy_start, busy_end in _busy_for(session, participants, ignore_owner=owner):
         if starts_at < busy_end and busy_start < ends_at:
             raise AdapterRejected("This slot is no longer free. Propose new slots.")
     booking = Booking(
@@ -117,4 +174,6 @@ def book(
         session.flush()
     except IntegrityError as exc:
         raise AdapterRejected("Someone booked this slot at the same moment.") from exc
+    if owner:
+        release(session, owner)
     return booking

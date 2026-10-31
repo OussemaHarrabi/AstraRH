@@ -21,7 +21,7 @@ from kernel.db import tenant_session, utcnow
 from kernel.knowledge.agents import Cited, PolicyAnswer, check_answer
 from kernel.knowledge.agents import build as build_policy
 from kernel.knowledge.models import Question, Ticket
-from kernel.schedule.models import Booking, BookingSeat, BusyBlock
+from kernel.schedule.models import Booking, BookingSeat, BusyBlock, Hold
 from kernel.trust.models import AuditEvent, Proposal
 from packs.talent import communications as talent_comms
 from packs.talent.communications import due_followups, sweep_followups
@@ -461,6 +461,62 @@ def test_scheduler_proposes_real_times_and_a_person_approves(tenant):
     assert proposal.payload["to"] == CANDIDATE
 
 
+def offer_slots(tenant, name, email, participants):
+    application_id = add_candidate(tenant, name, email)
+    with tenant_session(tenant) as session:
+        interview = talent_comms.request_interview(session, tenant, application_id, participants)
+    run = run_agent_graph(
+        "scheduler",
+        "talent",
+        talent_comms.build_scheduler(),
+        tenant,
+        event={"interview_id": str(interview.id)},
+        event_id=uuid4(),
+    )
+    assert run.status == "succeeded", run.error
+    with tenant_session(tenant) as session:
+        return session.get(Interview, interview.id)
+
+
+def test_offered_slots_are_held_from_other_candidates(tenant):
+    first = offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
+    second = offer_slots(tenant, "Sami Ben", "sami@mail.test", ["nadia@x.test"])
+    taken = {s["starts_at"] for s in first.slots}
+    assert taken.isdisjoint(s["starts_at"] for s in second.slots)
+    with tenant_session(tenant) as session:
+        holds = session.scalars(select(Hold).where(Hold.owner == f"talent.interview:{first.id}"))
+        assert len(holds.all()) == 3
+
+
+def test_booking_releases_the_other_held_slots(tenant):
+    interview = offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
+    chosen = interview.slots[0]
+    with tenant_session(tenant) as session:
+        talent_comms.book_interview(
+            session, tenant, {"interview_id": str(interview.id), **chosen}, "key"
+        )
+    with tenant_session(tenant) as session:
+        assert session.scalars(select(Hold)).all() == []
+    later = offer_slots(tenant, "Sami Ben", "sami@mail.test", ["nadia@x.test"])
+    assert chosen["starts_at"] not in {s["starts_at"] for s in later.slots}
+    assert interview.slots[1]["starts_at"] in {s["starts_at"] for s in later.slots}
+
+
+def test_rejecting_the_offer_frees_the_held_slots(tenant):
+    from kernel.events import relay_once
+
+    interview = offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
+    approver = make_user(tenant, roles=("hr",))
+    with tenant_session(tenant) as session:
+        proposal = session.scalar(select(Proposal))
+    with as_role("api"), tenant_session(tenant) as session:
+        trust.reject(session, approver.actor, proposal.id, "Wrong week")
+    relay_once(tenant)
+    with tenant_session(tenant) as session:
+        assert session.get(Interview, interview.id).status == "slots_declined"
+        assert session.scalars(select(Hold)).all() == []
+
+
 def test_booking_a_slot_that_stopped_being_free_is_refused(tenant):
     start = tunis(10, 10)
     with tenant_session(tenant) as session:
@@ -680,7 +736,9 @@ def test_check_answer_rules():
     # The model often puts the citation after the full stop; it still belongs to that sentence.
     after = PolicyAnswer(can_answer=True, answer="Up to 5 days. [C1]", citations=quote)
     assert check_answer(after, {"C1": hit}) is None
-    two = PolicyAnswer(can_answer=True, answer="Up to 5 days. [C1] Use them early.", citations=quote)
+    two = PolicyAnswer(
+        can_answer=True, answer="Up to 5 days. [C1] Use them early.", citations=quote
+    )
     assert check_answer(two, {"C1": hit}) == "a sentence has no citation"
     missing = PolicyAnswer(can_answer=True, answer="Up to 5 days. [C9]", citations=quote)
     assert check_answer(missing, {"C1": hit}) == "a citation points at no passage"

@@ -19,9 +19,10 @@ from kernel.ai import AgentContext, load_prompt
 from kernel.ai.graphs import AgentState, agent_node
 from kernel.comms.models import Classification, Message, Thread
 from kernel.db import tenant_session, utcnow
-from kernel.events import publish
+from kernel.events import EventOutbox, publish, subscribe
 from kernel.explain import DecisionDraft, Evidence
 from kernel.identity.models import UserAccount
+from kernel.trust.models import Proposal
 from packs.talent.blind import BLIND_TOKEN
 from packs.talent.events import FollowupDue, InterviewBooked, InterviewRequested
 from packs.talent.models import (
@@ -348,10 +349,12 @@ def propose_slots(ctx: AgentContext, state: dict) -> dict:
         select(CandidateIdentity).where(CandidateIdentity.candidate_id == application.candidate_id)
     )
     job = session.get(Job, application.job_id)
-    slots = schedule.find_slots(session, interview.participants)
+    owner = hold_owner(interview.id)
+    slots = schedule.find_slots(session, interview.participants, ignore_owner=owner)
     if not slots or not identity.email:
         interview.status = "no_slots"
         return {}
+    expires_at = schedule.hold(session, ctx.tenant_id, interview.participants, slots, owner)
     interview.slots = [slot.as_json() for slot in slots]
     interview.status = "slots_proposed"
     first = (identity.name or "").split(" ")[0] or "there"
@@ -380,7 +383,10 @@ def propose_slots(ctx: AgentContext, state: dict) -> dict:
                 )
                 for index, slot in enumerate(interview.slots, start=1)
             ],
-            limits=["Calendars can change, so the slot is checked again at booking."],
+            limits=[
+                "Calendars can change, so the slot is checked again at booking.",
+                f"The times are held for this candidate until {expires_at.isoformat()}.",
+            ],
             view_roles=["admin", "hr", "recruiter", "auditor"],
         )
     )
@@ -394,9 +400,33 @@ def propose_slots(ctx: AgentContext, state: dict) -> dict:
         f"Offer interview times to {identity.name or 'a candidate'}",
         decision.id,
         f"interview_slots:{interview.id}",
-        target={"application_id": str(application.id), "job_id": str(job.id)},
+        target={
+            "application_id": str(application.id),
+            "job_id": str(job.id),
+            "interview_id": str(interview.id),
+        },
     )
     return {}
+
+
+def hold_owner(interview_id: UUID) -> str:
+    return f"talent.interview:{interview_id}"
+
+
+@subscribe("trust.proposal.rejected.v1", "talent.release_rejected_slots")
+def release_rejected_slots(session: Session, event: EventOutbox) -> None:
+    """A person decided not to offer these times, so other candidates may be offered them."""
+    if event.payload["action_type"] != "kernel.email.send":
+        return
+    proposal = session.get(Proposal, UUID(event.payload["proposal_id"]))
+    interview_id = proposal.target.get("interview_id")
+    if not interview_id or not proposal.idempotency_key.startswith("interview_slots:"):
+        return
+    interview = session.get(Interview, UUID(interview_id), with_for_update=True)
+    if interview is None or interview.status != "slots_proposed":
+        return
+    schedule.release(session, hold_owner(interview.id))
+    interview.status = "slots_declined"
 
 
 def build_scheduler() -> StateGraph:
@@ -442,6 +472,7 @@ def book_interview(session: Session, tenant_id: UUID, payload: dict[str, Any], k
         ends_at,
         f"Interview: {job.title}",
         {"interview_id": str(interview.id)},
+        owner=hold_owner(interview.id),
     )
     interview.status = "booked"
     interview.booking_id = booking.id

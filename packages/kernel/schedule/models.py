@@ -33,6 +33,19 @@ class Booking(TenantMixin, Base):
     ref: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
 
 
+class Hold(TenantMixin, Base):
+    """A slot offered to someone, kept off other offers until it is booked, released or expires."""
+
+    __tablename__ = "hold"
+    __table_args__ = {"schema": "calendar"}
+
+    owner: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    participant: Mapped[str] = mapped_column(String(320), nullable=False, index=True)
+    starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
 class BookingSeat(TenantMixin, Base):
     """One row per participant. A database constraint makes double booking impossible."""
 

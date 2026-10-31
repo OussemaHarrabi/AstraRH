@@ -116,6 +116,11 @@ Committed in small steps. Each step below is one commit.
    - `/inbox` (digest and thread view), `/ask` (policy questions with citations), interview slot request and booking on the job page, and an email form (subject and body) in `/approvals` instead of raw JSON. Editing creates a new version, so the old approval no longer applies.
    - **Verified:** `tsc --noEmit` clean for `src/`. ESLint flags one `set-state-in-effect` on the job page, already present in the P4 commit.
    - **Not verified yet:** a browser run. Backend APIs come first (Oussema, 2026-10-31); the UI gets a full pass later.
+5. **Slot holds** (2026-11-01).
+   - New `calendar.hold` table (migration `d168b9f5912c`, RLS in `kernel_0006_hold_rules`). When the scheduler offers 3 slots it holds them for 72 hours (`schedule.HOLD_TTL`) under the owner `talent.interview:{id}`, so the same times aren't offered to another candidate. Free-slot search counts busy blocks, bookings and live holds; a holder's own holds don't block its own booking.
+   - Booking releases the interview's other held slots. If a person rejects the slots email, `talent.release_rejected_slots` (on `trust.proposal.rejected.v1`) frees the holds and sets the interview to `slots_declined`. Expired holds simply stop counting.
+   - The slots proposal target now includes `interview_id`, and its explanation states when the hold expires.
+   - **Verified:** ruff clean, `tests/test_communications.py` **46 passed**. New tests: held slots aren't offered to a second candidate, booking frees the other two, and rejecting the offer frees all three.
 
 ### Screening, web shell and two-layer ranking: 2026-10-31
 
