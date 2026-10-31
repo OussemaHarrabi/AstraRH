@@ -1,0 +1,61 @@
+id: workforce
+name: Workforce
+owner: khaled
+status: preview
+description: Team capacity, leave and shifts with operational clash detection, plus confidential conflict cases. The agent prepares, a human decides.
+models: packs.workforce.models
+
+ui:
+  route: /workforce
+  nav_label: Workforce
+  roles: [admin, hr, manager, employee, auditor]
+
+actions:
+  - id: workforce.overload.alert
+    risk: R0
+    description: Surface a team overload alert from team totals, with its factor breakdown. Team-level only, never an individual.
+  - id: workforce.leave.fix.draft
+    risk: R1
+    description: Draft a suggested fix for a detected leave or shift clash, for a manager to review.
+  - id: workforce.leave.approve
+    risk: R2
+    channel: internal
+    handler: packs.workforce.handlers:approve_leave
+    approver_roles: [admin, hr, manager]
+    view_roles: [admin, hr, manager, employee, auditor]
+    description: Approve a leave request. Publishes workforce.leave.approved.v1 and recomputes capacity.
+  - id: workforce.case.open
+    risk: R2
+    channel: internal
+    handler: packs.workforce.handlers:open_case
+    approver_roles: [admin, hr]
+    view_roles: [admin, hr]
+    description: Open a confidential conflict case. Visible only to its parties and the assigned mediator.
+  - id: workforce.case.close
+    risk: R3
+    channel: internal
+    handler: packs.workforce.handlers:close_case
+    approver_roles: [admin, hr]
+    view_roles: [admin, hr]
+    description: Close a case and record its resolution. Needs a second person and step-up authentication.
+
+agents:
+  - id: clash_fixer
+    events: [workforce.leave.requested.v1]
+    entry: packs.workforce.agents.clash_fixer:build
+    description: On a detected clash, drafts a human-readable fix suggestion. Proposes only, never applies.
+  - id: case_summarizer
+    events: [workforce.case.filed.v1]
+    entry: packs.workforce.agents.case_summarizer:build
+    description: Reads case intake text with no identity and no tools, drafts a neutral structured summary and a process citing policy.
+
+publishes:
+  - workforce.leave.requested.v1
+  - workforce.leave.approved.v1
+  - workforce.case.filed.v1
+  - workforce.case.opened.v1
+  - workforce.overload.detected.v1
+
+consumes:
+  - talent.candidate.hired.v1
+  # journey.onboarding.completed.v1  # pending team decision (design doc §12.3)
