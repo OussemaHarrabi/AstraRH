@@ -1,0 +1,4632 @@
+{
+  "version": 1,
+  "as_of": "2026-11-18T09:00:00",
+  "note": "Fictional seed. Plans are proposals until a human approves; training levels change only after verification.",
+  "background_gaps": [
+    {
+      "gap_id": "GAP-EMP-016-K8S",
+      "employee_id": "EMP-016",
+      "skill_id": "SKILL-K8S",
+      "current_level": 2,
+      "required_level": 3,
+      "gap": 1,
+      "severity": "medium",
+      "severity_score": "0.6000",
+      "confidence": "0.8500",
+      "message": "Kubernetes is at level 2; the role requires 3. 2 evidence signal(s), confidence 0.8500.",
+      "factors": [
+        {
+          "key": "gap",
+          "label": "Gap against the role requirement",
+          "weight": "0.20",
+          "value": "1",
+          "contribution": "0.20"
+        },
+        {
+          "key": "mandatory",
+          "label": "Mandatory requirement",
+          "weight": "0.25",
+          "value": "1",
+          "contribution": "0.25"
+        },
+        {
+          "key": "requirement_weight",
+          "label": "Role-profile weight",
+          "weight": "0.15",
+          "value": "1",
+          "contribution": "0.15"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "manager",
+          "weight": "1",
+          "summary": "Day-30 review: deployment work is reviewed, not owned",
+          "ref": "REV-EMP-002-016"
+        },
+        {
+          "kind": "applied_evidence",
+          "weight": "1",
+          "summary": "Touched manifests, no rollout or rollback ownership",
+          "ref": "PRS-016"
+        }
+      ],
+      "status": "confirmed",
+      "decided_by": "EMP-002",
+      "decided_at": "2026-11-18T09:00:00",
+      "decision_note": null,
+      "decision_record_id": "DR-GAP-EMP-016-K8S"
+    },
+    {
+      "gap_id": "GAP-EMP-017-K8S",
+      "employee_id": "EMP-017",
+      "skill_id": "SKILL-K8S",
+      "current_level": 2,
+      "required_level": 3,
+      "gap": 1,
+      "severity": "medium",
+      "severity_score": "0.6000",
+      "confidence": "0.8500",
+      "message": "Kubernetes is at level 2; the role requires 3. 2 evidence signal(s), confidence 0.8500.",
+      "factors": [
+        {
+          "key": "gap",
+          "label": "Gap against the role requirement",
+          "weight": "0.20",
+          "value": "1",
+          "contribution": "0.20"
+        },
+        {
+          "key": "mandatory",
+          "label": "Mandatory requirement",
+          "weight": "0.25",
+          "value": "1",
+          "contribution": "0.25"
+        },
+        {
+          "key": "requirement_weight",
+          "label": "Role-profile weight",
+          "weight": "0.15",
+          "value": "1",
+          "contribution": "0.15"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "manager",
+          "weight": "1",
+          "summary": "Day-30 review: deployment work is reviewed, not owned",
+          "ref": "REV-EMP-002-017"
+        },
+        {
+          "kind": "applied_evidence",
+          "weight": "1",
+          "summary": "Touched manifests, no rollout or rollback ownership",
+          "ref": "PRS-017"
+        }
+      ],
+      "status": "confirmed",
+      "decided_by": "EMP-002",
+      "decided_at": "2026-11-18T09:00:00",
+      "decision_note": null,
+      "decision_record_id": "DR-GAP-EMP-017-K8S"
+    },
+    {
+      "gap_id": "GAP-EMP-018-K8S",
+      "employee_id": "EMP-018",
+      "skill_id": "SKILL-K8S",
+      "current_level": 2,
+      "required_level": 3,
+      "gap": 1,
+      "severity": "medium",
+      "severity_score": "0.6000",
+      "confidence": "0.8500",
+      "message": "Kubernetes is at level 2; the role requires 3. 2 evidence signal(s), confidence 0.8500.",
+      "factors": [
+        {
+          "key": "gap",
+          "label": "Gap against the role requirement",
+          "weight": "0.20",
+          "value": "1",
+          "contribution": "0.20"
+        },
+        {
+          "key": "mandatory",
+          "label": "Mandatory requirement",
+          "weight": "0.25",
+          "value": "1",
+          "contribution": "0.25"
+        },
+        {
+          "key": "requirement_weight",
+          "label": "Role-profile weight",
+          "weight": "0.15",
+          "value": "1",
+          "contribution": "0.15"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "manager",
+          "weight": "1",
+          "summary": "Day-30 review: deployment work is reviewed, not owned",
+          "ref": "REV-EMP-002-018"
+        },
+        {
+          "kind": "applied_evidence",
+          "weight": "1",
+          "summary": "Touched manifests, no rollout or rollback ownership",
+          "ref": "PRS-018"
+        }
+      ],
+      "status": "confirmed",
+      "decided_by": "EMP-002",
+      "decided_at": "2026-11-18T09:00:00",
+      "decision_note": null,
+      "decision_record_id": "DR-GAP-EMP-018-K8S"
+    },
+    {
+      "gap_id": "GAP-EMP-019-K8S",
+      "employee_id": "EMP-019",
+      "skill_id": "SKILL-K8S",
+      "current_level": 2,
+      "required_level": 3,
+      "gap": 1,
+      "severity": "medium",
+      "severity_score": "0.6000",
+      "confidence": "0.8500",
+      "message": "Kubernetes is at level 2; the role requires 3. 2 evidence signal(s), confidence 0.8500.",
+      "factors": [
+        {
+          "key": "gap",
+          "label": "Gap against the role requirement",
+          "weight": "0.20",
+          "value": "1",
+          "contribution": "0.20"
+        },
+        {
+          "key": "mandatory",
+          "label": "Mandatory requirement",
+          "weight": "0.25",
+          "value": "1",
+          "contribution": "0.25"
+        },
+        {
+          "key": "requirement_weight",
+          "label": "Role-profile weight",
+          "weight": "0.15",
+          "value": "1",
+          "contribution": "0.15"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "manager",
+          "weight": "1",
+          "summary": "Day-30 review: deployment work is reviewed, not owned",
+          "ref": "REV-EMP-002-019"
+        },
+        {
+          "kind": "applied_evidence",
+          "weight": "1",
+          "summary": "Touched manifests, no rollout or rollback ownership",
+          "ref": "PRS-019"
+        }
+      ],
+      "status": "confirmed",
+      "decided_by": "EMP-002",
+      "decided_at": "2026-11-18T09:00:00",
+      "decision_note": null,
+      "decision_record_id": "DR-GAP-EMP-019-K8S"
+    },
+    {
+      "gap_id": "GAP-EMP-020-K8S",
+      "employee_id": "EMP-020",
+      "skill_id": "SKILL-K8S",
+      "current_level": 2,
+      "required_level": 3,
+      "gap": 1,
+      "severity": "medium",
+      "severity_score": "0.6000",
+      "confidence": "0.8500",
+      "message": "Kubernetes is at level 2; the role requires 3. 2 evidence signal(s), confidence 0.8500.",
+      "factors": [
+        {
+          "key": "gap",
+          "label": "Gap against the role requirement",
+          "weight": "0.20",
+          "value": "1",
+          "contribution": "0.20"
+        },
+        {
+          "key": "mandatory",
+          "label": "Mandatory requirement",
+          "weight": "0.25",
+          "value": "1",
+          "contribution": "0.25"
+        },
+        {
+          "key": "requirement_weight",
+          "label": "Role-profile weight",
+          "weight": "0.15",
+          "value": "1",
+          "contribution": "0.15"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "manager",
+          "weight": "1",
+          "summary": "Day-30 review: deployment work is reviewed, not owned",
+          "ref": "REV-EMP-002-020"
+        },
+        {
+          "kind": "applied_evidence",
+          "weight": "1",
+          "summary": "Touched manifests, no rollout or rollback ownership",
+          "ref": "PRS-020"
+        }
+      ],
+      "status": "confirmed",
+      "decided_by": "EMP-002",
+      "decided_at": "2026-11-18T09:00:00",
+      "decision_note": null,
+      "decision_record_id": "DR-GAP-EMP-020-K8S"
+    },
+    {
+      "gap_id": "GAP-EMP-021-K8S",
+      "employee_id": "EMP-021",
+      "skill_id": "SKILL-K8S",
+      "current_level": 2,
+      "required_level": 3,
+      "gap": 1,
+      "severity": "medium",
+      "severity_score": "0.6000",
+      "confidence": "0.8500",
+      "message": "Kubernetes is at level 2; the role requires 3. 2 evidence signal(s), confidence 0.8500.",
+      "factors": [
+        {
+          "key": "gap",
+          "label": "Gap against the role requirement",
+          "weight": "0.20",
+          "value": "1",
+          "contribution": "0.20"
+        },
+        {
+          "key": "mandatory",
+          "label": "Mandatory requirement",
+          "weight": "0.25",
+          "value": "1",
+          "contribution": "0.25"
+        },
+        {
+          "key": "requirement_weight",
+          "label": "Role-profile weight",
+          "weight": "0.15",
+          "value": "1",
+          "contribution": "0.15"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "manager",
+          "weight": "1",
+          "summary": "Day-30 review: deployment work is reviewed, not owned",
+          "ref": "REV-EMP-002-021"
+        },
+        {
+          "kind": "applied_evidence",
+          "weight": "1",
+          "summary": "Touched manifests, no rollout or rollback ownership",
+          "ref": "PRS-021"
+        }
+      ],
+      "status": "confirmed",
+      "decided_by": "EMP-002",
+      "decided_at": "2026-11-18T09:00:00",
+      "decision_note": null,
+      "decision_record_id": "DR-GAP-EMP-021-K8S"
+    },
+    {
+      "gap_id": "GAP-EMP-022-K8S",
+      "employee_id": "EMP-022",
+      "skill_id": "SKILL-K8S",
+      "current_level": 2,
+      "required_level": 3,
+      "gap": 1,
+      "severity": "medium",
+      "severity_score": "0.6000",
+      "confidence": "0.8500",
+      "message": "Kubernetes is at level 2; the role requires 3. 2 evidence signal(s), confidence 0.8500.",
+      "factors": [
+        {
+          "key": "gap",
+          "label": "Gap against the role requirement",
+          "weight": "0.20",
+          "value": "1",
+          "contribution": "0.20"
+        },
+        {
+          "key": "mandatory",
+          "label": "Mandatory requirement",
+          "weight": "0.25",
+          "value": "1",
+          "contribution": "0.25"
+        },
+        {
+          "key": "requirement_weight",
+          "label": "Role-profile weight",
+          "weight": "0.15",
+          "value": "1",
+          "contribution": "0.15"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "manager",
+          "weight": "1",
+          "summary": "Day-30 review: deployment work is reviewed, not owned",
+          "ref": "REV-EMP-002-022"
+        },
+        {
+          "kind": "applied_evidence",
+          "weight": "1",
+          "summary": "Touched manifests, no rollout or rollback ownership",
+          "ref": "PRS-022"
+        }
+      ],
+      "status": "confirmed",
+      "decided_by": "EMP-002",
+      "decided_at": "2026-11-18T09:00:00",
+      "decision_note": null,
+      "decision_record_id": "DR-GAP-EMP-022-K8S"
+    },
+    {
+      "gap_id": "GAP-EMP-023-K8S",
+      "employee_id": "EMP-023",
+      "skill_id": "SKILL-K8S",
+      "current_level": 2,
+      "required_level": 3,
+      "gap": 1,
+      "severity": "medium",
+      "severity_score": "0.6000",
+      "confidence": "0.8500",
+      "message": "Kubernetes is at level 2; the role requires 3. 2 evidence signal(s), confidence 0.8500.",
+      "factors": [
+        {
+          "key": "gap",
+          "label": "Gap against the role requirement",
+          "weight": "0.20",
+          "value": "1",
+          "contribution": "0.20"
+        },
+        {
+          "key": "mandatory",
+          "label": "Mandatory requirement",
+          "weight": "0.25",
+          "value": "1",
+          "contribution": "0.25"
+        },
+        {
+          "key": "requirement_weight",
+          "label": "Role-profile weight",
+          "weight": "0.15",
+          "value": "1",
+          "contribution": "0.15"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "manager",
+          "weight": "1",
+          "summary": "Day-30 review: deployment work is reviewed, not owned",
+          "ref": "REV-EMP-002-023"
+        },
+        {
+          "kind": "applied_evidence",
+          "weight": "1",
+          "summary": "Touched manifests, no rollout or rollback ownership",
+          "ref": "PRS-023"
+        }
+      ],
+      "status": "confirmed",
+      "decided_by": "EMP-002",
+      "decided_at": "2026-11-18T09:00:00",
+      "decision_note": null,
+      "decision_record_id": "DR-GAP-EMP-023-K8S"
+    },
+    {
+      "gap_id": "GAP-EMP-024-K8S",
+      "employee_id": "EMP-024",
+      "skill_id": "SKILL-K8S",
+      "current_level": 2,
+      "required_level": 3,
+      "gap": 1,
+      "severity": "medium",
+      "severity_score": "0.6000",
+      "confidence": "0.8500",
+      "message": "Kubernetes is at level 2; the role requires 3. 2 evidence signal(s), confidence 0.8500.",
+      "factors": [
+        {
+          "key": "gap",
+          "label": "Gap against the role requirement",
+          "weight": "0.20",
+          "value": "1",
+          "contribution": "0.20"
+        },
+        {
+          "key": "mandatory",
+          "label": "Mandatory requirement",
+          "weight": "0.25",
+          "value": "1",
+          "contribution": "0.25"
+        },
+        {
+          "key": "requirement_weight",
+          "label": "Role-profile weight",
+          "weight": "0.15",
+          "value": "1",
+          "contribution": "0.15"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "manager",
+          "weight": "1",
+          "summary": "Day-30 review: deployment work is reviewed, not owned",
+          "ref": "REV-EMP-002-024"
+        },
+        {
+          "kind": "applied_evidence",
+          "weight": "1",
+          "summary": "Touched manifests, no rollout or rollback ownership",
+          "ref": "PRS-024"
+        }
+      ],
+      "status": "confirmed",
+      "decided_by": "EMP-002",
+      "decided_at": "2026-11-18T09:00:00",
+      "decision_note": null,
+      "decision_record_id": "DR-GAP-EMP-024-K8S"
+    }
+  ],
+  "plans": [
+    {
+      "plan_id": "PLAN-EMP-010",
+      "employee_id": "EMP-010",
+      "display_name": "Amine Trabelsi",
+      "position_id": "POS-FE",
+      "org_unit_id": "ORG-PRD",
+      "manager_id": "EMP-003",
+      "buddy_id": "EMP-014",
+      "template_id": "TPL-GEN-01",
+      "start_date": "2026-12-01",
+      "target_ramp_date": "2027-04-07T09:00:00",
+      "status": "approved",
+      "phase": "preboarding",
+      "plan_approved_by": "EMP-006",
+      "approval_id": "APR-EMP-010-PLAN",
+      "tasks": [
+        {
+          "task_id": "GEN-01",
+          "title": "Sign contract and NDA",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-11-02T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Signed contract + NDA reference",
+          "evidence": {
+            "ref": "EVID-GEN-01",
+            "summary": "Signed contract + NDA reference"
+          },
+          "completed_at": "2026-11-02T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-02",
+          "title": "Complete payroll and tax forms",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-11-11T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Payroll record created",
+          "evidence": {
+            "ref": "EVID-GEN-02",
+            "summary": "Payroll record created"
+          },
+          "completed_at": "2026-11-11T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-03",
+          "title": "Request laptop and equipment",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-11-11T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Asset tag + delivery confirmation",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-04",
+          "title": "Provision accounts and access",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-11-20T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Accounts provisioned",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-05",
+          "title": "Manager pre-start checklist",
+          "phase": "preboarding",
+          "task_kind": "manager_prep",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2026-11-20T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Access requested, first task drafted, calendar blocked, buddy briefed",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-06",
+          "title": "Send welcome and first-week preview",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-11-30T09:00:00",
+          "status": "pending",
+          "mandatory": false,
+          "evidence_required": "Approved welcome message",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-07",
+          "title": "Buddy intro call",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-010",
+          "due_at": "2026-11-30T09:00:00",
+          "status": "pending",
+          "mandatory": false,
+          "evidence_required": "Intro call completed",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-08",
+          "title": "Day 1 welcome and workspace setup",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-12-01T09:00:00",
+          "status": "pending",
+          "mandatory": false,
+          "evidence_required": "Workspace or remote setup note",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-09",
+          "title": "Manager 1:1: purpose and success criteria",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2026-12-01T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Notes: purpose, success criteria, first 30 days",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-10",
+          "title": "Write role success criteria",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2026-12-03T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Written success criteria for day 30/60/90",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-11",
+          "title": "First small win",
+          "phase": "week1",
+          "task_kind": "first_win",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-010",
+          "due_at": "2026-12-07T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "First contribution link",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-12",
+          "title": "Attend team rituals",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-010",
+          "due_at": "2026-12-08T09:00:00",
+          "status": "pending",
+          "mandatory": false,
+          "evidence_required": "Attended team rituals; notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-13",
+          "title": "Acknowledge mandatory policies",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-12-10T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Signed acknowledgements",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-14",
+          "title": "Role gap task",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-010",
+          "due_at": "2027-01-13T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Training or applied evidence",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-15",
+          "title": "First deliverable review",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2027-01-13T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Deliverable link + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-16",
+          "title": "Day 30 check-in",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-010",
+          "due_at": "2027-01-13T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-17",
+          "title": "Independent work review",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2027-02-24T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Independent work evidence + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-18",
+          "title": "Day 60 check-in",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-010",
+          "due_at": "2027-02-24T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-19",
+          "title": "Day 90 ramp review and dossier",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2027-04-07T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Completed dossier + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-20",
+          "title": "Confirm verified skills",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2027-04-07T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Manager confirms level changes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-21",
+          "title": "Export probation pack",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2027-04-07T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Dossier exported; no decision recorded",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-22",
+          "title": "Day 90 check-in",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-010",
+          "due_at": "2027-04-07T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        }
+      ],
+      "checkins": [
+        {
+          "checkin_id": "CHK-EMP-010-day7",
+          "kind": "day7",
+          "scheduled_at": "2026-12-10T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-010-day30",
+          "kind": "day30",
+          "scheduled_at": "2027-01-13T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-010-day60",
+          "kind": "day60",
+          "scheduled_at": "2027-02-24T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-010-day90",
+          "kind": "day90",
+          "scheduled_at": "2027-04-07T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        }
+      ],
+      "support_flags": [],
+      "gaps": [],
+      "recommendations": [],
+      "enrollments": [],
+      "impact_measures": [],
+      "dossier": null
+    },
+    {
+      "plan_id": "PLAN-EMP-011",
+      "employee_id": "EMP-011",
+      "display_name": "Sarra Ben Amor",
+      "position_id": "POS-DATA",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "buddy_id": "EMP-009",
+      "template_id": "TPL-GEN-01",
+      "start_date": "2026-11-16",
+      "target_ramp_date": "2027-03-23T09:00:00",
+      "status": "in_progress",
+      "phase": "week1",
+      "plan_approved_by": "EMP-006",
+      "approval_id": "APR-EMP-011-PLAN",
+      "tasks": [
+        {
+          "task_id": "GEN-01",
+          "title": "Sign contract and NDA",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-10-16T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Signed contract + NDA reference",
+          "evidence": {
+            "ref": "EVID-GEN-01",
+            "summary": "Signed contract + NDA reference"
+          },
+          "completed_at": "2026-10-16T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-02",
+          "title": "Complete payroll and tax forms",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-10-27T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Payroll record created",
+          "evidence": {
+            "ref": "EVID-GEN-02",
+            "summary": "Payroll record created"
+          },
+          "completed_at": "2026-10-27T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-03",
+          "title": "Request laptop and equipment",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-10-27T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Asset tag + delivery confirmation",
+          "evidence": {
+            "ref": "EVID-GEN-03",
+            "summary": "Asset tag + delivery confirmation"
+          },
+          "completed_at": "2026-10-27T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-04",
+          "title": "Provision accounts and access",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-11-05T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Accounts provisioned",
+          "evidence": {
+            "ref": "EVID-GEN-04",
+            "summary": "Accounts provisioned"
+          },
+          "completed_at": "2026-11-05T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-05",
+          "title": "Manager pre-start checklist",
+          "phase": "preboarding",
+          "task_kind": "manager_prep",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2026-11-05T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Access requested, first task drafted, calendar blocked, buddy briefed",
+          "evidence": {
+            "ref": "EVID-GEN-05",
+            "summary": "Access requested, first task drafted, calendar blocked, buddy briefed"
+          },
+          "completed_at": "2026-11-05T15:00:00",
+          "approved_by": "EMP-002"
+        },
+        {
+          "task_id": "GEN-06",
+          "title": "Send welcome and first-week preview",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-11-13T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Approved welcome message",
+          "evidence": {
+            "ref": "EVID-GEN-06",
+            "summary": "Approved welcome message"
+          },
+          "completed_at": "2026-11-13T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-07",
+          "title": "Buddy intro call",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-011",
+          "due_at": "2026-11-13T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Intro call completed",
+          "evidence": {
+            "ref": "EVID-GEN-07",
+            "summary": "Intro call completed"
+          },
+          "completed_at": "2026-11-13T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-08",
+          "title": "Day 1 welcome and workspace setup",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-11-16T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Workspace or remote setup note",
+          "evidence": {
+            "ref": "EVID-GEN-08",
+            "summary": "Workspace or remote setup note"
+          },
+          "completed_at": "2026-11-16T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-09",
+          "title": "Manager 1:1: purpose and success criteria",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2026-11-16T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Notes: purpose, success criteria, first 30 days",
+          "evidence": {
+            "ref": "EVID-GEN-09",
+            "summary": "Notes: purpose, success criteria, first 30 days"
+          },
+          "completed_at": "2026-11-16T15:00:00",
+          "approved_by": "EMP-002"
+        },
+        {
+          "task_id": "GEN-10",
+          "title": "Write role success criteria",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2026-11-18T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Written success criteria for day 30/60/90",
+          "evidence": {
+            "ref": "EVID-GEN-10",
+            "summary": "Written success criteria for day 30/60/90"
+          },
+          "completed_at": "2026-11-18T15:00:00",
+          "approved_by": "EMP-002"
+        },
+        {
+          "task_id": "GEN-11",
+          "title": "First small win",
+          "phase": "week1",
+          "task_kind": "first_win",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-011",
+          "due_at": "2026-11-20T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "First contribution link",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-12",
+          "title": "Attend team rituals",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-011",
+          "due_at": "2026-11-23T09:00:00",
+          "status": "pending",
+          "mandatory": false,
+          "evidence_required": "Attended team rituals; notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-13",
+          "title": "Acknowledge mandatory policies",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-11-25T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Signed acknowledgements",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-14",
+          "title": "Role gap task",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-011",
+          "due_at": "2026-12-29T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Training or applied evidence",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-15",
+          "title": "First deliverable review",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2026-12-29T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Deliverable link + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-16",
+          "title": "Day 30 check-in",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-011",
+          "due_at": "2026-12-29T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-17",
+          "title": "Independent work review",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2027-02-09T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Independent work evidence + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-18",
+          "title": "Day 60 check-in",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-011",
+          "due_at": "2027-02-09T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-19",
+          "title": "Day 90 ramp review and dossier",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2027-03-23T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Completed dossier + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-20",
+          "title": "Confirm verified skills",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2027-03-23T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Manager confirms level changes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-21",
+          "title": "Export probation pack",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2027-03-23T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Dossier exported; no decision recorded",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-22",
+          "title": "Day 90 check-in",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-011",
+          "due_at": "2027-03-23T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        }
+      ],
+      "checkins": [
+        {
+          "checkin_id": "CHK-EMP-011-day7",
+          "kind": "day7",
+          "scheduled_at": "2026-11-25T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-011-day30",
+          "kind": "day30",
+          "scheduled_at": "2026-12-29T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-011-day60",
+          "kind": "day60",
+          "scheduled_at": "2027-02-09T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-011-day90",
+          "kind": "day90",
+          "scheduled_at": "2027-03-23T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        }
+      ],
+      "support_flags": [],
+      "gaps": [],
+      "recommendations": [],
+      "enrollments": [],
+      "impact_measures": [],
+      "dossier": null
+    },
+    {
+      "plan_id": "PLAN-EMP-012",
+      "employee_id": "EMP-012",
+      "display_name": "Youssef Khelifi",
+      "position_id": "POS-AE",
+      "org_unit_id": "ORG-SAL",
+      "manager_id": "EMP-004",
+      "buddy_id": "EMP-031",
+      "template_id": "TPL-AE-01",
+      "start_date": "2026-11-02",
+      "target_ramp_date": "2027-03-09T09:00:00",
+      "status": "in_progress",
+      "phase": "day30",
+      "plan_approved_by": "EMP-006",
+      "approval_id": "APR-EMP-012-PLAN",
+      "tasks": [
+        {
+          "task_id": "AE-01",
+          "title": "Sign contract and NDA",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-10-01T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Signed contract + NDA reference",
+          "evidence": {
+            "ref": "EVID-AE-01",
+            "summary": "Signed contract + NDA reference"
+          },
+          "completed_at": "2026-10-01T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "AE-02",
+          "title": "Complete payroll and tax forms",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-10-12T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Payroll record created",
+          "evidence": {
+            "ref": "EVID-AE-02",
+            "summary": "Payroll record created"
+          },
+          "completed_at": "2026-10-12T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "AE-03",
+          "title": "Request laptop and phone",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-10-12T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Asset tag + delivery confirmation",
+          "evidence": {
+            "ref": "EVID-AE-03",
+            "summary": "Asset tag + delivery confirmation"
+          },
+          "completed_at": "2026-10-12T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-04",
+          "title": "Provision CRM and email accounts",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-10-22T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "CRM and email provisioned",
+          "evidence": {
+            "ref": "EVID-AE-04",
+            "summary": "CRM and email provisioned"
+          },
+          "completed_at": "2026-10-22T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-05",
+          "title": "Manager pre-start checklist",
+          "phase": "preboarding",
+          "task_kind": "manager_prep",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-004",
+          "due_at": "2026-10-22T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Territory drafted, first calls picked, buddy briefed",
+          "evidence": {
+            "ref": "EVID-AE-05",
+            "summary": "Territory drafted, first calls picked, buddy briefed"
+          },
+          "completed_at": "2026-10-22T15:00:00",
+          "approved_by": "EMP-004"
+        },
+        {
+          "task_id": "AE-06",
+          "title": "Send welcome and first-week preview",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-10-30T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Approved welcome message",
+          "evidence": {
+            "ref": "EVID-AE-06",
+            "summary": "Approved welcome message"
+          },
+          "completed_at": "2026-10-30T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "AE-07",
+          "title": "Buddy intro call",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-012",
+          "due_at": "2026-10-30T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Intro call completed",
+          "evidence": {
+            "ref": "EVID-AE-07",
+            "summary": "Intro call completed"
+          },
+          "completed_at": "2026-10-30T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-08",
+          "title": "Day 1 welcome and workspace setup",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-11-02T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Workspace or remote setup note",
+          "evidence": {
+            "ref": "EVID-AE-08",
+            "summary": "Workspace or remote setup note"
+          },
+          "completed_at": "2026-11-02T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-09",
+          "title": "Manager 1:1: territory and quota",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-004",
+          "due_at": "2026-11-02T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Notes: territory, quota, first 30 days",
+          "evidence": {
+            "ref": "EVID-AE-09",
+            "summary": "Notes: territory, quota, first 30 days"
+          },
+          "completed_at": "2026-11-02T15:00:00",
+          "approved_by": "EMP-004"
+        },
+        {
+          "task_id": "AE-10",
+          "title": "Buddy lunch",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-012",
+          "due_at": "2026-11-02T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Calendar event + note",
+          "evidence": {
+            "ref": "EVID-AE-10",
+            "summary": "Calendar event + note"
+          },
+          "completed_at": "2026-11-02T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-11",
+          "title": "Read the sales playbook",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-012",
+          "due_at": "2026-11-03T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Notes on ICP, stages, objection handling",
+          "evidence": {
+            "ref": "EVID-AE-11",
+            "summary": "Notes on ICP, stages, objection handling"
+          },
+          "completed_at": "2026-11-03T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-12",
+          "title": "Complete CRM setup",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-11-03T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Pipeline and views configured",
+          "evidence": {
+            "ref": "EVID-AE-12",
+            "summary": "Pipeline and views configured"
+          },
+          "completed_at": "2026-11-03T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-13",
+          "title": "Product demo walkthrough",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-012",
+          "due_at": "2026-11-04T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Demo notes + questions",
+          "evidence": {
+            "ref": "EVID-AE-13",
+            "summary": "Demo notes + questions"
+          },
+          "completed_at": "2026-11-04T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-14",
+          "title": "Shadow two discovery calls",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-012",
+          "due_at": "2026-11-05T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Two call notes",
+          "evidence": {
+            "ref": "EVID-AE-14",
+            "summary": "Two call notes"
+          },
+          "completed_at": "2026-11-05T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-15",
+          "title": "First win: book two discovery calls",
+          "phase": "week1",
+          "task_kind": "first_win",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-012",
+          "due_at": "2026-11-06T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Two calendar bookings",
+          "evidence": {
+            "ref": "EVID-AE-15",
+            "summary": "Two calendar bookings"
+          },
+          "completed_at": "2026-11-06T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-16",
+          "title": "Attend team rituals",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-012",
+          "due_at": "2026-11-09T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Attended pipeline meeting; notes",
+          "evidence": {
+            "ref": "EVID-AE-16",
+            "summary": "Attended pipeline meeting; notes"
+          },
+          "completed_at": "2026-11-09T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-17",
+          "title": "Ask-anything session",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-012",
+          "due_at": "2026-11-09T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Questions and answers recorded",
+          "evidence": {
+            "ref": "EVID-AE-17",
+            "summary": "Questions and answers recorded"
+          },
+          "completed_at": "2026-11-09T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-18",
+          "title": "Write role success criteria",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-004",
+          "due_at": "2026-11-09T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Written success criteria for day 30/60/90",
+          "evidence": {
+            "ref": "EVID-AE-18",
+            "summary": "Written success criteria for day 30/60/90"
+          },
+          "completed_at": "2026-11-09T15:00:00",
+          "approved_by": "EMP-004"
+        },
+        {
+          "task_id": "AE-19",
+          "title": "Acknowledge mandatory policies",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-11-11T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Signed acknowledgements",
+          "evidence": {
+            "ref": "EVID-AE-19",
+            "summary": "Signed acknowledgements"
+          },
+          "completed_at": "2026-11-11T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "AE-20",
+          "title": "Communication and negotiation gap task",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-012",
+          "due_at": "2026-12-14T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "CRS-COMM-01 completed or mentor session note",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-21",
+          "title": "First pipeline review",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-004",
+          "due_at": "2026-12-14T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pipeline review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-22",
+          "title": "Day 30 check-in",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-012",
+          "due_at": "2026-12-14T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-23",
+          "title": "CRM hygiene audit",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-012",
+          "due_at": "2027-01-05T09:00:00",
+          "status": "pending",
+          "mandatory": false,
+          "evidence_required": "No empty required fields; next steps set",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-24",
+          "title": "Independent deal support",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-004",
+          "due_at": "2027-01-26T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Deal review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-25",
+          "title": "Day 60 check-in",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-012",
+          "due_at": "2027-01-26T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-26",
+          "title": "Day 90 ramp review and dossier",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-004",
+          "due_at": "2027-03-09T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Completed dossier + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-27",
+          "title": "Confirm verified skills",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-004",
+          "due_at": "2027-03-09T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Manager confirms level changes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-28",
+          "title": "Export probation pack",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2027-03-09T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Dossier exported; no decision recorded",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "AE-29",
+          "title": "Day 90 check-in",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-012",
+          "due_at": "2027-03-09T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        }
+      ],
+      "checkins": [
+        {
+          "checkin_id": "CHK-EMP-012-day7",
+          "kind": "day7",
+          "scheduled_at": "2026-11-11T09:00:00",
+          "completed_at": "2026-11-11T11:00:00",
+          "status": "completed",
+          "answers": {
+            "role_clarity": 4,
+            "access_ready": 4,
+            "buddy_contact": 5,
+            "first_week_tasks": 4
+          },
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-012-day30",
+          "kind": "day30",
+          "scheduled_at": "2026-12-14T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-012-day60",
+          "kind": "day60",
+          "scheduled_at": "2027-01-26T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-012-day90",
+          "kind": "day90",
+          "scheduled_at": "2027-03-09T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        }
+      ],
+      "support_flags": [],
+      "gaps": [],
+      "recommendations": [],
+      "enrollments": [],
+      "impact_measures": [],
+      "dossier": null
+    },
+    {
+      "plan_id": "PLAN-EMP-013",
+      "employee_id": "EMP-013",
+      "display_name": "Mariem Dridi",
+      "position_id": "POS-DES",
+      "org_unit_id": "ORG-PRD",
+      "manager_id": "EMP-003",
+      "buddy_id": "EMP-032",
+      "template_id": "TPL-GEN-01",
+      "start_date": "2026-10-01",
+      "target_ramp_date": "2027-02-08T09:00:00",
+      "status": "in_progress",
+      "phase": "day60",
+      "plan_approved_by": "EMP-006",
+      "approval_id": "APR-EMP-013-PLAN",
+      "tasks": [
+        {
+          "task_id": "GEN-01",
+          "title": "Sign contract and NDA",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-09-02T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Signed contract + NDA reference",
+          "evidence": {
+            "ref": "EVID-GEN-01",
+            "summary": "Signed contract + NDA reference"
+          },
+          "completed_at": "2026-09-02T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-02",
+          "title": "Complete payroll and tax forms",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-09-11T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Payroll record created",
+          "evidence": {
+            "ref": "EVID-GEN-02",
+            "summary": "Payroll record created"
+          },
+          "completed_at": "2026-09-11T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-03",
+          "title": "Request laptop and equipment",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-09-11T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Asset tag + delivery confirmation",
+          "evidence": {
+            "ref": "EVID-GEN-03",
+            "summary": "Asset tag + delivery confirmation"
+          },
+          "completed_at": "2026-09-11T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-04",
+          "title": "Provision accounts and access",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-09-22T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Accounts provisioned",
+          "evidence": {
+            "ref": "EVID-GEN-04",
+            "summary": "Accounts provisioned"
+          },
+          "completed_at": "2026-09-22T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-05",
+          "title": "Manager pre-start checklist",
+          "phase": "preboarding",
+          "task_kind": "manager_prep",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2026-09-22T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Access requested, first task drafted, calendar blocked, buddy briefed",
+          "evidence": {
+            "ref": "EVID-GEN-05",
+            "summary": "Access requested, first task drafted, calendar blocked, buddy briefed"
+          },
+          "completed_at": "2026-09-22T15:00:00",
+          "approved_by": "EMP-003"
+        },
+        {
+          "task_id": "GEN-06",
+          "title": "Send welcome and first-week preview",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-09-30T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Approved welcome message",
+          "evidence": {
+            "ref": "EVID-GEN-06",
+            "summary": "Approved welcome message"
+          },
+          "completed_at": "2026-09-30T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-07",
+          "title": "Buddy intro call",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-013",
+          "due_at": "2026-09-30T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Intro call completed",
+          "evidence": {
+            "ref": "EVID-GEN-07",
+            "summary": "Intro call completed"
+          },
+          "completed_at": "2026-09-30T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-08",
+          "title": "Day 1 welcome and workspace setup",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-10-01T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Workspace or remote setup note",
+          "evidence": {
+            "ref": "EVID-GEN-08",
+            "summary": "Workspace or remote setup note"
+          },
+          "completed_at": "2026-10-01T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-09",
+          "title": "Manager 1:1: purpose and success criteria",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2026-10-01T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Notes: purpose, success criteria, first 30 days",
+          "evidence": {
+            "ref": "EVID-GEN-09",
+            "summary": "Notes: purpose, success criteria, first 30 days"
+          },
+          "completed_at": "2026-10-01T15:00:00",
+          "approved_by": "EMP-003"
+        },
+        {
+          "task_id": "GEN-10",
+          "title": "Write role success criteria",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2026-10-05T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Written success criteria for day 30/60/90",
+          "evidence": {
+            "ref": "EVID-GEN-10",
+            "summary": "Written success criteria for day 30/60/90"
+          },
+          "completed_at": "2026-10-05T15:00:00",
+          "approved_by": "EMP-003"
+        },
+        {
+          "task_id": "GEN-11",
+          "title": "First small win",
+          "phase": "week1",
+          "task_kind": "first_win",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-013",
+          "due_at": "2026-10-07T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "First contribution link",
+          "evidence": {
+            "ref": "EVID-GEN-11",
+            "summary": "First contribution link"
+          },
+          "completed_at": "2026-10-07T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-12",
+          "title": "Attend team rituals",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-013",
+          "due_at": "2026-10-08T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Attended team rituals; notes",
+          "evidence": {
+            "ref": "EVID-GEN-12",
+            "summary": "Attended team rituals; notes"
+          },
+          "completed_at": "2026-10-08T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-13",
+          "title": "Acknowledge mandatory policies",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-10-12T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Signed acknowledgements",
+          "evidence": {
+            "ref": "EVID-GEN-13",
+            "summary": "Signed acknowledgements"
+          },
+          "completed_at": "2026-10-12T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-14",
+          "title": "Role gap task",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-013",
+          "due_at": "2026-11-13T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Training or applied evidence",
+          "evidence": {
+            "ref": "EVID-GEN-14",
+            "summary": "Training or applied evidence"
+          },
+          "completed_at": "2026-11-13T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-15",
+          "title": "First deliverable review",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2026-11-13T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Deliverable link + review notes",
+          "evidence": {
+            "ref": "EVID-GEN-15",
+            "summary": "Deliverable link + review notes"
+          },
+          "completed_at": "2026-11-13T15:00:00",
+          "approved_by": "EMP-003"
+        },
+        {
+          "task_id": "GEN-16",
+          "title": "Day 30 check-in",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-013",
+          "due_at": "2026-11-13T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": {
+            "ref": "EVID-GEN-16",
+            "summary": "Pulse submitted"
+          },
+          "completed_at": "2026-11-13T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-17",
+          "title": "Independent work review",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2026-12-28T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Independent work evidence + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-18",
+          "title": "Day 60 check-in",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-013",
+          "due_at": "2026-12-28T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-19",
+          "title": "Day 90 ramp review and dossier",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2027-02-08T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Completed dossier + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-20",
+          "title": "Confirm verified skills",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2027-02-08T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Manager confirms level changes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-21",
+          "title": "Export probation pack",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2027-02-08T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Dossier exported; no decision recorded",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-22",
+          "title": "Day 90 check-in",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-013",
+          "due_at": "2027-02-08T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        }
+      ],
+      "checkins": [
+        {
+          "checkin_id": "CHK-EMP-013-day7",
+          "kind": "day7",
+          "scheduled_at": "2026-10-12T09:00:00",
+          "completed_at": "2026-10-12T11:00:00",
+          "status": "completed",
+          "answers": {
+            "role_clarity": 4,
+            "access_ready": 4,
+            "buddy_contact": 5,
+            "first_week_tasks": 4
+          },
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-013-day30",
+          "kind": "day30",
+          "scheduled_at": "2026-11-13T09:00:00",
+          "completed_at": "2026-11-13T11:00:00",
+          "status": "completed",
+          "answers": {
+            "role_clarity": 4,
+            "first_contribution": 4,
+            "manager_feedback": 4,
+            "team_context": 4
+          },
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-013-day60",
+          "kind": "day60",
+          "scheduled_at": "2026-12-28T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-013-day90",
+          "kind": "day90",
+          "scheduled_at": "2027-02-08T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        }
+      ],
+      "support_flags": [],
+      "gaps": [],
+      "recommendations": [],
+      "enrollments": [],
+      "impact_measures": [],
+      "dossier": null
+    },
+    {
+      "plan_id": "PLAN-EMP-014",
+      "employee_id": "EMP-014",
+      "display_name": "Hamza Bouazizi",
+      "position_id": "POS-PM",
+      "org_unit_id": "ORG-PRD",
+      "manager_id": "EMP-003",
+      "buddy_id": "EMP-003",
+      "template_id": "TPL-GEN-01",
+      "start_date": "2026-07-01",
+      "target_ramp_date": "2026-11-06T09:00:00",
+      "status": "completed",
+      "phase": "completed",
+      "plan_approved_by": "EMP-006",
+      "approval_id": "APR-EMP-014-PLAN",
+      "tasks": [
+        {
+          "task_id": "GEN-01",
+          "title": "Sign contract and NDA",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-06-02T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Signed contract + NDA reference",
+          "evidence": {
+            "ref": "EVID-GEN-01",
+            "summary": "Signed contract + NDA reference"
+          },
+          "completed_at": "2026-06-02T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-02",
+          "title": "Complete payroll and tax forms",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-06-11T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Payroll record created",
+          "evidence": {
+            "ref": "EVID-GEN-02",
+            "summary": "Payroll record created"
+          },
+          "completed_at": "2026-06-11T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-03",
+          "title": "Request laptop and equipment",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-06-11T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Asset tag + delivery confirmation",
+          "evidence": {
+            "ref": "EVID-GEN-03",
+            "summary": "Asset tag + delivery confirmation"
+          },
+          "completed_at": "2026-06-11T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-04",
+          "title": "Provision accounts and access",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-06-22T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Accounts provisioned",
+          "evidence": {
+            "ref": "EVID-GEN-04",
+            "summary": "Accounts provisioned"
+          },
+          "completed_at": "2026-06-22T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-05",
+          "title": "Manager pre-start checklist",
+          "phase": "preboarding",
+          "task_kind": "manager_prep",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2026-06-22T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Access requested, first task drafted, calendar blocked, buddy briefed",
+          "evidence": {
+            "ref": "EVID-GEN-05",
+            "summary": "Access requested, first task drafted, calendar blocked, buddy briefed"
+          },
+          "completed_at": "2026-06-22T15:00:00",
+          "approved_by": "EMP-003"
+        },
+        {
+          "task_id": "GEN-06",
+          "title": "Send welcome and first-week preview",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-06-30T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Approved welcome message",
+          "evidence": {
+            "ref": "EVID-GEN-06",
+            "summary": "Approved welcome message"
+          },
+          "completed_at": "2026-06-30T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-07",
+          "title": "Buddy intro call",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-014",
+          "due_at": "2026-06-30T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Intro call completed",
+          "evidence": {
+            "ref": "EVID-GEN-07",
+            "summary": "Intro call completed"
+          },
+          "completed_at": "2026-06-30T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-08",
+          "title": "Day 1 welcome and workspace setup",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-07-01T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Workspace or remote setup note",
+          "evidence": {
+            "ref": "EVID-GEN-08",
+            "summary": "Workspace or remote setup note"
+          },
+          "completed_at": "2026-07-01T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-09",
+          "title": "Manager 1:1: purpose and success criteria",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2026-07-01T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Notes: purpose, success criteria, first 30 days",
+          "evidence": {
+            "ref": "EVID-GEN-09",
+            "summary": "Notes: purpose, success criteria, first 30 days"
+          },
+          "completed_at": "2026-07-01T15:00:00",
+          "approved_by": "EMP-003"
+        },
+        {
+          "task_id": "GEN-10",
+          "title": "Write role success criteria",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2026-07-03T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Written success criteria for day 30/60/90",
+          "evidence": {
+            "ref": "EVID-GEN-10",
+            "summary": "Written success criteria for day 30/60/90"
+          },
+          "completed_at": "2026-07-03T15:00:00",
+          "approved_by": "EMP-003"
+        },
+        {
+          "task_id": "GEN-11",
+          "title": "First small win",
+          "phase": "week1",
+          "task_kind": "first_win",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-014",
+          "due_at": "2026-07-07T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "First contribution link",
+          "evidence": {
+            "ref": "EVID-GEN-11",
+            "summary": "First contribution link"
+          },
+          "completed_at": "2026-07-07T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-12",
+          "title": "Attend team rituals",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-014",
+          "due_at": "2026-07-08T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Attended team rituals; notes",
+          "evidence": {
+            "ref": "EVID-GEN-12",
+            "summary": "Attended team rituals; notes"
+          },
+          "completed_at": "2026-07-08T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-13",
+          "title": "Acknowledge mandatory policies",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-07-10T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Signed acknowledgements",
+          "evidence": {
+            "ref": "EVID-GEN-13",
+            "summary": "Signed acknowledgements"
+          },
+          "completed_at": "2026-07-10T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-14",
+          "title": "Role gap task",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-014",
+          "due_at": "2026-08-12T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Training or applied evidence",
+          "evidence": {
+            "ref": "EVID-GEN-14",
+            "summary": "Training or applied evidence"
+          },
+          "completed_at": "2026-08-12T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-15",
+          "title": "First deliverable review",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2026-08-12T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Deliverable link + review notes",
+          "evidence": {
+            "ref": "EVID-GEN-15",
+            "summary": "Deliverable link + review notes"
+          },
+          "completed_at": "2026-08-12T15:00:00",
+          "approved_by": "EMP-003"
+        },
+        {
+          "task_id": "GEN-16",
+          "title": "Day 30 check-in",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-014",
+          "due_at": "2026-08-12T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": {
+            "ref": "EVID-GEN-16",
+            "summary": "Pulse submitted"
+          },
+          "completed_at": "2026-08-12T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-17",
+          "title": "Independent work review",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2026-09-24T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Independent work evidence + review notes",
+          "evidence": null,
+          "completed_at": "2026-09-24T15:00:00",
+          "approved_by": "EMP-003"
+        },
+        {
+          "task_id": "GEN-18",
+          "title": "Day 60 check-in",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-014",
+          "due_at": "2026-09-24T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": {
+            "ref": "EVID-GEN-18",
+            "summary": "Pulse submitted"
+          },
+          "completed_at": "2026-09-24T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-19",
+          "title": "Day 90 ramp review and dossier",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2026-11-06T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Completed dossier + review notes",
+          "evidence": {
+            "ref": "EVID-GEN-19",
+            "summary": "Completed dossier + review notes"
+          },
+          "completed_at": "2026-11-06T15:00:00",
+          "approved_by": "EMP-003"
+        },
+        {
+          "task_id": "GEN-20",
+          "title": "Confirm verified skills",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-003",
+          "due_at": "2026-11-06T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Manager confirms level changes",
+          "evidence": {
+            "ref": "EVID-GEN-20",
+            "summary": "Manager confirms level changes"
+          },
+          "completed_at": "2026-11-06T15:00:00",
+          "approved_by": "EMP-003"
+        },
+        {
+          "task_id": "GEN-21",
+          "title": "Export probation pack",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-11-06T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Dossier exported; no decision recorded",
+          "evidence": {
+            "ref": "EVID-GEN-21",
+            "summary": "Dossier exported; no decision recorded"
+          },
+          "completed_at": "2026-11-06T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-22",
+          "title": "Day 90 check-in",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-014",
+          "due_at": "2026-11-06T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": {
+            "ref": "EVID-GEN-22",
+            "summary": "Pulse submitted"
+          },
+          "completed_at": "2026-11-06T15:00:00",
+          "approved_by": null
+        }
+      ],
+      "checkins": [
+        {
+          "checkin_id": "CHK-EMP-014-day7",
+          "kind": "day7",
+          "scheduled_at": "2026-07-10T09:00:00",
+          "completed_at": "2026-07-10T11:00:00",
+          "status": "completed",
+          "answers": {
+            "role_clarity": 4,
+            "access_ready": 4,
+            "buddy_contact": 5,
+            "first_week_tasks": 4
+          },
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-014-day30",
+          "kind": "day30",
+          "scheduled_at": "2026-08-12T09:00:00",
+          "completed_at": "2026-08-12T11:00:00",
+          "status": "completed",
+          "answers": {
+            "role_clarity": 4,
+            "first_contribution": 4,
+            "manager_feedback": 4,
+            "team_context": 4
+          },
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-014-day60",
+          "kind": "day60",
+          "scheduled_at": "2026-09-24T09:00:00",
+          "completed_at": "2026-09-24T11:00:00",
+          "status": "completed",
+          "answers": {
+            "independent_work": 4,
+            "wider_context": 4,
+            "learning_progress": 4,
+            "manager_support": 4
+          },
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-014-day90",
+          "kind": "day90",
+          "scheduled_at": "2026-11-06T09:00:00",
+          "completed_at": "2026-11-06T11:00:00",
+          "status": "completed",
+          "answers": {
+            "role_readiness": 4,
+            "contribution": 4,
+            "training_application": 4,
+            "team_integration": 4
+          },
+          "escalation": false
+        }
+      ],
+      "support_flags": [],
+      "gaps": [
+        {
+          "gap_id": "GAP-EMP-014-K8S",
+          "employee_id": "EMP-014",
+          "skill_id": "SKILL-K8S",
+          "current_level": 3,
+          "required_level": 3,
+          "gap": 0,
+          "severity": "none",
+          "severity_score": "0.0000",
+          "confidence": "1.0000",
+          "message": "Kubernetes meets the role requirement (3/3).",
+          "factors": [],
+          "evidence": [
+            {
+              "kind": "assessment",
+              "weight": "1",
+              "summary": "Post-course assessment: 88/100",
+              "ref": "ENR-EMP-014-K8S"
+            },
+            {
+              "kind": "applied_evidence",
+              "weight": "1",
+              "summary": "Two deployment PRs after the course",
+              "ref": "PRS-EMP-014"
+            }
+          ],
+          "status": "closed",
+          "decided_by": "EMP-003",
+          "decided_at": "2026-11-18T09:00:00",
+          "decision_note": null,
+          "decision_record_id": "DR-GAP-EMP-014-K8S"
+        }
+      ],
+      "recommendations": [
+        {
+          "recommendation_id": "REC-EMP-014-K8S",
+          "gap_id": "GAP-EMP-014-K8S",
+          "employee_id": "EMP-014",
+          "kind": "course",
+          "course_id": "CRS-K8S-02",
+          "mentor_employee_id": null,
+          "rationale": "CKA-prep course closes the level-3 requirement; manager approved the spend.",
+          "cost_tnd": "450.00",
+          "hours": 12,
+          "kpi_id": "KPI-MTTR",
+          "expected_effect": "Deployment ownership and faster restore (hypothesis)",
+          "status": "completed",
+          "approval_id": "APR-EMP-014-REC"
+        }
+      ],
+      "enrollments": [
+        {
+          "enrollment_id": "ENR-EMP-014-K8S",
+          "recommendation_id": "REC-EMP-014-K8S",
+          "employee_id": "EMP-014",
+          "course_id": "CRS-K8S-02",
+          "status": "completed",
+          "started_at": "2026-09-07T09:00:00",
+          "completed_at": "2026-09-25T17:00:00",
+          "score": 88,
+          "evidence": {
+            "assessment": 88,
+            "applied": "two deployment PRs"
+          },
+          "verified_by": "EMP-003",
+          "verified_at": "2026-10-02T10:00:00"
+        }
+      ],
+      "impact_measures": [
+        {
+          "impact_id": "IMP-EMP-014-K8S",
+          "recommendation_id": "REC-EMP-014-K8S",
+          "kpi_id": "KPI-MTTR",
+          "baseline_value": "8.4",
+          "post_value": "7.6",
+          "delta": "-0.8",
+          "comparison_employee_ids": [
+            "EMP-017",
+            "EMP-018",
+            "EMP-019",
+            "EMP-020",
+            "EMP-021"
+          ],
+          "comparison_n": 5,
+          "method": "difference-in-differences over 30 days; no random assignment",
+          "observed_delta": "-0.6000",
+          "label": "observed",
+          "measured_at": "2026-10-25T10:00:00",
+          "caveat": "Observed change, not causal. Comparison group n=5."
+        }
+      ],
+      "dossier": {
+        "tasks_total": 22,
+        "tasks_completed": 22,
+        "tasks_with_evidence": 21,
+        "missing": [
+          "Independent work review"
+        ],
+        "checkins_completed": 4,
+        "verified_skills": [
+          {
+            "skill_id": "SKILL-K8S",
+            "level": 3
+          }
+        ],
+        "note": "Assembled for a human decision. No salary, rating or recommendation is included."
+      }
+    },
+    {
+      "plan_id": "PLAN-EMP-015",
+      "employee_id": "EMP-015",
+      "display_name": "Farah Jlassi",
+      "position_id": "POS-SUP",
+      "org_unit_id": "ORG-OPS",
+      "manager_id": "EMP-005",
+      "buddy_id": "EMP-030",
+      "template_id": "TPL-GEN-01",
+      "start_date": "2026-09-01",
+      "target_ramp_date": "2027-01-07T09:00:00",
+      "status": "in_progress",
+      "phase": "day60",
+      "plan_approved_by": "EMP-006",
+      "approval_id": "APR-EMP-015-PLAN",
+      "tasks": [
+        {
+          "task_id": "GEN-01",
+          "title": "Sign contract and NDA",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-07-31T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Signed contract + NDA reference",
+          "evidence": {
+            "ref": "EVID-GEN-01",
+            "summary": "Signed contract + NDA reference"
+          },
+          "completed_at": "2026-07-31T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-02",
+          "title": "Complete payroll and tax forms",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-08-11T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Payroll record created",
+          "evidence": {
+            "ref": "EVID-GEN-02",
+            "summary": "Payroll record created"
+          },
+          "completed_at": "2026-08-11T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-03",
+          "title": "Request laptop and equipment",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-08-11T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Asset tag + delivery confirmation",
+          "evidence": {
+            "ref": "EVID-GEN-03",
+            "summary": "Asset tag + delivery confirmation"
+          },
+          "completed_at": "2026-08-11T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-04",
+          "title": "Provision accounts and access",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-08-21T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Accounts provisioned",
+          "evidence": {
+            "ref": "EVID-GEN-04",
+            "summary": "Accounts provisioned"
+          },
+          "completed_at": "2026-08-21T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-05",
+          "title": "Manager pre-start checklist",
+          "phase": "preboarding",
+          "task_kind": "manager_prep",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-005",
+          "due_at": "2026-08-21T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Access requested, first task drafted, calendar blocked, buddy briefed",
+          "evidence": {
+            "ref": "EVID-GEN-05",
+            "summary": "Access requested, first task drafted, calendar blocked, buddy briefed"
+          },
+          "completed_at": "2026-08-21T15:00:00",
+          "approved_by": "EMP-005"
+        },
+        {
+          "task_id": "GEN-06",
+          "title": "Send welcome and first-week preview",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-08-31T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Approved welcome message",
+          "evidence": {
+            "ref": "EVID-GEN-06",
+            "summary": "Approved welcome message"
+          },
+          "completed_at": "2026-08-31T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-07",
+          "title": "Buddy intro call",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-015",
+          "due_at": "2026-08-31T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Intro call completed",
+          "evidence": {
+            "ref": "EVID-GEN-07",
+            "summary": "Intro call completed"
+          },
+          "completed_at": "2026-08-31T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-08",
+          "title": "Day 1 welcome and workspace setup",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-09-01T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Workspace or remote setup note",
+          "evidence": {
+            "ref": "EVID-GEN-08",
+            "summary": "Workspace or remote setup note"
+          },
+          "completed_at": "2026-09-01T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-09",
+          "title": "Manager 1:1: purpose and success criteria",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-005",
+          "due_at": "2026-09-01T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Notes: purpose, success criteria, first 30 days",
+          "evidence": {
+            "ref": "EVID-GEN-09",
+            "summary": "Notes: purpose, success criteria, first 30 days"
+          },
+          "completed_at": "2026-09-01T15:00:00",
+          "approved_by": "EMP-005"
+        },
+        {
+          "task_id": "GEN-10",
+          "title": "Write role success criteria",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-005",
+          "due_at": "2026-09-03T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Written success criteria for day 30/60/90",
+          "evidence": {
+            "ref": "EVID-GEN-10",
+            "summary": "Written success criteria for day 30/60/90"
+          },
+          "completed_at": "2026-09-03T15:00:00",
+          "approved_by": "EMP-005"
+        },
+        {
+          "task_id": "GEN-11",
+          "title": "First small win",
+          "phase": "week1",
+          "task_kind": "first_win",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-015",
+          "due_at": "2026-09-07T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "First contribution link",
+          "evidence": {
+            "ref": "EVID-GEN-11",
+            "summary": "First contribution link"
+          },
+          "completed_at": "2026-09-07T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-12",
+          "title": "Attend team rituals",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-015",
+          "due_at": "2026-09-08T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Attended team rituals; notes",
+          "evidence": {
+            "ref": "EVID-GEN-12",
+            "summary": "Attended team rituals; notes"
+          },
+          "completed_at": "2026-09-08T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-13",
+          "title": "Acknowledge mandatory policies",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-09-10T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Signed acknowledgements",
+          "evidence": {
+            "ref": "EVID-GEN-13",
+            "summary": "Signed acknowledgements"
+          },
+          "completed_at": "2026-09-10T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "GEN-14",
+          "title": "Role gap task",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-015",
+          "due_at": "2026-10-13T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Training or applied evidence",
+          "evidence": {
+            "ref": "EVID-GEN-14",
+            "summary": "Training or applied evidence"
+          },
+          "completed_at": "2026-10-13T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-15",
+          "title": "First deliverable review",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-005",
+          "due_at": "2026-10-13T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Deliverable link + review notes",
+          "evidence": {
+            "ref": "EVID-GEN-15",
+            "summary": "Deliverable link + review notes"
+          },
+          "completed_at": "2026-10-13T15:00:00",
+          "approved_by": "EMP-005"
+        },
+        {
+          "task_id": "GEN-16",
+          "title": "Day 30 check-in",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-015",
+          "due_at": "2026-10-13T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": {
+            "ref": "EVID-GEN-16",
+            "summary": "Pulse submitted"
+          },
+          "completed_at": "2026-10-13T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-17",
+          "title": "Independent work review",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-005",
+          "due_at": "2026-11-25T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Independent work evidence + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-18",
+          "title": "Day 60 check-in",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-015",
+          "due_at": "2026-11-25T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-19",
+          "title": "Day 90 ramp review and dossier",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-005",
+          "due_at": "2027-01-07T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Completed dossier + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-20",
+          "title": "Confirm verified skills",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-005",
+          "due_at": "2027-01-07T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Manager confirms level changes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-21",
+          "title": "Export probation pack",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2027-01-07T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Dossier exported; no decision recorded",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "GEN-22",
+          "title": "Day 90 check-in",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-015",
+          "due_at": "2027-01-07T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        }
+      ],
+      "checkins": [
+        {
+          "checkin_id": "CHK-EMP-015-day7",
+          "kind": "day7",
+          "scheduled_at": "2026-09-10T09:00:00",
+          "completed_at": "2026-09-10T11:00:00",
+          "status": "completed",
+          "answers": {
+            "role_clarity": 4,
+            "access_ready": 4,
+            "buddy_contact": 5,
+            "first_week_tasks": 4
+          },
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-015-day30",
+          "kind": "day30",
+          "scheduled_at": "2026-10-13T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-015-day60",
+          "kind": "day60",
+          "scheduled_at": "2026-11-25T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-015-day90",
+          "kind": "day90",
+          "scheduled_at": "2027-01-07T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        }
+      ],
+      "support_flags": [
+        {
+          "flag_id": "FLAG-EMP-015-1",
+          "kind": "missed_checkin",
+          "reason_code": "day30_not_submitted",
+          "facts": [
+            "D30 check-in was scheduled and is still pending."
+          ],
+          "status": "open",
+          "raised_at": "2026-11-18T09:00:00",
+          "resolved_at": null,
+          "resolved_by": null
+        }
+      ],
+      "gaps": [],
+      "recommendations": [],
+      "enrollments": [],
+      "impact_measures": [],
+      "dossier": null
+    },
+    {
+      "plan_id": "PLAN-EMP-016",
+      "employee_id": "EMP-016",
+      "display_name": "Nizar Ayari",
+      "position_id": "POS-BE",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "buddy_id": "EMP-009",
+      "template_id": "TPL-BE-01",
+      "start_date": "2026-10-15",
+      "target_ramp_date": "2027-02-19T09:00:00",
+      "status": "in_progress",
+      "phase": "day30",
+      "plan_approved_by": "EMP-006",
+      "approval_id": "APR-EMP-016-PLAN",
+      "tasks": [
+        {
+          "task_id": "BE-01",
+          "title": "Sign contract and NDA",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-09-16T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Signed contract + NDA reference",
+          "evidence": {
+            "ref": "EVID-BE-01",
+            "summary": "Signed contract + NDA reference"
+          },
+          "completed_at": "2026-09-16T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "BE-02",
+          "title": "Complete payroll and tax forms",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-09-25T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Payroll record created",
+          "evidence": {
+            "ref": "EVID-BE-02",
+            "summary": "Payroll record created"
+          },
+          "completed_at": "2026-09-25T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "BE-03",
+          "title": "Request laptop and equipment",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-09-25T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Asset tag + delivery confirmation",
+          "evidence": {
+            "ref": "EVID-BE-03",
+            "summary": "Asset tag + delivery confirmation"
+          },
+          "completed_at": "2026-09-25T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-04",
+          "title": "Provision accounts and repo access",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-10-06T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Accounts provisioned: email, SSO, repo",
+          "evidence": {
+            "ref": "EVID-BE-04",
+            "summary": "Accounts provisioned: email, SSO, repo"
+          },
+          "completed_at": "2026-10-06T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-05",
+          "title": "Manager pre-start checklist",
+          "phase": "preboarding",
+          "task_kind": "manager_prep",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2026-10-06T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Access requested, first task drafted, calendar blocked, buddy briefed",
+          "evidence": {
+            "ref": "EVID-BE-05",
+            "summary": "Access requested, first task drafted, calendar blocked, buddy briefed"
+          },
+          "completed_at": "2026-10-06T15:00:00",
+          "approved_by": "EMP-002"
+        },
+        {
+          "task_id": "BE-06",
+          "title": "Send welcome and first-week preview",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-10-14T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Approved welcome message",
+          "evidence": {
+            "ref": "EVID-BE-06",
+            "summary": "Approved welcome message"
+          },
+          "completed_at": "2026-10-14T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "BE-07",
+          "title": "Buddy intro call",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-016",
+          "due_at": "2026-10-14T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Intro call completed",
+          "evidence": {
+            "ref": "EVID-BE-07",
+            "summary": "Intro call completed"
+          },
+          "completed_at": "2026-10-14T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-08",
+          "title": "Day 1 welcome and workspace setup",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-10-15T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Workspace or remote setup note",
+          "evidence": {
+            "ref": "EVID-BE-08",
+            "summary": "Workspace or remote setup note"
+          },
+          "completed_at": "2026-10-15T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-09",
+          "title": "Manager 1:1: purpose, not paperwork",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2026-10-15T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Notes: purpose, success criteria, first 30 days",
+          "evidence": {
+            "ref": "EVID-BE-09",
+            "summary": "Notes: purpose, success criteria, first 30 days"
+          },
+          "completed_at": "2026-10-15T15:00:00",
+          "approved_by": "EMP-002"
+        },
+        {
+          "task_id": "BE-10",
+          "title": "Buddy lunch",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-016",
+          "due_at": "2026-10-15T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Calendar event + note",
+          "evidence": {
+            "ref": "EVID-BE-10",
+            "summary": "Calendar event + note"
+          },
+          "completed_at": "2026-10-15T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-11",
+          "title": "Read the three maps, not 300 docs",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-016",
+          "due_at": "2026-10-16T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Notes on architecture, runbook, on-call",
+          "evidence": {
+            "ref": "EVID-BE-11",
+            "summary": "Notes on architecture, runbook, on-call"
+          },
+          "completed_at": "2026-10-16T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-12",
+          "title": "Run the local development stack",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-10-16T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Local stack running; test command passes",
+          "evidence": {
+            "ref": "EVID-BE-12",
+            "summary": "Local stack running; test command passes"
+          },
+          "completed_at": "2026-10-16T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-13",
+          "title": "Repo and architecture tour",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-016",
+          "due_at": "2026-10-19T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Map of services and owners",
+          "evidence": {
+            "ref": "EVID-BE-13",
+            "summary": "Map of services and owners"
+          },
+          "completed_at": "2026-10-19T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-14",
+          "title": "First small win: merge one PR",
+          "phase": "week1",
+          "task_kind": "first_win",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-016",
+          "due_at": "2026-10-20T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "PR link or ticket closed",
+          "evidence": {
+            "ref": "EVID-BE-14",
+            "summary": "PR link or ticket closed"
+          },
+          "completed_at": "2026-10-20T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-15",
+          "title": "Attend team rituals",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-016",
+          "due_at": "2026-10-21T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Attended standup and retro; notes",
+          "evidence": {
+            "ref": "EVID-BE-15",
+            "summary": "Attended standup and retro; notes"
+          },
+          "completed_at": "2026-10-21T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-16",
+          "title": "Ask-anything session",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-016",
+          "due_at": "2026-10-22T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Questions and answers recorded",
+          "evidence": {
+            "ref": "EVID-BE-16",
+            "summary": "Questions and answers recorded"
+          },
+          "completed_at": "2026-10-22T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-17",
+          "title": "Write role success criteria",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2026-10-22T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Written success criteria for day 30/60/90",
+          "evidence": {
+            "ref": "EVID-BE-17",
+            "summary": "Written success criteria for day 30/60/90"
+          },
+          "completed_at": "2026-10-22T15:00:00",
+          "approved_by": "EMP-002"
+        },
+        {
+          "task_id": "BE-18",
+          "title": "Acknowledge mandatory policies",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-10-26T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Signed acknowledgements",
+          "evidence": {
+            "ref": "EVID-BE-18",
+            "summary": "Signed acknowledgements"
+          },
+          "completed_at": "2026-10-26T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "BE-19",
+          "title": "Kubernetes gap task",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-016",
+          "due_at": "2026-11-26T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "CRS-K8S-01 completed or lab evidence",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-20",
+          "title": "First deliverable review",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2026-11-26T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Deliverable link + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-21",
+          "title": "Day 30 check-in",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-016",
+          "due_at": "2026-11-26T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-22",
+          "title": "Observability gap task",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-016",
+          "due_at": "2027-01-08T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "CRS-OBS-01 or incident review evidence",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-23",
+          "title": "Independent work review",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2027-01-08T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Two independent changes + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-24",
+          "title": "Cross-team contribution",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-016",
+          "due_at": "2027-01-08T09:00:00",
+          "status": "pending",
+          "mandatory": false,
+          "evidence_required": "Contribution note",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-25",
+          "title": "Day 60 check-in",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-016",
+          "due_at": "2027-01-08T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-26",
+          "title": "Day 90 ramp review and dossier",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2027-02-19T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Completed dossier + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-27",
+          "title": "Confirm verified skills",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2027-02-19T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Manager confirms level changes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-28",
+          "title": "Export probation pack",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2027-02-19T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Dossier exported; no decision recorded",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-29",
+          "title": "Day 90 check-in",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-016",
+          "due_at": "2027-02-19T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        }
+      ],
+      "checkins": [
+        {
+          "checkin_id": "CHK-EMP-016-day7",
+          "kind": "day7",
+          "scheduled_at": "2026-10-26T09:00:00",
+          "completed_at": "2026-10-26T11:00:00",
+          "status": "completed",
+          "answers": {
+            "role_clarity": 4,
+            "access_ready": 4,
+            "buddy_contact": 5,
+            "first_week_tasks": 4
+          },
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-016-day30",
+          "kind": "day30",
+          "scheduled_at": "2026-11-26T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-016-day60",
+          "kind": "day60",
+          "scheduled_at": "2027-01-08T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-016-day90",
+          "kind": "day90",
+          "scheduled_at": "2027-02-19T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        }
+      ],
+      "support_flags": [],
+      "gaps": [],
+      "recommendations": [],
+      "enrollments": [],
+      "impact_measures": [],
+      "dossier": null
+    },
+    {
+      "plan_id": "PLAN-EMP-041",
+      "employee_id": "EMP-041",
+      "display_name": "Yasmine Trabelsi",
+      "position_id": "POS-BE",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "buddy_id": "EMP-009",
+      "template_id": "TPL-BE-01",
+      "start_date": "2026-11-09",
+      "target_ramp_date": "2027-03-16T09:00:00",
+      "status": "in_progress",
+      "phase": "week1",
+      "plan_approved_by": "EMP-006",
+      "approval_id": "APR-EMP-041-PLAN",
+      "tasks": [
+        {
+          "task_id": "BE-01",
+          "title": "Sign contract and NDA",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-10-08T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Signed contract + NDA reference",
+          "evidence": {
+            "ref": "EVID-BE-01",
+            "summary": "Signed contract + NDA reference"
+          },
+          "completed_at": "2026-10-08T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "BE-02",
+          "title": "Complete payroll and tax forms",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-10-20T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Payroll record created",
+          "evidence": {
+            "ref": "EVID-BE-02",
+            "summary": "Payroll record created"
+          },
+          "completed_at": "2026-10-20T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "BE-03",
+          "title": "Request laptop and equipment",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-10-20T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Asset tag + delivery confirmation",
+          "evidence": {
+            "ref": "EVID-BE-03",
+            "summary": "Asset tag + delivery confirmation"
+          },
+          "completed_at": "2026-10-20T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-04",
+          "title": "Provision accounts and repo access",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-10-29T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Accounts provisioned: email, SSO, repo",
+          "evidence": {
+            "ref": "EVID-BE-04",
+            "summary": "Accounts provisioned: email, SSO, repo"
+          },
+          "completed_at": "2026-10-29T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-05",
+          "title": "Manager pre-start checklist",
+          "phase": "preboarding",
+          "task_kind": "manager_prep",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2026-10-29T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Access requested, first task drafted, calendar blocked, buddy briefed",
+          "evidence": {
+            "ref": "EVID-BE-05",
+            "summary": "Access requested, first task drafted, calendar blocked, buddy briefed"
+          },
+          "completed_at": "2026-10-29T15:00:00",
+          "approved_by": "EMP-002"
+        },
+        {
+          "task_id": "BE-06",
+          "title": "Send welcome and first-week preview",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-11-06T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Approved welcome message",
+          "evidence": {
+            "ref": "EVID-BE-06",
+            "summary": "Approved welcome message"
+          },
+          "completed_at": "2026-11-06T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "BE-07",
+          "title": "Buddy intro call",
+          "phase": "preboarding",
+          "task_kind": "preboarding",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-041",
+          "due_at": "2026-11-06T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Intro call completed",
+          "evidence": {
+            "ref": "EVID-BE-07",
+            "summary": "Intro call completed"
+          },
+          "completed_at": "2026-11-06T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-08",
+          "title": "Day 1 welcome and workspace setup",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-11-09T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Workspace or remote setup note",
+          "evidence": {
+            "ref": "EVID-BE-08",
+            "summary": "Workspace or remote setup note"
+          },
+          "completed_at": "2026-11-09T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-09",
+          "title": "Manager 1:1: purpose, not paperwork",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2026-11-09T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Notes: purpose, success criteria, first 30 days",
+          "evidence": {
+            "ref": "EVID-BE-09",
+            "summary": "Notes: purpose, success criteria, first 30 days"
+          },
+          "completed_at": "2026-11-09T15:00:00",
+          "approved_by": "EMP-002"
+        },
+        {
+          "task_id": "BE-10",
+          "title": "Buddy lunch",
+          "phase": "day1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-041",
+          "due_at": "2026-11-09T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Calendar event + note",
+          "evidence": {
+            "ref": "EVID-BE-10",
+            "summary": "Calendar event + note"
+          },
+          "completed_at": "2026-11-09T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-11",
+          "title": "Read the three maps, not 300 docs",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-041",
+          "due_at": "2026-11-10T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Notes on architecture, runbook, on-call",
+          "evidence": {
+            "ref": "EVID-BE-11",
+            "summary": "Notes on architecture, runbook, on-call"
+          },
+          "completed_at": "2026-11-10T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-12",
+          "title": "Run the local development stack",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "admin",
+          "owner_employee_id": null,
+          "due_at": "2026-11-10T09:00:00",
+          "status": "in_progress",
+          "mandatory": true,
+          "evidence_required": "Local stack running; test command passes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-13",
+          "title": "Repo and architecture tour",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-041",
+          "due_at": "2026-11-11T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Map of services and owners",
+          "evidence": {
+            "ref": "EVID-BE-13",
+            "summary": "Map of services and owners"
+          },
+          "completed_at": "2026-11-11T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-14",
+          "title": "First small win: merge one PR",
+          "phase": "week1",
+          "task_kind": "first_win",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-041",
+          "due_at": "2026-11-12T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "PR link or ticket closed",
+          "evidence": {
+            "ref": "EVID-BE-14",
+            "summary": "PR link or ticket closed"
+          },
+          "completed_at": "2026-11-12T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-15",
+          "title": "Attend team rituals",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-041",
+          "due_at": "2026-11-13T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Attended standup and retro; notes",
+          "evidence": {
+            "ref": "EVID-BE-15",
+            "summary": "Attended standup and retro; notes"
+          },
+          "completed_at": "2026-11-13T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-16",
+          "title": "Ask-anything session",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-041",
+          "due_at": "2026-11-16T09:00:00",
+          "status": "completed",
+          "mandatory": false,
+          "evidence_required": "Questions and answers recorded",
+          "evidence": {
+            "ref": "EVID-BE-16",
+            "summary": "Questions and answers recorded"
+          },
+          "completed_at": "2026-11-16T15:00:00",
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-17",
+          "title": "Write role success criteria",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2026-11-16T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Written success criteria for day 30/60/90",
+          "evidence": {
+            "ref": "EVID-BE-17",
+            "summary": "Written success criteria for day 30/60/90"
+          },
+          "completed_at": "2026-11-16T15:00:00",
+          "approved_by": "EMP-002"
+        },
+        {
+          "task_id": "BE-18",
+          "title": "Acknowledge mandatory policies",
+          "phase": "week1",
+          "task_kind": "standard",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2026-11-18T09:00:00",
+          "status": "completed",
+          "mandatory": true,
+          "evidence_required": "Signed acknowledgements",
+          "evidence": {
+            "ref": "EVID-BE-18",
+            "summary": "Signed acknowledgements"
+          },
+          "completed_at": "2026-11-18T15:00:00",
+          "approved_by": "EMP-006"
+        },
+        {
+          "task_id": "BE-19",
+          "title": "Kubernetes gap task",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-041",
+          "due_at": "2026-12-22T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "CRS-K8S-01 completed or lab evidence",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-20",
+          "title": "First deliverable review",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2026-12-22T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Deliverable link + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-21",
+          "title": "Day 30 check-in",
+          "phase": "day30",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-041",
+          "due_at": "2026-12-22T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-22",
+          "title": "Observability gap task",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-041",
+          "due_at": "2027-02-02T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "CRS-OBS-01 or incident review evidence",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-23",
+          "title": "Independent work review",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2027-02-02T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Two independent changes + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-24",
+          "title": "Cross-team contribution",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-041",
+          "due_at": "2027-02-02T09:00:00",
+          "status": "pending",
+          "mandatory": false,
+          "evidence_required": "Contribution note",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-25",
+          "title": "Day 60 check-in",
+          "phase": "day60",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-041",
+          "due_at": "2027-02-02T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-26",
+          "title": "Day 90 ramp review and dossier",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2027-03-16T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Completed dossier + review notes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-27",
+          "title": "Confirm verified skills",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "manager",
+          "owner_employee_id": "EMP-002",
+          "due_at": "2027-03-16T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Manager confirms level changes",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-28",
+          "title": "Export probation pack",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "hr",
+          "owner_employee_id": null,
+          "due_at": "2027-03-16T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Dossier exported; no decision recorded",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        },
+        {
+          "task_id": "BE-29",
+          "title": "Day 90 check-in",
+          "phase": "day90",
+          "task_kind": "standard",
+          "owner_role": "employee",
+          "owner_employee_id": "EMP-041",
+          "due_at": "2027-03-16T09:00:00",
+          "status": "pending",
+          "mandatory": true,
+          "evidence_required": "Pulse submitted",
+          "evidence": null,
+          "completed_at": null,
+          "approved_by": null
+        }
+      ],
+      "checkins": [
+        {
+          "checkin_id": "CHK-EMP-041-day7",
+          "kind": "day7",
+          "scheduled_at": "2026-11-18T09:00:00",
+          "completed_at": "2026-11-18T11:00:00",
+          "status": "completed",
+          "answers": {
+            "role_clarity": 4,
+            "access_ready": 2,
+            "buddy_contact": 5,
+            "first_week_tasks": 4,
+            "blockers_text": "Staging DB access is still pending."
+          },
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-041-day30",
+          "kind": "day30",
+          "scheduled_at": "2026-12-22T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-041-day60",
+          "kind": "day60",
+          "scheduled_at": "2027-02-02T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        },
+        {
+          "checkin_id": "CHK-EMP-041-day90",
+          "kind": "day90",
+          "scheduled_at": "2027-03-16T09:00:00",
+          "completed_at": null,
+          "status": "pending",
+          "answers": {},
+          "escalation": false
+        }
+      ],
+      "support_flags": [
+        {
+          "flag_id": "FLAG-EMP-041-1",
+          "kind": "milestone_slip",
+          "reason_code": "staging_access_missing",
+          "facts": [
+            "BE-12 Run the local development stack is in progress; staging DB access has not been provisioned."
+          ],
+          "status": "open",
+          "raised_at": "2026-11-18T09:00:00",
+          "resolved_at": null,
+          "resolved_by": null
+        },
+        {
+          "flag_id": "FLAG-EMP-041-2",
+          "kind": "low_answer",
+          "reason_code": "access_ready_low",
+          "facts": [
+            "D7 pulse: access_ready=2; blockers_text recorded for a human to read."
+          ],
+          "status": "open",
+          "raised_at": "2026-11-18T09:00:00",
+          "resolved_at": null,
+          "resolved_by": null
+        },
+        {
+          "flag_id": "FLAG-EMP-041-3",
+          "kind": "doc_feedback",
+          "reason_code": "doc_outdated",
+          "facts": [
+            "New hire flagged 'Engineering Runbook v4 section 3.2 Access' as outdated."
+          ],
+          "status": "resolved",
+          "raised_at": "2026-11-17T09:00:00",
+          "resolved_at": "2026-11-18T09:00:00",
+          "resolved_by": "EMP-006"
+        }
+      ],
+      "gaps": [
+        {
+          "gap_id": "GAP-EMP-041-K8S",
+          "employee_id": "EMP-041",
+          "skill_id": "SKILL-K8S",
+          "current_level": 1,
+          "required_level": 3,
+          "gap": 2,
+          "severity": "high",
+          "severity_score": "0.8000",
+          "confidence": "0.5667",
+          "message": "Kubernetes is at level 1; the role requires 3. 3 evidence signal(s), confidence 0.5667.",
+          "factors": [
+            {
+              "key": "gap",
+              "label": "Gap against the role requirement",
+              "weight": "0.20",
+              "value": "2",
+              "contribution": "0.40"
+            },
+            {
+              "key": "mandatory",
+              "label": "Mandatory requirement",
+              "weight": "0.25",
+              "value": "1",
+              "contribution": "0.25"
+            },
+            {
+              "key": "requirement_weight",
+              "label": "Role-profile weight",
+              "weight": "0.15",
+              "value": "1",
+              "contribution": "0.15"
+            }
+          ],
+          "evidence": [
+            {
+              "kind": "inferred",
+              "weight": "1",
+              "summary": "Screening: 14 PRs touched manifests, zero deployment ownership",
+              "ref": "SCREEN-CAND-001"
+            },
+            {
+              "kind": "manager",
+              "weight": "1",
+              "summary": "Day-60 review: 2/5 on deployment ownership",
+              "ref": "REV-EMP-002-041"
+            },
+            {
+              "kind": "inferred",
+              "weight": "1",
+              "summary": "No CKA certification on file",
+              "ref": "CERT-NONE-041"
+            }
+          ],
+          "status": "confirmed",
+          "decided_by": "EMP-002",
+          "decided_at": "2026-11-18T09:00:00",
+          "decision_note": null,
+          "decision_record_id": "DR-GAP-EMP-041-K8S"
+        },
+        {
+          "gap_id": "GAP-EMP-041-OBS",
+          "employee_id": "EMP-041",
+          "skill_id": "SKILL-OBS",
+          "current_level": 1,
+          "required_level": 3,
+          "gap": 2,
+          "severity": "high",
+          "severity_score": "0.7850",
+          "confidence": "0.5000",
+          "message": "Observability is at level 1; the role requires 3. 1 evidence signal(s), confidence 0.5000.",
+          "factors": [
+            {
+              "key": "gap",
+              "label": "Gap against the role requirement",
+              "weight": "0.20",
+              "value": "2",
+              "contribution": "0.40"
+            },
+            {
+              "key": "mandatory",
+              "label": "Mandatory requirement",
+              "weight": "0.25",
+              "value": "1",
+              "contribution": "0.25"
+            },
+            {
+              "key": "requirement_weight",
+              "label": "Role-profile weight",
+              "weight": "0.15",
+              "value": "0.9",
+              "contribution": "0.135"
+            }
+          ],
+          "evidence": [
+            {
+              "kind": "inferred",
+              "weight": "1",
+              "summary": "Screening: no incident-review or dashboard ownership evidence",
+              "ref": "SCREEN-CAND-001-OBS"
+            }
+          ],
+          "status": "proposed",
+          "decided_by": null,
+          "decided_at": null,
+          "decision_note": null,
+          "decision_record_id": null
+        }
+      ],
+      "recommendations": [
+        {
+          "recommendation_id": "REC-EMP-041-K8S",
+          "gap_id": "GAP-EMP-041-K8S",
+          "employee_id": "EMP-041",
+          "kind": "course",
+          "course_id": "CRS-K8S-01",
+          "mentor_employee_id": "EMP-009",
+          "rationale": "Start with Kubernetes Fundamentals; it is 6 hours, 0 TND, and the team's internal expert EMP-009 is available for pairing. The next step is CRS-K8S-02 if the gap is still open at day 60.",
+          "cost_tnd": "0.00",
+          "hours": 6,
+          "kpi_id": "KPI-MTTR",
+          "expected_effect": "Lower MTTR for deployment incidents (hypothesis)",
+          "status": "proposed",
+          "approval_id": null
+        }
+      ],
+      "enrollments": [],
+      "impact_measures": [],
+      "dossier": null
+    }
+  ]
+}

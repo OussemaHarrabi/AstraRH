@@ -80,6 +80,24 @@ def phase_for_day(day: int) -> str:
     return "completed"
 
 
+def working_days_between(
+    start: date,
+    end: date,
+    holidays: Iterable[date] = DEMO_HOLIDAYS,
+) -> int:
+    """Signed number of working days between two dates. Used for the plan phase."""
+    if end < start:
+        return -working_days_between(end, start, holidays)
+    holiday_set = set(holidays)
+    count = 0
+    current = start
+    while current < end:
+        current += timedelta(days=1)
+        if current.weekday() < 5 and current not in holiday_set:
+            count += 1
+    return count
+
+
 def expand_template(
     template: Mapping[str, Any],
     start: date,

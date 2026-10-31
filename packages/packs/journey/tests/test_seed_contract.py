@@ -121,7 +121,7 @@ def test_courses_are_fictional_and_cover_the_hero_path():
 def test_templates_are_consistent_and_long_enough():
     payload = json.loads((SEED / "onboarding_templates.json").read_text(encoding="utf-8"))
     templates = payload["templates"]
-    assert {template["position_id"] for template in templates} == {"POS-BE", "POS-AE"}
+    assert {template["position_id"] for template in templates} == {"POS-BE", "POS-AE", "GENERIC"}
     for template in templates:
         tasks = template["tasks"]
         assert len(tasks) >= 15, template["id"]
@@ -170,3 +170,4 @@ def test_scenarios_cover_the_pack_contract():
         assert token in text, token
     for token in ("payload", "audit", "no evidence", "cross-tenant", "fail closed"):
         assert token.lower() in text.lower(), token
+

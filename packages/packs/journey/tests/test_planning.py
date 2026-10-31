@@ -11,6 +11,7 @@ from journey.services.planning import (
     is_working_day,
     next_three,
     phase_for_day,
+    working_days_between,
 )
 
 MONDAY = date(2026, 11, 9)
@@ -51,6 +52,14 @@ def test_phase_boundaries():
     assert phase_for_day(61) == "day90"
     assert phase_for_day(90) == "day90"
     assert phase_for_day(91) == "completed"
+
+
+def test_working_days_between_is_signed_and_skips_weekends():
+    assert working_days_between(MONDAY, MONDAY, holidays=()) == 0
+    assert working_days_between(MONDAY, date(2026, 11, 13), holidays=()) == 4
+    assert working_days_between(MONDAY, date(2026, 11, 16), holidays=()) == 5
+    assert working_days_between(date(2026, 11, 6), MONDAY, holidays=()) == 1
+    assert working_days_between(MONDAY, date(2026, 11, 6), holidays=()) == -1
 
 
 def test_expand_template_sets_due_dates_and_phases():
@@ -164,3 +173,4 @@ def test_dossier_counts_evidence_and_missing_items_without_salary():
     assert result["verified_skills"] == [{"skill_id": "SKILL-K8S", "level": 2}]
     assert "salary" not in result
     assert "rating" not in result
+
