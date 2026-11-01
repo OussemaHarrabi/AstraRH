@@ -16,6 +16,7 @@ from kernel.identity import Actor
 from packs.finance import proposals
 from packs.finance.models import RuleSetRecord
 from packs.finance.payroll import calc, examples, rules
+from packs.finance.payroll import scorer
 
 ACTIVATE_ACTION = "finance.rules.activate"
 DECISION_VIEW_ROLES = ["admin", "finance", "hr", "auditor"]
@@ -156,6 +157,45 @@ def calculate_net(session: Session, data: calc.PayslipInput, day: date) -> dict[
         return payslip_json(calc.payslip(data, parsed), parsed)
     except (rules.RuleSetUnavailable, calc.PayslipInvalid) as exc:
         raise ValidationFailed(str(exc)) from exc
+
+
+def impact_preview(session: Session, rule_set_id: UUID, run_id: UUID) -> dict[str, Any]:
+    """Recalculate a settled run with a draft rule set without persisting results."""
+    from packs.finance.models import Payslip, PayrollRun
+
+    record = get_rule_set(session, rule_set_id)
+    run = session.get(PayrollRun, run_id)
+    if run is None:
+        raise NotFound("Payroll run not found")
+    if run.status not in {"approved", "payment_pending", "paid", "closed"}:
+        raise Conflict("Impact previews require a settled source run")
+    parsed = parse_definition(record.definition)
+    rows = []
+    current_net = Decimal(0)
+    preview_net = Decimal(0)
+    for slip in session.scalars(select(Payslip).where(Payslip.run_id == run.id)):
+        current = scorer.compute(slip.inputs)
+        preview = calc.payslip(scorer.payslip_input(slip.inputs), parsed)
+        current_net += current.net_pay
+        preview_net += preview.net_pay
+        rows.append(
+            {
+                "employee_id": str(slip.employee_id),
+                "current_net": _text(current.net_pay),
+                "preview_net": _text(preview.net_pay),
+                "delta": _text(preview.net_pay - current.net_pay),
+            }
+        )
+    return {
+        "run_id": str(run.id),
+        "rule_set": record.rule_id,
+        "rule_set_version": record.version,
+        "current_net": _text(current_net),
+        "preview_net": _text(preview_net),
+        "delta": _text(preview_net - current_net),
+        "employees": rows,
+        "persisted": False,
+    }
 
 
 def _flatten(value: Any, prefix: str = "") -> dict[str, Any]:

@@ -317,6 +317,8 @@ class PayrollRun(TenantMixin, Base):
     period_end: Mapped[date] = mapped_column(Date, nullable=False)
     pay_date: Mapped[date] = mapped_column(Date, nullable=False)
     regime_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    run_type: Mapped[str] = mapped_column(String(16), nullable=False, default="regular")
+    employee_ids: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
     status: Mapped[str] = mapped_column(String(24), nullable=False, default="draft")
     rule_set_refs: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     input_batch_refs: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)

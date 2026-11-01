@@ -10,7 +10,7 @@ from kernel.db import utcnow
 from kernel.errors import KernelError
 from kernel.events import publish
 from kernel.trust import AdapterRejected, Approval, Proposal
-from packs.finance import engagements, issues, payments, runs, service
+from packs.finance import civp, engagements, issues, payments, runs, service
 from packs.finance.events import EngagementActivated, PayrollApproved
 from packs.finance.models import Engagement, PayrollRun, Payslip, RuleSetRecord
 
@@ -140,3 +140,19 @@ def close_run(session: Session, tenant_id: UUID, payload: dict[str, Any], key: s
     except KernelError as exc:
         raise AdapterRejected(exc.message) from exc
     return f"run:{payload['run_id']}:closed"
+
+
+def activate_civp(session: Session, tenant_id: UUID, payload: dict[str, Any], key: str) -> str:
+    try:
+        placement = civp.activate(session, tenant_id, UUID(payload["placement_id"]))
+    except KernelError as exc:
+        raise AdapterRejected(exc.message) from exc
+    return f"civp:{placement.id}:active"
+
+
+def complete_civp(session: Session, tenant_id: UUID, payload: dict[str, Any], key: str) -> str:
+    try:
+        placement = civp.complete(session, tenant_id, UUID(payload["placement_id"]))
+    except KernelError as exc:
+        raise AdapterRejected(exc.message) from exc
+    return f"civp:{placement.id}:completed"

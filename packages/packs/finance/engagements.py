@@ -18,7 +18,12 @@ from kernel.events import publish
 from kernel.identity import Actor
 from kernel.people.models import Employee
 from packs.finance import issues, proposals
-from packs.finance.events import EngagementAmended, EngagementValidated
+from packs.finance.events import (
+    EngagementAmended,
+    EngagementEndingSoon,
+    EngagementTerminated,
+    EngagementValidated,
+)
 from packs.finance.models import (
     DocumentRef,
     Engagement,
@@ -180,6 +185,16 @@ def _view(session: Session, engagement: Engagement) -> rules.EngagementView:
         for doc in _documents(session, engagement.id)
         if doc.verification_status == "verified"
     )
+    base_salary = next(
+        (
+            item.amount
+            for item in items
+            if item.code == BASE_SALARY
+            and item.valid_from <= engagement.starts_on
+            and (item.valid_to is None or item.valid_to >= engagement.starts_on)
+        ),
+        None,
+    )
     return rules.EngagementView(
         type=engagement.type,
         starts_on=engagement.starts_on,
@@ -189,6 +204,7 @@ def _view(session: Session, engagement: Engagement) -> rules.EngagementView:
         cdd_reason_code=engagement.cdd_reason_code,
         has_base_salary=has_salary,
         verified_documents=verified,
+        base_salary=base_salary,
     )
 
 
@@ -580,3 +596,70 @@ def convert_hire_notice(
     notice.engagement_id = engagement.id
     session.flush()
     return engagement
+
+
+def edit_draft(
+    session: Session,
+    tenant_id: UUID,
+    engagement_id: UUID,
+    *,
+    job_title: str | None = None,
+    work_location: str | None = None,
+    weekly_hours: Decimal | None = None,
+    ends_on: date | None = None,
+    base_salary: Decimal | None = None,
+) -> Engagement:
+    row = get_engagement(session, engagement_id)
+    if row.status not in EDITABLE:
+        raise Conflict("Only a draft or review engagement can be edited")
+    if job_title is not None:
+        row.job_title = job_title.strip()
+    if work_location is not None:
+        row.work_location = work_location.strip() or None
+    if weekly_hours is not None:
+        row.weekly_hours = weekly_hours
+    if ends_on is not None:
+        row.ends_on = ends_on
+    if base_salary is not None:
+        item = next((i for i in _items(session, row.id) if i.code == BASE_SALARY), None)
+        if item is None:
+            add_pay_item(
+                session,
+                tenant_id,
+                row,
+                PayItemInput(BASE_SALARY, base_salary, row.starts_on),
+                revalidate=False,
+            )
+        else:
+            item.amount = base_salary
+    session.flush()
+    return validate_engagement(session, tenant_id, row)
+
+
+def terminate(session: Session, tenant_id: UUID, engagement_id: UUID, end_on: date, reason: str) -> Engagement:
+    row = get_engagement(session, engagement_id)
+    if row.status != "active":
+        raise Conflict("Only an active engagement can be terminated")
+    if end_on < row.starts_on:
+        raise ValidationFailed("The termination date is before the engagement start")
+    row.ends_on = end_on
+    row.status = "terminated"
+    session.flush()
+    publish(session, tenant_id, EngagementTerminated(engagement_id=row.id, ends_on=end_on))
+    return row
+
+
+def ending_soon(session: Session, tenant_id: UUID, on: date, days: int = 30) -> list[Engagement]:
+    rows = list(
+        session.scalars(
+            select(Engagement).where(
+                Engagement.status == "active",
+                Engagement.ends_on.is_not(None),
+                Engagement.ends_on >= on,
+                Engagement.ends_on <= on + timedelta(days=days),
+            )
+        )
+    )
+    for row in rows:
+        publish(session, tenant_id, EngagementEndingSoon(engagement_id=row.id, ends_on=row.ends_on))
+    return rows

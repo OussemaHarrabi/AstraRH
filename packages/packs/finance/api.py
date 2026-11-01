@@ -12,11 +12,18 @@ from sqlalchemy import select
 from kernel import explain
 from kernel.authz import has_role, require_role
 from kernel.errors import NotFound
+from kernel.identity.models import UserAccount
 from kernel.people.models import Employee
 from kernel.web import request_context
-from packs.finance import engagements, inputs, issues, payments, runs, service
+from packs.finance import civp, engagements, exports, inputs, issues, payments, runs, service
 from packs.finance.models import (
     DocumentRef,
+    CivpExtensionRequest,
+    CivpLedgerEntry,
+    CivpPlacement,
+    CivpTraining,
+    EmployerProfile,
+    Adjustment,
     Engagement,
     HireNotice,
     PaymentDestination,
@@ -43,6 +50,7 @@ INPUT_WRITE = {"admin", "finance"}
 RUN_SUMMARY_READ = {"admin", "finance", "hr", "auditor"}
 RUN_DETAIL_READ = {"admin", "finance", "auditor"}
 RUN_WRITE = {"admin", "finance"}
+SELF_READ = {"employee"}
 
 router = APIRouter()
 
@@ -139,6 +147,60 @@ def test_rule_set(record_id: UUID, request: Request) -> dict[str, Any]:
         return service.example_report(service.parse_definition(record.definition))
 
 
+@router.get("/rule-sets/{record_id}/impact-preview/{run_id}", summary="Preview rule impact on a settled run")
+def rule_impact_preview(record_id: UUID, run_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, READ_ROLES)
+        return service.impact_preview(ctx.session, record_id, run_id)
+
+
+class EmployerProfileBody(BaseModel):
+    external_id: str = Field(min_length=1, max_length=64)
+    legal_entity: str = Field(min_length=1, max_length=200)
+    sector: str | None = Field(default=None, max_length=64)
+    regime_id: str = Field(min_length=1, max_length=64)
+    identifiers: dict[str, str] = Field(default_factory=dict)
+
+
+@router.put("/employer-profile", summary="Set employer payroll configuration")
+def put_employer_profile(body: EmployerProfileBody, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, {"admin"})
+        row = ctx.session.scalar(select(EmployerProfile).where(EmployerProfile.external_id == body.external_id))
+        if row is None:
+            row = EmployerProfile(tenant_id=ctx.actor.tenant_id, **body.model_dump())
+            ctx.session.add(row)
+        else:
+            for key, value in body.model_dump().items():
+                setattr(row, key, value)
+        ctx.session.flush()
+        return {
+            "id": str(row.id),
+            "external_id": row.external_id,
+            "legal_entity": row.legal_entity,
+            "sector": row.sector,
+            "regime_id": row.regime_id,
+            "identifiers": row.identifiers,
+        }
+
+
+@router.get("/employer-profile", summary="Get employer payroll configuration")
+def get_employer_profile(request: Request) -> dict[str, Any] | None:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, {"admin", "finance", "auditor"})
+        row = ctx.session.scalar(select(EmployerProfile).order_by(EmployerProfile.created_at))
+        if row is None:
+            return None
+        return {
+            "id": str(row.id),
+            "external_id": row.external_id,
+            "legal_entity": row.legal_entity,
+            "sector": row.sector,
+            "regime_id": row.regime_id,
+            "identifiers": row.identifiers,
+        }
+
+
 @router.post(
     "/rule-sets/{record_id}/activate",
     status_code=202,
@@ -200,6 +262,51 @@ class AmendBody(BaseModel):
     field: Literal["base_salary", "weekly_hours", "job_title", "work_location", "ends_on"]
     new_value: str = Field(min_length=1, max_length=200)
     effective_from: date
+    reason: str = Field(min_length=3, max_length=1000)
+
+
+class DraftEditBody(BaseModel):
+    job_title: str | None = Field(default=None, min_length=1, max_length=200)
+    work_location: str | None = Field(default=None, max_length=128)
+    weekly_hours: Decimal | None = Field(default=None, gt=0, le=168, decimal_places=2)
+    ends_on: date | None = None
+    base_salary: Decimal | None = Field(default=None, gt=0, decimal_places=3)
+
+
+class TerminationBody(BaseModel):
+    ends_on: date
+    reason: str = Field(min_length=3, max_length=1000)
+
+
+class CivpBody(BaseModel):
+    participant_category: Literal["higher_education", "bts", "other"]
+    aneti_reference: str | None = Field(default=None, max_length=64)
+    starts_on: date
+    ends_on: date
+    disabled_participant: bool = False
+    aneti_allowance_monthly: Decimal | None = Field(default=None, gt=0, decimal_places=3)
+    employer_complement_monthly: Decimal | None = Field(default=None, gt=0, decimal_places=3)
+    training_hours_limit: Decimal | None = Field(default=None, gt=0, decimal_places=2)
+
+
+class CivpPaymentBody(BaseModel):
+    paid_amount: Decimal = Field(ge=0, decimal_places=3)
+    payment_ref: str = Field(min_length=1, max_length=128)
+
+
+class CivpTrainingBody(BaseModel):
+    training_date: date
+    hours: Decimal = Field(gt=0, decimal_places=2)
+    topic: str = Field(min_length=1, max_length=500)
+
+
+class CivpExtensionBody(BaseModel):
+    requested_end: date
+    reason: str = Field(min_length=3, max_length=1000)
+
+
+class CivpExtensionDecisionBody(BaseModel):
+    approve: bool
     reason: str = Field(min_length=3, max_length=1000)
 
 
@@ -451,6 +558,43 @@ def amend_engagement(engagement_id: UUID, body: AmendBody, request: Request) -> 
         return {"proposal_id": str(proposal.id), "status": proposal.status}
 
 
+@router.patch("/engagements/{engagement_id}", summary="Edit a draft engagement's terms")
+def edit_draft_engagement(
+    engagement_id: UUID, body: DraftEditBody, request: Request
+) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        if body.base_salary is not None:
+            require_role(ctx.actor, PAY_WRITE)
+        row = engagements.edit_draft(
+            ctx.session,
+            ctx.actor.tenant_id,
+            engagement_id,
+            **body.model_dump(exclude_unset=True),
+        )
+        return _engagement_json(ctx.session, row, has_role(ctx.actor, PAY_READ))
+
+
+@router.post("/engagements/{engagement_id}/terminate", summary="Terminate an active engagement")
+def terminate_engagement(
+    engagement_id: UUID, body: TerminationBody, request: Request
+) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        row = engagements.terminate(
+            ctx.session, ctx.actor.tenant_id, engagement_id, body.ends_on, body.reason
+        )
+        return _engagement_json(ctx.session, row, has_role(ctx.actor, PAY_READ))
+
+
+@router.post("/engagement-reminders/check", summary="Publish reminders for engagements ending soon")
+def check_ending_engagements(request: Request, on: date | None = None) -> dict[str, int]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        rows = engagements.ending_soon(ctx.session, ctx.actor.tenant_id, on or service.today_in_tunis())
+        return {"reminders": len(rows)}
+
+
 @router.get("/hire-notices", summary="Candidates who reached hired and still need their terms")
 def list_hire_notices(request: Request, status: str | None = None) -> list[dict[str, Any]]:
     with request_context(request) as ctx:
@@ -677,6 +821,17 @@ class RunBody(BaseModel):
     regime_id: str = Field(default=runs.DEFAULT_REGIME, min_length=1, max_length=64)
     input_batch_ids: list[UUID] = Field(default_factory=list, max_length=20)
     external_request_id: str | None = Field(default=None, max_length=128)
+    run_type: Literal["regular", "off_cycle"] = "regular"
+    employee_ids: list[UUID] = Field(default_factory=list, max_length=1000)
+
+
+class AdjustmentBody(BaseModel):
+    employee_id: UUID
+    amount: Decimal = Field(decimal_places=3, max_digits=15)
+    code: str = Field(min_length=1, max_length=32)
+    reason: str = Field(min_length=3, max_length=1000)
+    origin_run_id: UUID | None = None
+    amendment_id: UUID | None = None
 
 
 def _payslip_json(row: Payslip, employee_ref: str) -> dict[str, Any]:
@@ -713,6 +868,8 @@ def create_payroll_run(body: RunBody, request: Request, response: Response) -> d
             body.regime_id,
             body.input_batch_ids,
             body.external_request_id,
+            body.run_type,
+            body.employee_ids,
         )
         if not created:
             response.status_code = 200
@@ -746,6 +903,34 @@ def calculate_payroll_run(run_id: UUID, request: Request) -> dict[str, Any]:
         return {"status": run.status, "calculation_state": run.calculation_state}
 
 
+@router.post("/payroll-runs/{run_id}/adjustments", status_code=201, summary="Add a retroactive adjustment")
+def add_payroll_adjustment(
+    run_id: UUID, body: AdjustmentBody, request: Request
+) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, RUN_WRITE)
+        row = runs.create_adjustment(
+            ctx.session,
+            ctx.actor.tenant_id,
+            run_id,
+            body.employee_id,
+            body.amount,
+            body.code,
+            body.reason,
+            body.origin_run_id,
+            body.amendment_id,
+        )
+        return {
+            "id": str(row.id),
+            "run_id": str(row.run_id),
+            "employee_id": str(row.employee_id),
+            "code": row.code,
+            "amount": format(row.amount, "f"),
+            "origin_run_id": str(row.origin_run_id) if row.origin_run_id else None,
+            "reason": row.reason,
+        }
+
+
 @router.get("/payroll-runs/{run_id}/payslips", summary="The payslips of a run")
 def list_run_payslips(run_id: UUID, request: Request) -> list[dict[str, Any]]:
     with request_context(request) as ctx:
@@ -758,6 +943,13 @@ def list_run_payslips(run_id: UUID, request: Request) -> list[dict[str, Any]]:
             .order_by(Employee.external_id)
         )
         return [_payslip_json(row, ref) for row, ref in rows]
+
+
+@router.get("/payroll-runs/{run_id}/compare/{other_run_id}", summary="Compare two payroll runs")
+def compare_payroll_runs(run_id: UUID, other_run_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, RUN_DETAIL_READ)
+        return runs.compare_runs(ctx.session, run_id, other_run_id)
 
 
 @router.get("/payslips/{payslip_id}", summary="One payslip with every line and the rule it used")
@@ -911,3 +1103,169 @@ def close_payroll_run(run_id: UUID, request: Request) -> dict[str, str]:
         require_role(ctx.actor, RUN_WRITE)
         proposal = payments.request_close(ctx.session, ctx.actor.tenant_id, ctx.actor, run_id)
         return {"proposal_id": str(proposal.id), "status": proposal.status}
+
+
+@router.post("/engagements/{engagement_id}/civp", status_code=201, summary="Create a CIVP placement")
+def create_civp(engagement_id: UUID, body: CivpBody, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        placement = civp.create_placement(
+            ctx.session,
+            ctx.actor.tenant_id,
+            engagement_id,
+            body.participant_category,
+            body.aneti_reference,
+            body.starts_on,
+            body.ends_on,
+            body.disabled_participant,
+            body.aneti_allowance_monthly,
+            body.employer_complement_monthly,
+            body.training_hours_limit,
+        )
+        return civp.summary(ctx.session, placement.id)
+
+
+@router.get("/civp/{placement_id}", summary="CIVP placement, two payer ledgers and training")
+def get_civp(placement_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_READ)
+        return civp.summary(ctx.session, placement_id)
+
+
+@router.post("/civp/{placement_id}/eligibility", summary="Confirm CIVP eligibility")
+def confirm_civp_eligibility(placement_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        civp.confirm_eligibility(ctx.session, ctx.actor, placement_id)
+        return civp.summary(ctx.session, placement_id)
+
+
+@router.post("/civp/{placement_id}/activate", status_code=202, summary="Propose CIVP activation")
+def activate_civp(placement_id: UUID, request: Request) -> dict[str, str]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        proposal = civp.request_activation(ctx.session, ctx.actor.tenant_id, ctx.actor, placement_id)
+        return {"proposal_id": str(proposal.id), "status": proposal.status}
+
+
+@router.post("/civp/{placement_id}/payments", summary="Generate the two CIVP payer rows for a month")
+def generate_civp_payments(placement_id: UUID, month: date, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, PAY_WRITE)
+        civp.generate_month(ctx.session, ctx.actor.tenant_id, placement_id, month)
+        return civp.summary(ctx.session, placement_id)
+
+
+@router.post("/civp/ledger/{entry_id}/reconcile", summary="Reconcile one CIVP payer row")
+def reconcile_civp_payment(entry_id: UUID, body: CivpPaymentBody, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, PAY_WRITE)
+        row = civp.reconcile_payment(
+            ctx.session, ctx.actor.tenant_id, entry_id, body.paid_amount, body.payment_ref
+        )
+        return {
+            "id": str(row.id),
+            "payer": row.payer,
+            "status": row.status,
+            "paid_amount": format(row.paid_amount, "f"),
+        }
+
+
+@router.post("/civp/{placement_id}/training", summary="Record CIVP training")
+def record_civp_training(
+    placement_id: UUID, body: CivpTrainingBody, request: Request
+) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        civp.record_training(
+            ctx.session,
+            ctx.actor.tenant_id,
+            ctx.actor,
+            placement_id,
+            body.training_date,
+            body.hours,
+            body.topic,
+        )
+        return civp.summary(ctx.session, placement_id)
+
+
+@router.post("/civp/{placement_id}/extension-requests", status_code=201, summary="Request a CIVP extension")
+def request_civp_extension(
+    placement_id: UUID, body: CivpExtensionBody, request: Request
+) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        row = civp.request_extension(
+            ctx.session, ctx.actor.tenant_id, placement_id, body.requested_end, body.reason
+        )
+        return {
+            "id": str(row.id),
+            "status": row.status,
+            "requested_end": row.requested_end.isoformat(),
+            "decision_reason": row.decision_reason,
+        }
+
+
+@router.post("/civp/extension-requests/{request_id}/decide", summary="Decide a CIVP extension")
+def decide_civp_extension(
+    request_id: UUID, body: CivpExtensionDecisionBody, request: Request
+) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        row = civp.decide_extension(ctx.session, ctx.actor, request_id, body.approve, body.reason)
+        return {"id": str(row.id), "status": row.status, "decision_reason": row.decision_reason}
+
+
+@router.post("/civp/{placement_id}/complete", status_code=202, summary="Propose CIVP completion")
+def complete_civp(placement_id: UUID, request: Request) -> dict[str, str]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, ENGAGEMENT_WRITE)
+        proposal = civp.request_completion(ctx.session, ctx.actor.tenant_id, ctx.actor, placement_id)
+        return {"proposal_id": str(proposal.id), "status": proposal.status}
+
+
+@router.get("/me/payslips", summary="The signed-in employee's approved payslips")
+def my_payslips(request: Request) -> list[dict[str, Any]]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, SELF_READ)
+        account = ctx.session.get(UserAccount, ctx.actor.user_id)
+        employee = (
+            ctx.session.scalar(select(Employee).where(Employee.person_id == account.person_id))
+            if account and account.person_id
+            else None
+        )
+        if employee is None:
+            return []
+        rows = ctx.session.execute(
+            select(Payslip, Employee.external_id)
+            .join(Employee, Employee.id == Payslip.employee_id)
+            .join(PayrollRun, PayrollRun.id == Payslip.run_id)
+            .where(
+                Payslip.employee_id == employee.id,
+                PayrollRun.status.in_(["approved", "payment_pending", "paid", "closed"]),
+            )
+            .order_by(PayrollRun.period_start.desc())
+        )
+        return [_payslip_json(row, ref) for row, ref in rows]
+
+
+@router.get("/payroll-runs/{run_id}/exports/journal", summary="Export an approved payroll journal")
+def export_journal(run_id: UUID, request: Request) -> Response:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, PAY_WRITE)
+        return Response(
+            exports.journal(ctx.session, run_id),
+            media_type="text/csv",
+            headers={"Content-Disposition": f'attachment; filename="payroll-{run_id}.csv"'},
+        )
+
+
+@router.get("/payroll-runs/{run_id}/exports/contributions", summary="Export contribution totals")
+def export_contributions(run_id: UUID, request: Request) -> Response:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, PAY_WRITE)
+        return Response(
+            exports.contributions(ctx.session, run_id),
+            media_type="text/csv",
+            headers={"Content-Disposition": f'attachment; filename="contributions-{run_id}.csv"'},
+        )

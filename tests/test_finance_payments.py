@@ -10,6 +10,7 @@ Account tokens decide what the sandbox bank does (see apps/bank/main.py):
     -REFUSE makes the bank refuse the whole batch, any other token is paid in full.
 """
 
+from datetime import timedelta
 from uuid import UUID
 
 import httpx
@@ -607,6 +608,26 @@ def test_a_timeout_leaves_the_outcome_unknown_and_a_retry_is_refused(tenant, slu
     assert proposal_status(tenant, proposal.id) != "executed"
     with as_role("executor"):
         assert trust.execute(tenant, proposal.id, adapters.run, channel="external") == "skipped"
+
+
+def test_an_unknown_release_is_reconciled_by_key_without_resending(tenant, slug, monkeypatch):
+    _, run_id, _ = approved_run(tenant, slug, {})
+    original_request = bank_adapter._request
+
+    def slow(method, path, **kwargs):
+        raise httpx.ReadTimeout("no answer")
+
+    monkeypatch.setattr(bank_adapter, "_request", slow)
+    proposal = propose_release(tenant, run_id)
+    assert send(tenant, proposal) == "unknown"
+    assert bank._batches == {}
+
+    monkeypatch.setattr(bank_adapter, "_request", original_request)
+    with as_role("executor"):
+        assert trust.reconcile_stale(tenant, adapters.lookup, older_than=timedelta(0)) == 1
+    relay(tenant)
+    assert bank._batches == {}
+    assert statuses_of(tenant, run_id) == ["due"]
 
 
 def test_a_crashed_send_is_found_at_the_bank_and_recorded_without_sending_again(tenant, slug):

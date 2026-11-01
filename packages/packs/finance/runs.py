@@ -24,6 +24,7 @@ from packs.finance import issues, payments, proposals, service
 from packs.finance.events import PayrollCalculated, PayrollCalculationRequested, PayrollRejected
 from packs.finance.models import (
     Engagement,
+    Adjustment,
     PayItem,
     PayrollInput,
     PayrollInputBatch,
@@ -89,7 +90,14 @@ def create_run(
     regime_id: str,
     batch_ids: list[UUID],
     external_request_id: str | None,
+    run_type: str = "regular",
+    employee_ids: list[UUID] | None = None,
 ) -> tuple[PayrollRun, bool]:
+    if run_type not in {"regular", "off_cycle"}:
+        raise ValidationFailed("A run type must be regular or off_cycle")
+    selected_employees = sorted({str(employee_id) for employee_id in (employee_ids or [])})
+    if run_type == "off_cycle" and not selected_employees:
+        raise ValidationFailed("An off-cycle run needs at least one employee")
     refs = sorted({str(b) for b in batch_ids})
     if external_request_id:
         existing = session.scalar(
@@ -101,6 +109,8 @@ def create_run(
                 and existing.period_end == period_end
                 and existing.pay_date == pay_date
                 and existing.regime_id == regime_id
+                and existing.run_type == run_type
+                and sorted(existing.employee_ids) == selected_employees
                 and sorted(existing.input_batch_refs) == refs
             )
             if not same:
@@ -112,13 +122,16 @@ def create_run(
         raise ValidationFailed(f"A pay period is at most {MAX_PERIOD_DAYS} days")
     if pay_date < period_start:
         raise ValidationFailed("The pay date is before the period starts")
-    overlapping = session.scalar(
-        select(PayrollRun.id).where(
-            PayrollRun.period_start <= period_end, PayrollRun.period_end >= period_start
+    if run_type == "regular":
+        overlapping = session.scalar(
+            select(PayrollRun.id).where(
+                PayrollRun.run_type == "regular",
+                PayrollRun.period_start <= period_end,
+                PayrollRun.period_end >= period_start,
+            )
         )
-    )
-    if overlapping is not None:
-        raise Conflict("Another payroll run already covers part of this period")
+        if overlapping is not None:
+            raise Conflict("Another payroll run already covers part of this period")
     _rule_set_for(session, period_start, period_end)
     for batch_id in batch_ids:
         batch = session.get(PayrollInputBatch, batch_id)
@@ -133,6 +146,8 @@ def create_run(
         period_end=period_end,
         pay_date=pay_date,
         regime_id=regime_id,
+        run_type=run_type,
+        employee_ids=selected_employees,
         input_batch_refs=refs,
         prepared_by=actor.user_id,
     )
@@ -164,6 +179,7 @@ class _Plan:
     engagement: Engagement
     components: dict[str, Decimal]
     reimbursements: Decimal
+    proration: Decimal
 
 
 def _specs_for_employee(
@@ -233,6 +249,11 @@ def calculate(session: Session, tenant_id: UUID, run_id: UUID) -> PayrollRun | N
             select(Engagement).where(
                 Engagement.status == "active",
                 Engagement.type != "CIVP",
+                (
+                    Engagement.employee_id.in_(run.employee_ids)
+                    if run.run_type == "off_cycle"
+                    else True
+                ),
                 Engagement.starts_on <= run.period_end,
                 (Engagement.ends_on.is_(None)) | (Engagement.ends_on >= run.period_start),
             )
@@ -257,18 +278,11 @@ def calculate(session: Session, tenant_id: UUID, run_id: UUID) -> PayrollRun | N
             )
             continue
         engagement = owned[0]
-        if engagement.starts_on > run.period_start or (
-            engagement.ends_on is not None and engagement.ends_on < run.period_end
-        ):
-            fail(
-                specs,
-                "PARTIAL_PERIOD",
-                BLOCKING,
-                str(employee_id),
-                f"{who} is employed for only part of this period. Proration is not built yet.",
-                "Pay this employee outside this run",
-            )
-            continue
+        period_days = Decimal((run.period_end - run.period_start).days + 1)
+        active_start = max(engagement.starts_on, run.period_start)
+        active_end = min(engagement.ends_on or run.period_end, run.period_end)
+        active_days = max(0, (active_end - active_start).days + 1)
+        proration = Decimal(active_days) / period_days
         items = list(
             session.scalars(
                 select(PayItem).where(
@@ -282,25 +296,16 @@ def calculate(session: Session, tenant_id: UUID, run_id: UUID) -> PayrollRun | N
         reimbursements = Decimal(0)
         broken = False
         for item in items:
-            whole = item.valid_from <= run.period_start and (
-                item.valid_to is None or item.valid_to >= run.period_end
-            )
-            if not whole or item.code in components:
-                fail(
-                    specs,
-                    "PAY_CHANGE_IN_PERIOD",
-                    BLOCKING,
-                    str(employee_id),
-                    f"The {item.code} of {who} changes inside this period. Proration is not "
-                    "built yet.",
-                    "Pay this employee outside this run",
-                )
-                broken = True
-                break
+            item_start = max(item.valid_from, run.period_start, active_start)
+            item_end = min(item.valid_to or run.period_end, run.period_end, active_end)
+            if item_end < item_start:
+                continue
+            item_days = Decimal((item_end - item_start).days + 1)
+            prorated_amount = item.amount * item_days / period_days
             if item.code == "REIMBURSEMENT":
-                reimbursements += item.amount
+                reimbursements += prorated_amount
             else:
-                components[item.code] = item.amount
+                components[item.code] = components.get(item.code, Decimal(0)) + prorated_amount
         if broken:
             continue
         if BASE_SALARY not in components:
@@ -313,7 +318,7 @@ def calculate(session: Session, tenant_id: UUID, run_id: UUID) -> PayrollRun | N
                 "Enter the base salary",
             )
             continue
-        plans[employee_id] = _Plan(engagement, components, reimbursements)
+        plans[employee_id] = _Plan(engagement, components, reimbursements, proration)
 
     for employee_id, rows in by_employee.items():
         who = externals.get(employee_id, str(employee_id))
@@ -328,6 +333,17 @@ def calculate(session: Session, tenant_id: UUID, run_id: UUID) -> PayrollRun | N
             )
             continue
         plan = plans[employee_id]
+        adjustments = list(
+            session.scalars(
+                select(Adjustment).where(
+                    Adjustment.run_id == run.id, Adjustment.employee_id == employee_id
+                )
+            )
+        )
+        for adjustment in adjustments:
+            plan.components[adjustment.code] = (
+                plan.components.get(adjustment.code, Decimal(0)) + adjustment.amount
+            )
         absence_days = Decimal(0)
         for row in rows:
             if row.kind in {"bonus", "allowance"}:
@@ -576,6 +592,8 @@ def run_json(session: Session, run: PayrollRun) -> dict[str, Any]:
         "period_end": run.period_end.isoformat(),
         "pay_date": run.pay_date.isoformat(),
         "regime_id": run.regime_id,
+        "run_type": run.run_type,
+        "employee_ids": run.employee_ids,
         "status": run.status,
         "calculation_state": run.calculation_state,
         "calculation_error": run.calculation_error if run.calculation_state == "failed" else None,
@@ -588,6 +606,79 @@ def run_json(session: Session, run: PayrollRun) -> dict[str, Any]:
         "open_issues": open_counts(session, run.id),
         "notice": service.DEMO_NOTICE if (run.rule_set_refs or {}).get("is_demo") else None,
     }
+
+
+def compare_runs(session: Session, first_id: UUID, second_id: UUID) -> dict[str, Any]:
+    first = get_run(session, first_id)
+    second = get_run(session, second_id)
+    rows = session.execute(
+        select(
+            Payslip.employee_id,
+            Payslip.gross,
+            Payslip.net_pay,
+            Payslip.employer_cost,
+            Payslip.run_id,
+        ).where(Payslip.run_id.in_([first.id, second.id]))
+    ).all()
+    by_employee: dict[UUID, dict[UUID, tuple[Decimal, Decimal, Decimal]]] = {}
+    for employee_id, gross, net_pay, employer_cost, run_id in rows:
+        by_employee.setdefault(employee_id, {})[run_id] = (gross, net_pay, employer_cost)
+    changes = []
+    for employee_id, values in by_employee.items():
+        before = values.get(first.id, (Decimal(0), Decimal(0), Decimal(0)))
+        after = values.get(second.id, (Decimal(0), Decimal(0), Decimal(0)))
+        changes.append(
+            {
+                "employee_id": str(employee_id),
+                "gross_delta": _text(after[0] - before[0]),
+                "net_delta": _text(after[1] - before[1]),
+                "employer_cost_delta": _text(after[2] - before[2]),
+                "first_present": first.id in values,
+                "second_present": second.id in values,
+            }
+        )
+    return {
+        "first_run": str(first.id),
+        "second_run": str(second.id),
+        "first_totals": totals(session, first.id),
+        "second_totals": totals(session, second.id),
+        "changes": sorted(changes, key=lambda row: row["employee_id"]),
+    }
+
+
+def create_adjustment(
+    session: Session,
+    tenant_id: UUID,
+    run_id: UUID,
+    employee_id: UUID,
+    amount: Decimal,
+    code: str,
+    reason: str,
+    origin_run_id: UUID | None = None,
+    amendment_id: UUID | None = None,
+) -> Adjustment:
+    run = get_run(session, run_id)
+    if run.status not in {"draft", "calculated"}:
+        raise Conflict("Adjustments can only be added to an open run")
+    if amount == 0 or not reason.strip() or not code.strip():
+        raise ValidationFailed("An adjustment needs a non-zero amount, code and reason")
+    if origin_run_id is not None:
+        origin = get_run(session, origin_run_id)
+        if origin.status != "closed":
+            raise ValidationFailed("An adjustment's origin run must be closed")
+    row = Adjustment(
+        tenant_id=tenant_id,
+        run_id=run.id,
+        employee_id=employee_id,
+        origin_run_id=origin_run_id,
+        amendment_id=amendment_id,
+        code=code.strip().upper(),
+        amount=amount,
+        reason=reason.strip(),
+    )
+    session.add(row)
+    session.flush()
+    return row
 
 
 def submit_for_approval(

@@ -36,6 +36,12 @@ class EngagementEndingSoon(BaseModel):
     ends_on: date
 
 
+@event_type("finance.engagement.terminated.v1")
+class EngagementTerminated(BaseModel):
+    engagement_id: UUID
+    ends_on: date
+
+
 @event_type("finance.civp.activated.v1")
 class CivpActivated(BaseModel):
     placement_id: UUID
@@ -56,6 +62,18 @@ class CivpPaymentReconciled(BaseModel):
     month: date
     payer: str
     status: str
+
+
+@event_type("finance.civp.training_recorded.v1")
+class CivpTrainingRecorded(BaseModel):
+    placement_id: UUID
+    hours: str
+
+
+@event_type("finance.civp.extension_review_required.v1")
+class CivpExtensionReviewRequired(BaseModel):
+    placement_id: UUID
+    requested_end: date
 
 
 @event_type("finance.civp.completed.v1")

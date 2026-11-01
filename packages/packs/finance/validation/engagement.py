@@ -20,6 +20,7 @@ ENGAGEMENT_TYPES = {CDI, CDD, CIVP}
 RECOGNISED_CDD_REASONS = {"REPLACEMENT", "SEASONAL", "TEMPORARY_INCREASE", "PROJECT"}
 STANDARD_WEEKLY_HOURS_LIMIT = Decimal(48)
 CIVP_MAX_MONTHS = 12
+MINIMUM_MONTHLY_WAGE = Decimal("500.000")  # demo value; verify against the current SMIG
 
 REQUIRED_DOCUMENTS = {
     CDI: ("identity", "contract"),
@@ -39,6 +40,7 @@ class EngagementView:
     cdd_reason_code: str | None
     has_base_salary: bool
     verified_documents: frozenset[str]
+    base_salary: Decimal | None = None
 
 
 def add_months(day: date, months: int) -> date:
@@ -163,6 +165,20 @@ def validate(view: EngagementView) -> list[IssueSpec]:
             "There is no base salary in force on the start date.",
             "Enter the base salary",
             "FINANCE",
+        )
+    if (
+        view.type != CIVP
+        and view.base_salary is not None
+        and view.base_salary < MINIMUM_MONTHLY_WAGE
+    ):
+        add(
+            "MINIMUM_WAGE_REVIEW",
+            REVIEW,
+            "pay_items.BASE_SALARY",
+            f"The base salary {view.base_salary} is below the demo minimum wage "
+            f"{MINIMUM_MONTHLY_WAGE}. Verify the current SMIG before activation.",
+            "Confirm the applicable minimum wage or correct the salary",
+            "HR_LEGAL",
         )
 
     for document in REQUIRED_DOCUMENTS[view.type]:

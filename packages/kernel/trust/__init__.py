@@ -15,7 +15,7 @@ from uuid import UUID
 
 from opentelemetry import trace
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -610,7 +610,12 @@ def reconcile_stale(
                 Execution.id, Execution.proposal_id, Execution.idempotency_key, Proposal.action_type
             )
             .join(Proposal, Proposal.id == Execution.proposal_id)
-            .where(Execution.status == "started", Execution.created_at <= cutoff)
+            .where(
+                or_(
+                    Execution.status == "unknown",
+                    (Execution.status == "started") & (Execution.created_at <= cutoff),
+                )
+            )
         ).all()
         adapters = {r.action_type: _action_type(session, r.action_type).adapter for r in rows}
     for row in rows:
