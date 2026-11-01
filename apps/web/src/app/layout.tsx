@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
-import "@fontsource-variable/bricolage-grotesque";
-import "@fontsource-variable/source-sans-3";
+import "@fontsource-variable/instrument-sans";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "AstraRH",
-  description: "AI does the HR work. People decide about people.",
+  description: "The agents do the work. You make the calls.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full" suppressHydrationWarning>
       <body className="min-h-full">{children}</body>
     </html>
   );

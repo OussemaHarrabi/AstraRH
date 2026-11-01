@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   // The dev server sits behind Caddy on these hosts. Dev only: production ignores this setting.
   allowedDevOrigins: ["127.0.0.1", "localhost"],
+  devIndicators: false,
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

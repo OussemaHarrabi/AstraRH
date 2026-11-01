@@ -1,181 +1,354 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { type ApiError, get, post, type Digest, type DigestItem, type ThreadView } from "@/lib/api";
-import { Button, EmptyState, ErrorNote, Loading, PageHeader, Tag, humanDate } from "@/ui/kit";
+import { motion } from "motion/react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { type FormEvent, Suspense, useEffect, useState } from "react";
+import { type ApiError, type Digest, get, type InboxStats, post, put, type ThreadDetail, type ThreadPage } from "@/lib/api";
+import { useLocal } from "@/lib/local";
+import { agentById, Face } from "@/ui/Face";
+import { Icon } from "@/ui/Icon";
+import { ago, Avatar, Button, EmptyState, ErrorNote, Field, Loading, Modal, PageHeader, Tabs, Tag, type Tone, titleCase, useLoad } from "@/ui/kit";
+import { useToast } from "@/ui/Shell";
 
-const TYPE_LABELS: Record<string, string> = {
-  legal_or_complaint: "Legal and complaints",
-  offer_or_salary: "Offers and pay",
-  visa_or_permit: "Visas and permits",
-  reschedule: "Rescheduling",
-  availability: "Availability",
-  question: "Questions",
-  application: "New applications",
-  policy_question: "Employee questions",
-  internal: "Internal",
-  other: "Other",
-  spam: "Spam",
-};
-const TYPE_ORDER = Object.keys(TYPE_LABELS);
+type View = "digest" | "human" | "open" | "handled";
 
-function Conversation({ threadId, onClose }: { threadId: string; onClose: () => void }) {
-  const [thread, setThread] = useState<ThreadView | null>(null);
-  const [error, setError] = useState<string | null>(null);
+const URGENCY_TONE: Record<string, Tone> = { high: "bad", critical: "bad", medium: "warn", low: "neutral" };
+const NO_DRAFTS: Record<string, string> = {};
 
-  useEffect(() => {
-    get<ThreadView>(`/comms/threads/${threadId}`)
-      .then(setThread)
-      .catch((e: ApiError) => setError(e.message));
-  }, [threadId]);
+function Correct({ stats, messageId, sorting, onDone, onClose }: { stats: InboxStats | null; messageId: string; sorting: NonNullable<ThreadDetail["messages"][number]["sorting"]>; onDone: () => void; onClose: () => void }) {
+  const toast = useToast();
+  async function save(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    try {
+      await put(`/comms/messages/${messageId}/sorting`, {
+        type: form.get("type"),
+        urgency: form.get("urgency"),
+        needs_human: form.get("needs_human") === "on",
+        reason: form.get("reason") || null,
+      });
+      toast("Correction saved. Salem's first answer is kept, so accuracy stays measurable.");
+      onDone();
+      onClose();
+    } catch (e) {
+      toast((e as ApiError).message, "bad");
+    }
+  }
+  return (
+    <Modal open onClose={onClose} label="Correct the sorting" width={420}>
+      <form onSubmit={save} className="space-y-3 p-5">
+        <h2 className="text-[17px] font-[560]">Correct the sorting</h2>
+        <Field label="Type">
+          <select name="type" defaultValue={sorting.type} className="field">
+            {(stats?.types ?? [sorting.type]).map((type) => <option key={type} value={type}>{titleCase(type)}</option>)}
+          </select>
+        </Field>
+        <Field label="Urgency">
+          <select name="urgency" defaultValue={sorting.urgency} className="field">
+            {(stats?.urgencies ?? [sorting.urgency]).map((urgency) => <option key={urgency} value={urgency}>{titleCase(urgency)}</option>)}
+          </select>
+        </Field>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" name="needs_human" defaultChecked={sorting.needs_human} className="accent-[var(--door)]" /> Needs a person
+        </label>
+        <Field label="Reason">
+          <input name="reason" defaultValue={sorting.human_reason ?? ""} className="field" />
+        </Field>
+        <div className="flex gap-2">
+          <Button type="submit">Save correction</Button>
+          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
+function ThreadPane({ id, stats, onChanged }: { id: string; stats: InboxStats | null; onChanged: () => void }) {
+  const toast = useToast();
+  const { data: thread, error, reload } = useLoad(() => get<ThreadDetail>(`/comms/threads/${id}`), [id]);
+  const [correcting, setCorrecting] = useState<string | null>(null);
+  const [drafts, setDrafts] = useLocal<Record<string, string>>("inbox.drafts", NO_DRAFTS);
+
+  async function setHandled(handled: boolean) {
+    try {
+      if (handled) await post(`/comms/threads/${id}/handled`, { note: "Dealt with" });
+      else await post(`/comms/threads/${id}/reopen`);
+      toast(handled ? "Marked as handled." : "Reopened.");
+      reload();
+      onChanged();
+    } catch (e) {
+      toast((e as ApiError).message, "bad");
+    }
+  }
+
+  if (error) return <div className="p-5"><ErrorNote message={error} /></div>;
+  if (!thread) return <div className="p-5"><Loading rows={6} /></div>;
+  const correctingMessage = thread.messages.find((message) => message.id === correcting);
 
   return (
-    <div className="fixed inset-0 z-40 flex justify-end bg-ink/40" onClick={onClose}>
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label="Conversation"
-        className="drawer-enter h-full w-full max-w-2xl overflow-y-auto bg-surface p-6 shadow-2xl md:p-8"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-ink-soft">{thread?.party_email}</p>
-            <h2 className="mt-1 text-2xl font-bold">{thread?.subject ?? "Conversation"}</h2>
-          </div>
-          <Button variant="secondary" onClick={onClose} autoFocus>
-            Close
-          </Button>
+    <div className="flex h-full flex-col">
+      <div className="flex flex-wrap items-center gap-2 border-b border-line px-5 py-3">
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-[16px] font-[560]" dir="auto">{thread.subject}</h2>
+          <p className="truncate text-[13px] text-ink-soft">{thread.party_email}</p>
         </div>
-        <ErrorNote message={error} />
-        {!thread && !error ? <Loading /> : null}
-        {thread?.pending_reply_ids.length ? (
-          <p className="mt-4 rounded-md bg-door-wash px-3 py-2 text-door-deep">
-            A drafted reply is waiting in{" "}
-            <a className="font-semibold underline" href="/approvals">
-              Approvals
-            </a>
-            .
-          </p>
-        ) : null}
-        <ol className="mt-6 space-y-6">
-          {thread?.messages.map((message) => (
-            <li key={message.id}>
-              <p className="text-sm text-ink-soft">
-                {message.direction === "in" ? message.sender : "Sent by the team"},{" "}
-                {humanDate(message.sent_at)}
-              </p>
-              <p dir="auto" className="mt-1 whitespace-pre-wrap">
-                {message.body}
-              </p>
-              {message.needs_human ? (
-                <p className="mt-2 font-medium text-ochre">
-                  A person should answer this: {message.human_reason}
-                </p>
-              ) : null}
-              {message.flagged ? (
-                <p className="mt-1 font-medium text-brick">
-                  This message tries to instruct the AI. Its instructions were not followed.
-                </p>
-              ) : null}
-            </li>
-          ))}
-        </ol>
-      </aside>
+        {thread.status === "open" ? (
+          <Button variant="secondary" size="sm" onClick={() => setHandled(true)}><Icon name="check" size={13} /> Mark handled</Button>
+        ) : (
+          <Button variant="secondary" size="sm" onClick={() => setHandled(false)}>Reopen</Button>
+        )}
+      </div>
+      <div className="flex-1 space-y-3 overflow-y-auto bg-plaster p-5">
+        {thread.messages.map((message) => (
+          <motion.article key={message.id} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className={`rounded-xl border border-line bg-surface p-3.5 ${message.direction === "out" ? "ml-8" : "mr-8"}`}>
+            <div className="flex items-center gap-2">
+              <Avatar name={message.sender} size={24} />
+              <p className="min-w-0 flex-1 truncate font-[520]">{message.sender}</p>
+              <span className="text-[13px] text-ink-soft">{ago(message.sent_at)}</span>
+            </div>
+            <p className="mt-2 whitespace-pre-wrap leading-relaxed" dir="auto">{message.body}</p>
+            {message.attachments.length > 0 ? (
+              <ul className="mt-2 space-y-1">
+                {message.attachments.map((file) => (
+                  <li key={file.id} className="flex items-center gap-1.5 text-[13px] text-ink-soft">
+                    <Icon name="file" size={13} /> {file.filename} <Tag tone={file.status === "rejected" ? "bad" : "neutral"}>{titleCase(file.status)}</Tag>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {message.sorting ? (
+              <div className="mt-3 rounded-lg bg-plaster p-2.5">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <Face agent={agentById("inbox_triage")} size={20} />
+                  <Tag>{titleCase(message.sorting.type)}</Tag>
+                  <Tag tone={URGENCY_TONE[message.sorting.urgency] ?? "neutral"}>{titleCase(message.sorting.urgency)}</Tag>
+                  {message.sorting.needs_human ? <Tag tone="bloom">Needs a person</Tag> : null}
+                  {message.sorting.flagged ? <Tag tone="bad">Injection attempt flagged</Tag> : null}
+                  {message.sorting.corrected ? <Tag tone="info">Corrected by a person</Tag> : null}
+                  <button type="button" onClick={() => setCorrecting(message.id)} className="ml-auto text-[13px] font-[520] text-door hover:underline">Correct</button>
+                </div>
+                <p className="mt-1.5 text-ink-soft" dir="auto">{message.sorting.summary}</p>
+                {message.sorting.human_reason ? <p className="mt-0.5 text-bloom">{message.sorting.human_reason}</p> : null}
+              </div>
+            ) : null}
+          </motion.article>
+        ))}
+      </div>
+      <div className="border-t border-line bg-surface p-3">
+        {thread.pending_reply_ids.length > 0 ? (
+          <div className="flex items-center gap-2.5 rounded-lg bg-door-wash p-2.5">
+            <Face agent={agentById("reply_drafter")} mood="waiting" size={28} />
+            <p className="min-w-0 flex-1">Yara drafted a reply from this candidate&rsquo;s file. It waits for you.</p>
+            <Link href={`/approvals?id=${thread.pending_reply_ids[0]}`} className="flex h-7 items-center rounded-lg bg-door px-2.5 text-[13px] font-[520] whitespace-nowrap text-white hover:bg-door-deep">Review draft</Link>
+          </div>
+        ) : (
+          <div>
+            <textarea
+              aria-label="Your own note or draft"
+              placeholder="Write a private draft. It stays on this device until you send it through approvals."
+              value={drafts[id] ?? ""}
+              onChange={(event) => setDrafts((all) => ({ ...all, [id]: event.target.value }))}
+              rows={2}
+              className="field"
+            />
+          </div>
+        )}
+      </div>
+      {correctingMessage?.sorting ? (
+        <Correct stats={stats} messageId={correctingMessage.id} sorting={correctingMessage.sorting} onDone={() => { reload(); onChanged(); }} onClose={() => setCorrecting(null)} />
+      ) : null}
     </div>
   );
 }
 
-function Item({ item, onOpen }: { item: DigestItem; onOpen: (threadId: string) => void }) {
-  return (
-    <li className="py-3">
-      <button type="button" onClick={() => onOpen(item.thread_id)} className="w-full text-left">
-        <span className="flex flex-wrap items-center gap-2">
-          <span className="font-semibold text-door hover:underline">{item.subject}</span>
-          {item.urgency === "high" ? <Tag tone="warn">Urgent</Tag> : null}
-          {item.needs_human ? <Tag tone="info">Needs a person</Tag> : null}
-          {item.flagged ? <Tag tone="bad">Tries to instruct the AI</Tag> : null}
-        </span>
-        <span className="mt-0.5 block">{item.summary}</span>
-        <span className="block text-sm text-ink-soft">
-          {item.sender}
-          {item.human_reason ? `. ${item.human_reason}` : ""}
-        </span>
-      </button>
-    </li>
-  );
-}
+function InboxInner() {
+  const params = useSearchParams();
+  const toast = useToast();
+  const [view, setView] = useState<View>(params.get("view") === "human" ? "human" : "digest");
+  const [type, setType] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<string | null>(null);
+  const [rebuilding, setRebuilding] = useState(false);
 
-export default function InboxPage() {
-  const [digest, setDigest] = useState<Digest | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [open, setOpen] = useState<string | null>(null);
+  useEffect(() => {
+    const timer = setTimeout(() => setSearch(query), 220);
+    return () => clearTimeout(timer);
+  }, [query]);
 
-  const load = useCallback(() => {
-    get<Digest>("/comms/digest")
-      .then(setDigest)
-      .catch((e: ApiError) => setError(e.message));
-  }, []);
+  const stats = useLoad(() => get<InboxStats>("/comms/stats"), []);
+  const digest = useLoad(() => get<Digest>("/comms/digest"), []);
+  const threads = useLoad(() => {
+    const filter = new URLSearchParams({ limit: "50", status: view === "handled" ? "handled" : "open" });
+    if (view === "human") filter.set("needs_human", "true");
+    if (type) filter.set("type", type);
+    if (search) filter.set("q", search);
+    return get<ThreadPage>(`/comms/threads?${filter}`);
+  }, [view, type, search]);
 
-  useEffect(load, [load]);
+  function refresh() {
+    stats.reload();
+    threads.reload();
+    digest.reload();
+  }
 
-  async function refresh() {
-    setBusy(true);
+  async function rebuild() {
+    setRebuilding(true);
     try {
-      setDigest(await post<Digest>("/comms/digest"));
+      await post("/comms/digest");
+      await digest.reload();
+      toast("Digest rebuilt with the latest messages.");
     } catch (e) {
-      setError((e as ApiError).message);
+      toast((e as ApiError).message, "bad");
     } finally {
-      setBusy(false);
+      setRebuilding(false);
     }
   }
 
-  const types = digest ? TYPE_ORDER.filter((type) => digest.groups[type]?.length) : [];
+  const items = threads.data?.items ?? [];
+  const current = selected ?? (view !== "digest" ? items[0]?.id : null);
+  const groups = Object.entries(digest.data?.groups ?? {});
+
   return (
     <>
       <PageHeader
         title="Inbox"
-        subtitle="Today's digest, grouped by type. Messages that need a person come first."
-        action={
-          <Button variant="secondary" onClick={refresh} disabled={busy}>
-            {busy ? "Updating…" : "Update digest"}
-          </Button>
-        }
+        subtitle="Salem reads everything that arrives at HR and flags what needs a person."
+        action={<Button variant="secondary" onClick={rebuild} disabled={rebuilding}><Icon name="sparkle" size={14} /> {rebuilding ? "Rebuilding…" : "Rebuild digest"}</Button>}
       />
-      <ErrorNote message={error} />
-      {!digest && !error ? <Loading /> : null}
-      {digest ? (
-        <p className="tabular mb-6 text-lg">
-          <strong>{digest.totals.messages}</strong> messages,{" "}
-          <strong>{digest.totals.needs_human}</strong> need a person,{" "}
-          <strong>{digest.totals.high_urgency}</strong> urgent
-          {digest.totals.flagged ? (
-            <>
-              , <strong>{digest.totals.flagged}</strong> tried to instruct the AI
-            </>
-          ) : null}
-          .
-        </p>
-      ) : null}
-      {digest && types.length === 0 ? (
-        <EmptyState title="Nothing sorted yet">
-          New messages appear here once the agent has read them. Use Update digest to refresh.
-        </EmptyState>
-      ) : null}
-      {types.map((type) => (
-        <section key={type} className="mb-8" aria-labelledby={`group-${type}`}>
-          <h2 id={`group-${type}`} className="text-xl font-semibold">
-            {TYPE_LABELS[type]}
-          </h2>
-          <ul className="mt-2 divide-y divide-line border-y border-line">
-            {digest?.groups[type].map((item) => (
-              <Item key={item.message_id} item={item} onOpen={setOpen} />
+      <Tabs
+        value={view}
+        onChange={(next) => { setView(next); setSelected(null); }}
+        tabs={[
+          { id: "digest", label: "Today's digest", count: digest.data?.totals.messages },
+          { id: "human", label: "Needs a person", count: stats.data?.open_needing_a_person },
+          { id: "open", label: "All open", count: stats.data?.threads.open },
+          { id: "handled", label: "Handled", count: stats.data?.threads.handled },
+        ]}
+      />
+      <ErrorNote message={threads.error ?? digest.error} />
+      {view === "digest" ? (
+        <div className="mt-4 grid items-start gap-5 lg:grid-cols-[1fr_minmax(0,1fr)]">
+          <div className="space-y-5">
+            {!digest.data ? <Loading rows={6} /> : null}
+            {digest.data && groups.length === 0 ? (
+              <div className="rounded-xl border border-line bg-surface">
+                <EmptyState title="No digest yet today" art={<Face agent={agentById("inbox_triage")} size={56} mood="asleep" />}>Salem builds it at 07:00. You can rebuild it any time.</EmptyState>
+              </div>
+            ) : null}
+            {digest.data && groups.length > 0 ? (
+              <div className="grid grid-cols-3 divide-x divide-line rounded-xl border border-line bg-surface shadow-soft">
+                {[["Messages", digest.data.totals.messages], ["Need a person", digest.data.totals.needs_human], ["Urgent", digest.data.totals.high_urgency]].map(([label, value]) => (
+                  <div key={label} className="px-4 py-3">
+                    <p className="text-ink-soft">{label}</p>
+                    <p className="tabular text-[24px] leading-tight font-[520]">{value}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+            {groups.map(([group, rows]) => (
+              <section key={group} className="overflow-hidden rounded-xl border border-line bg-surface shadow-soft">
+                <h2 className="flex items-center justify-between border-b border-line px-4 py-2.5 font-[560]">
+                  {titleCase(group)} <span className="tabular font-[400] text-ink-soft">{rows.length}</span>
+                </h2>
+                <ul>
+                  {rows.map((row) => (
+                    <li key={row.message_id}>
+                      <button
+                        type="button"
+                        onClick={() => setSelected(row.thread_id)}
+                        className={`flex w-full gap-2.5 border-b border-line px-4 py-2.5 text-left transition-colors last:border-0 ${current === row.thread_id ? "bg-door-wash" : "hover:bg-plaster"}`}
+                      >
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate font-[500]" dir="auto">{row.subject}</span>
+                          <span className="line-clamp-2 text-ink-soft" dir="auto">{row.summary}</span>
+                        </span>
+                        <span className="flex shrink-0 flex-col items-end gap-1">
+                          <Tag tone={URGENCY_TONE[row.urgency] ?? "neutral"}>{titleCase(row.urgency)}</Tag>
+                          {row.needs_human ? <Tag tone="bloom">Person</Tag> : null}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             ))}
-          </ul>
-        </section>
-      ))}
-      {open ? <Conversation threadId={open} onClose={() => setOpen(null)} /> : null}
+          </div>
+          <div className="sticky top-16 h-[calc(100vh-96px)] overflow-hidden rounded-xl border border-line bg-surface shadow-soft">
+            {current ? (
+              <ThreadPane key={current} id={current} stats={stats.data} onChanged={refresh} />
+            ) : (
+              <EmptyState title="Pick a message" art={<Face agent={agentById("inbox_triage")} size={56} track />}>Its full conversation and Salem&rsquo;s reasoning open here.</EmptyState>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="mt-4 grid overflow-hidden rounded-xl border border-line bg-surface shadow-soft lg:h-[calc(100vh-232px)] lg:min-h-[520px] lg:grid-cols-[370px_1fr]">
+          <div className="flex min-h-0 flex-col border-b border-line lg:border-r lg:border-b-0">
+            <div className="space-y-2 border-b border-line p-2">
+              <div className="relative">
+                <Icon name="search" size={14} className="absolute top-2.5 left-2.5 text-ink-faint" />
+                <input value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search conversations" placeholder="Search by subject or sender" className="field !pl-8" />
+              </div>
+              <div className="flex gap-1 overflow-x-auto pb-0.5">
+                {[null, ...(stats.data?.types ?? [])].map((name) => (
+                  <button
+                    key={name ?? "all"}
+                    type="button"
+                    onClick={() => setType(name)}
+                    className={`h-6 shrink-0 rounded-md px-1.5 text-xs font-[520] transition-colors ${type === name ? "bg-door-wash text-door-deep" : "text-ink-soft hover:bg-sunken"}`}
+                  >
+                    {name ? titleCase(name) : "All"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <ul className="max-h-80 flex-1 overflow-y-auto lg:max-h-none">
+              {!threads.data ? <li className="p-4"><Loading /></li> : null}
+              {threads.data && items.length === 0 ? <li className="p-8 text-center text-ink-soft">No conversations match.</li> : null}
+              {items.map((thread) => {
+                const sorting = thread.latest_inbound?.sorting;
+                return (
+                  <li key={thread.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelected(thread.id)}
+                      className={`flex w-full gap-2.5 border-b border-line px-3 py-2.5 text-left transition-colors ${current === thread.id ? "bg-door-wash" : "hover:bg-plaster"}`}
+                    >
+                      <Avatar name={thread.party_email} size={28} />
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-baseline justify-between gap-2">
+                          <span className="truncate font-[520]" dir="auto">{thread.subject}</span>
+                          <span className="shrink-0 text-[12px] text-ink-soft">{ago(thread.last_message_at)}</span>
+                        </span>
+                        <span className="line-clamp-1 text-ink-soft" dir="auto">{sorting?.summary ?? thread.party_email}</span>
+                        <span className="mt-1 flex flex-wrap gap-1">
+                          {sorting ? <Tag>{titleCase(sorting.type)}</Tag> : null}
+                          {sorting?.needs_human ? <Tag tone="bloom">Person</Tag> : null}
+                          {sorting?.flagged ? <Tag tone="bad">Flagged</Tag> : null}
+                          {thread.pending_reply_ids.length ? <Tag tone="info">Draft ready</Tag> : null}
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <div className="min-h-0 min-w-0">
+            {current ? <ThreadPane key={current} id={current} stats={stats.data} onChanged={refresh} /> : <EmptyState title="Nothing selected" art={<Face agent={agentById("inbox_triage")} size={56} mood="happy" />}>Nothing is waiting in this view.</EmptyState>}
+          </div>
+        </div>
+      )}
     </>
+  );
+}
+
+export default function InboxPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <InboxInner />
+    </Suspense>
   );
 }

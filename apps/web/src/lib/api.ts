@@ -31,6 +31,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
       body.message ?? detail ?? "The server could not complete this request.",
     );
   }
+  if (response.status === 204) return null as T;
   return response.json();
 }
 
@@ -62,6 +63,7 @@ export interface Pack {
 
 export interface Job {
   id: string;
+  external_id?: string | null;
   title: string;
   description: string;
   org_unit: string | null;
@@ -145,6 +147,8 @@ export interface Proposal {
   target: Record<string, unknown>;
   decision_record_id: string;
   revision: number;
+  payload_hash?: string;
+  agent_run_id?: string | null;
   expires_at: string;
   created_at: string;
 }
@@ -247,4 +251,212 @@ export interface Interview {
   status: string;
   slots: { starts_at: string; ends_at: string }[];
   starts_at: string | null;
+  ends_at?: string | null;
+  candidate?: string | null;
+  created_at?: string;
 }
+
+export interface Sorting {
+  type: string;
+  urgency: string;
+  needs_human: boolean;
+  human_reason: string | null;
+  summary: string;
+  quote: string | null;
+  flagged: boolean;
+  flags: string[];
+  corrected: boolean;
+  model_values: Record<string, unknown> | null;
+}
+
+export interface ThreadRow {
+  id: string;
+  subject: string;
+  party_email: string;
+  status: string;
+  last_message_at: string;
+  handled_at: string | null;
+  handled_note: string | null;
+  messages: number;
+  latest_inbound: { message_id: string; sender: string; sent_at: string; sorting: Sorting | null } | null;
+  pending_reply_ids: string[];
+}
+
+export interface ThreadPage {
+  items: ThreadRow[];
+  next_before: string | null;
+}
+
+export interface ThreadDetail {
+  id: string;
+  subject: string;
+  party_email: string;
+  status: string;
+  last_message_at: string;
+  handled_note: string | null;
+  pending_reply_ids: string[];
+  messages: {
+    id: string;
+    direction: string;
+    sender: string;
+    recipient: string;
+    subject: string;
+    body: string;
+    sent_at: string;
+    sorting: Sorting | null;
+    attachments: { id: string; filename: string; status: string; reason?: string | null }[];
+  }[];
+}
+
+export interface InboxStats {
+  threads: { open: number; handled: number };
+  open_needing_a_person: number;
+  open_messages_by_type: Record<string, number>;
+  flagged_messages: number;
+  classified_messages: number;
+  corrected_by_a_person: number;
+  types: string[];
+  urgencies: string[];
+}
+
+export interface AgentRun {
+  id: string;
+  agent: string;
+  pack: string;
+  status: string;
+  input_tokens: number;
+  output_tokens: number;
+  cost_usd: string;
+  error: string | null;
+  trace_id: string | null;
+  started_at: string;
+  finished_at: string | null;
+}
+
+export interface AgentRunDetail extends AgentRun {
+  steps: {
+    name: string;
+    tier: string | null;
+    provider: string | null;
+    model: string | null;
+    input_tokens: number;
+    output_tokens: number;
+    cost_usd: string;
+    latency_ms: number;
+    cached: boolean;
+    fallback: boolean;
+  }[];
+}
+
+export interface GraphData {
+  nodes: { id: string; label: string; props: Record<string, string> }[];
+  edges: { from: string; to: string; type: string }[];
+  rows: Record<string, unknown>[];
+}
+
+export interface Employee {
+  id: string;
+  external_id: string | null;
+  display_name: string;
+  email: string;
+  org_unit_id: string;
+  position_id: string;
+  manager_id: string | null;
+  start_date: string;
+  status: string;
+}
+
+export interface OrgReference {
+  org_units: { id: string; external_id: string; name: string }[];
+  positions: { id: string; external_id: string; title: string }[];
+  skills: { id: string; external_id: string; name: string }[];
+  kpis: { id: string; external_id: string; name: string; unit: string }[];
+}
+
+export interface Plan {
+  id: string;
+  employee_id: string;
+  start_date: string;
+  target_ramp_date: string;
+  status: string;
+  phase: string;
+}
+
+export interface PlanDetail extends Plan {
+  tasks: {
+    id: string;
+    phase: string;
+    position: number;
+    title: string;
+    owner_role: string;
+    due_at: string;
+    status: string;
+    mandatory: boolean;
+    evidence_required: string | null;
+  }[];
+  checkins?: { id: string; status: string; due_at?: string; day?: number; kind?: string }[];
+  flags?: { id?: string; kind?: string; message?: string; reason?: string; severity?: string }[];
+}
+
+export interface SkillGap {
+  id: string;
+  employee_id: string;
+  skill_id: string;
+  current_level: number;
+  required_level: number;
+  severity: string;
+  message: string;
+  status: string;
+}
+
+export interface PolicyDocument {
+  id: string;
+  external_id: string;
+  title: string;
+  version: string;
+  audience_roles: string[];
+  status: string;
+  sections: number;
+  published_at: string;
+}
+
+export interface Ticket {
+  id: string;
+  status: string;
+  reason: string;
+  question: string;
+  asked_at: string;
+  assignee?: string | null;
+  answer?: string | null;
+}
+
+export interface Booking {
+  id: string;
+  title?: string;
+  starts_at: string;
+  ends_at: string;
+  status: string;
+  participants?: string[];
+}
+
+export interface BusyItem {
+  id?: string;
+  kind?: string;
+  source?: string;
+  label?: string | null;
+  starts_at: string;
+  ends_at: string;
+}
+
+export interface PayrollRun {
+  id: string;
+  period_start: string;
+  period_end: string;
+  pay_date: string;
+  status: string;
+  totals?: Record<string, string>;
+}
+
+export const put = <T,>(path: string, body: unknown = {}) =>
+  request<T>(path, { method: "PUT", body: JSON.stringify(body) });
+export const del = <T,>(path: string) => request<T>(path, { method: "DELETE" });

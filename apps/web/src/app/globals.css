@@ -1,72 +1,117 @@
 @import "tailwindcss";
 
-/* AstraRH tokens. Blue doors on white plaster, with ochre kept for warnings only. */
+/* AstraRH tokens. Blue doors on white plaster, seen from the Gulf of Tunis at dusk. */
 :root {
-  --plaster: #f4f6fa;
+  --plaster: #f6f7f9;
   --surface: #ffffff;
-  --ink: #12233f;
-  --ink-soft: #4f5f78;
-  --line: #d8dfea;
-  --door: #0f5fc2;
-  --door-deep: #0a3f85;
-  --door-wash: #e3edfb;
-  --ochre: #9a6200;
-  --ochre-wash: #fbf1dc;
-  --olive: #26704f;
-  --olive-wash: #e0f1e9;
-  --brick: #a92f24;
-  --brick-wash: #fae6e3;
-  --rail: #12233f;
-  --rail-text: #d4dff0;
+  --sunken: #eef0f4;
+  --ink: #1b1e2e;
+  --ink-soft: #5b6075;
+  --ink-faint: #767b90;
+  --line: #e4e6ec;
+  --line-strong: #d3d6df;
+  --door: #4254db;
+  --door-deep: #2f3db0;
+  --door-wash: #eceefd;
+  --ochre: #8f5b00;
+  --ochre-wash: #fbf2de;
+  --olive: #1f7a55;
+  --olive-wash: #e2f3ec;
+  --brick: #b23427;
+  --brick-wash: #fbe9e6;
+  --bloom: #b8327a;
+  --bloom-wash: #fbe8f2;
+  --night: #10142e;
+  --shadow-sm: 0 1px 2px rgb(27 30 46 / 6%);
+  --shadow-md: 0 1px 2px rgb(27 30 46 / 5%), 0 8px 24px -8px rgb(27 30 46 / 14%);
+  --shadow-lg: 0 2px 6px rgb(27 30 46 / 6%), 0 24px 64px -16px rgb(27 30 46 / 28%);
   --radius: 10px;
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --plaster: #0e1727;
-    --surface: #16233a;
-    --ink: #e9eff9;
-    --ink-soft: #a5b4cc;
-    --line: #2b3b57;
-    --door: #6aa7f2;
-    --door-deep: #a6ccf8;
-    --door-wash: #1b3355;
+    --plaster: #0f1222;
+    --surface: #171b2f;
+    --sunken: #12162a;
+    --ink: #eceef6;
+    --ink-soft: #a4a9bf;
+    --ink-faint: #858aa3;
+    --line: #262b42;
+    --line-strong: #363c58;
+    --door: #8593f5;
+    --door-deep: #a9b3f9;
+    --door-wash: #20264a;
     --ochre: #e5b45d;
-    --ochre-wash: #3a2c10;
-    --olive: #74cda6;
-    --olive-wash: #15352a;
+    --ochre-wash: #33290f;
+    --olive: #6fcfa5;
+    --olive-wash: #12322a;
     --brick: #f19a90;
-    --brick-wash: #3f1c18;
-    --rail: #0a1120;
-    --rail-text: #c3d0e5;
+    --brick-wash: #3a1a17;
+    --bloom: #ee84bb;
+    --bloom-wash: #3a1830;
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
+    --shadow-md: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px -8px rgb(0 0 0 / 50%);
+    --shadow-lg: 0 2px 6px rgb(0 0 0 / 30%), 0 24px 64px -16px rgb(0 0 0 / 70%);
+    color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --plaster: #0e1727;
-  --surface: #16233a;
-  --ink: #e9eff9;
-  --ink-soft: #a5b4cc;
-  --line: #2b3b57;
-  --door: #6aa7f2;
-  --door-deep: #a6ccf8;
-  --door-wash: #1b3355;
+  --plaster: #0f1222;
+  --surface: #171b2f;
+  --sunken: #12162a;
+  --ink: #eceef6;
+  --ink-soft: #a4a9bf;
+  --ink-faint: #858aa3;
+  --line: #262b42;
+  --line-strong: #363c58;
+  --door: #8593f5;
+  --door-deep: #a9b3f9;
+  --door-wash: #20264a;
   --ochre: #e5b45d;
-  --ochre-wash: #3a2c10;
-  --olive: #74cda6;
-  --olive-wash: #15352a;
+  --ochre-wash: #33290f;
+  --olive: #6fcfa5;
+  --olive-wash: #12322a;
   --brick: #f19a90;
-  --brick-wash: #3f1c18;
-  --rail: #0a1120;
-  --rail-text: #c3d0e5;
+  --brick-wash: #3a1a17;
+  --bloom: #ee84bb;
+  --bloom-wash: #3a1830;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
+  --shadow-md: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px -8px rgb(0 0 0 / 50%);
+  --shadow-lg: 0 2px 6px rgb(0 0 0 / 30%), 0 24px 64px -16px rgb(0 0 0 / 70%);
+  color-scheme: dark;
+}
+
+/* The landing's product windows stay light, whatever the visitor's system theme. */
+.light-tokens {
+  --plaster: #f6f7f9;
+  --surface: #ffffff;
+  --sunken: #eef0f4;
+  --ink: #1b1e2e;
+  --ink-soft: #5b6075;
+  --ink-faint: #767b90;
+  --line: #e4e6ec;
+  --line-strong: #d3d6df;
+  --door: #4254db;
+  --door-deep: #2f3db0;
+  --door-wash: #eceefd;
+  --olive: #1f7a55;
+  --olive-wash: #e2f3ec;
+  --bloom: #b8327a;
+  --bloom-wash: #fbe8f2;
+  color-scheme: light;
 }
 
 @theme inline {
   --color-plaster: var(--plaster);
   --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
   --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
   --color-door: var(--door);
   --color-door-deep: var(--door-deep);
   --color-door-wash: var(--door-wash);
@@ -76,45 +121,170 @@
   --color-olive-wash: var(--olive-wash);
   --color-brick: var(--brick);
   --color-brick-wash: var(--brick-wash);
-  --font-display: "Bricolage Grotesque Variable", "Segoe UI", sans-serif;
-  --font-body: "Source Sans 3 Variable", "Segoe UI", sans-serif;
+  --color-bloom: var(--bloom);
+  --color-bloom-wash: var(--bloom-wash);
+  --color-night: var(--night);
+  --font-sans: "Instrument Sans Variable", "Segoe UI", system-ui, sans-serif;
+  --shadow-soft: var(--shadow-sm);
+  --shadow-lift: var(--shadow-md);
+  --shadow-float: var(--shadow-lg);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 body {
   background: var(--plaster);
   color: var(--ink);
-  font-family: var(--font-body);
-  font-size: 16px;
-  line-height: 1.5;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 h1,
 h2,
 h3 {
-  font-family: var(--font-display);
   line-height: 1.15;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.012em;
+  font-weight: 560;
+}
+
+button,
+a,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
 }
 
 :focus-visible {
-  outline: 3px solid var(--door);
+  outline: 2px solid var(--door);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
+}
+
+::selection {
+  background: var(--door-wash);
 }
 
 .tabular {
   font-variant-numeric: tabular-nums;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .drawer-enter {
-    animation: drawer-in 180ms ease-out;
+.field {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  padding: 7px 10px;
+  transition:
+    border-color 120ms,
+    box-shadow 120ms;
+}
+
+.field:hover {
+  border-color: var(--ink-faint);
+}
+
+.field:focus {
+  outline: none;
+  border-color: var(--door);
+  box-shadow: 0 0 0 3px var(--door-wash);
+}
+
+/* A row that answers the pointer. Calm, no movement. */
+.row-hover {
+  transition: background-color 110ms;
+}
+
+.row-hover:hover {
+  background: var(--plaster);
+}
+
+.skeleton {
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--sunken) 25%, var(--line) 50%, var(--sunken) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
   }
 }
 
-@keyframes drawer-in {
-  from {
-    transform: translateX(24px);
-    opacity: 0;
+/* Agent faces */
+.face-blink {
+  animation: face-blink 5.2s infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes face-blink {
+  0%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  97% {
+    transform: scaleY(0.08);
+  }
+}
+
+.face-working .face-eyes {
+  animation: face-scan 1.6s ease-in-out infinite;
+}
+
+@keyframes face-scan {
+  0%,
+  100% {
+    transform: translateX(-1.6px);
+  }
+  50% {
+    transform: translateX(1.6px);
+  }
+}
+
+.face-bob {
+  animation: face-bob 3.4s ease-in-out infinite;
+}
+
+@keyframes face-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-1.5px);
+  }
+}
+
+.pulse-dot {
+  animation: pulse-dot 1.6s ease-out infinite;
+}
+
+@keyframes pulse-dot {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 7px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
