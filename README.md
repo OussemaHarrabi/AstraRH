@@ -826,7 +826,7 @@ To use real mail, replace `SMTP_HOST` and the `mailbox` adapter's provider with 
 
 | Measure | Result |
 |---|---|
-| Reading 42 CVs with the real model | About 27 seconds |
+| Reading 42 CVs with the real model | About 66 seconds, or 1.6 s per CV |
 | Parsing one CV once warm | About 1.2 s |
 | Screening run cost | About $0.018 |
 | Reranker | About 50 ms per short pair on CPU |
