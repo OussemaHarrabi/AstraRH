@@ -13,6 +13,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
 import clash  # noqa: E402
 
+m = clash.minutes
 SEED = pathlib.Path(__file__).resolve().parents[4] / "data" / "workforce"
 
 
@@ -50,16 +51,16 @@ def test_order_independent():
 
 def test_shift_overlap_same_person_is_a_clash():
     shifts = [
-        clash.ShiftInterval("S1", "E1", date(2026, 11, 6), clash.minutes("08:00"), clash.minutes("16:00")),
-        clash.ShiftInterval("S2", "E1", date(2026, 11, 6), clash.minutes("12:00"), clash.minutes("20:00")),
+        clash.ShiftInterval("S1", "E1", date(2026, 11, 6), m("08:00"), m("16:00")),
+        clash.ShiftInterval("S2", "E1", date(2026, 11, 6), m("12:00"), m("20:00")),
     ]
     assert len(clash.detect_shift_clashes(shifts)) == 1
 
 
 def test_adjacent_shifts_do_not_clash():
     shifts = [
-        clash.ShiftInterval("S1", "E1", date(2026, 11, 6), clash.minutes("08:00"), clash.minutes("16:00")),
-        clash.ShiftInterval("S2", "E1", date(2026, 11, 6), clash.minutes("16:00"), clash.minutes("23:00")),
+        clash.ShiftInterval("S1", "E1", date(2026, 11, 6), m("08:00"), m("16:00")),
+        clash.ShiftInterval("S2", "E1", date(2026, 11, 6), m("16:00"), m("23:00")),
     ]
     assert clash.detect_shift_clashes(shifts) == []
 
@@ -67,7 +68,8 @@ def test_adjacent_shifts_do_not_clash():
 # --- against the real seed ------------------------------------------------
 
 def _leave_intervals_from_seed():
-    org = {r["employee_id"]: r["org_unit_id"] for r in csv.DictReader(open(SEED / "employees.csv", encoding="utf-8"))}
+    reader = csv.DictReader(open(SEED / "employees.csv", encoding="utf-8"))
+    org = {r["employee_id"]: r["org_unit_id"] for r in reader}
     out = []
     for r in csv.DictReader(open(SEED / "leave_requests.csv", encoding="utf-8")):
         out.append(
@@ -91,7 +93,7 @@ def test_seed_has_exactly_one_shift_clash():
     shifts = [
         clash.ShiftInterval(
             r["shift_id"], r["employee_id"], date.fromisoformat(r["date"]),
-            clash.minutes(r["start"]), clash.minutes(r["end"]),
+            m(r["start"]), m(r["end"]),
         )
         for r in csv.DictReader(open(SEED / "shifts.csv", encoding="utf-8"))
     ]

@@ -18,12 +18,12 @@ from kernel.people.models import Employee, OrgUnit
 from kernel.web import request_context
 from packs.workforce import scoring, service
 from packs.workforce.models import (
+    CapacitySnapshot,
     Case,
     CaseEvent,
     CaseParty,
     LeaveRequest,
     LeaveType,
-    CapacitySnapshot,
 )
 
 READ_ROLES = {"admin", "hr", "manager", "employee", "auditor"}
@@ -156,12 +156,18 @@ def create_leave(body: LeaveBody, request: Request) -> dict[str, Any]:
             raise NotFound(f"Unknown leave type '{body.leave_type}'")
         codes = {lt.id: lt.code for lt in ctx.session.scalars(select(LeaveType))}
         leave = service.request_leave(
-            ctx.session, ctx.actor.tenant_id, body.employee_id, leave_type.id, body.start, body.end, body.note
+            ctx.session,
+            ctx.actor.tenant_id,
+            body.employee_id,
+            leave_type.id,
+            body.start,
+            body.end,
+            body.note,
         )
         return _leave_json(ctx.session, leave, codes)
 
 
-@router.post("/leave/{leave_id}/approve", status_code=202, summary="Propose approval of a leave request (R2)")
+@router.post("/leave/{leave_id}/approve", status_code=202, summary="Propose leave approval (R2)")
 def approve_leave(leave_id: UUID, request: Request) -> dict[str, str]:
     with request_context(request) as ctx:
         require_role(ctx.actor, MANAGE_ROLES)
@@ -230,7 +236,12 @@ def get_case(case_id: UUID, request: Request) -> dict[str, Any]:
             "parties": [{"employee_id": str(p.employee_id), "role": p.role} for p in parties],
             "events": [{"kind": e.kind, "at": e.at.isoformat(), "data": e.data} for e in events],
             "resolution": (
-                {"steps": plan.steps, "citations": plan.policy_citations, "outcome": plan.outcome, "status": plan.status}
+                {
+                    "steps": plan.steps,
+                    "citations": plan.policy_citations,
+                    "outcome": plan.outcome,
+                    "status": plan.status,
+                }
                 if plan
                 else None
             ),
@@ -258,7 +269,7 @@ def file_case(body: CaseBody, request: Request) -> dict[str, str]:
         return {"proposal_id": str(proposal.id), "status": proposal.status}
 
 
-@router.post("/cases/{case_id}/close", status_code=202, summary="Propose closing a case with a resolution (R3)")
+@router.post("/cases/{case_id}/close", status_code=202, summary="Propose closing a case (R3)")
 def close_case(case_id: UUID, body: CloseBody, request: Request) -> dict[str, str]:
     with request_context(request) as ctx:
         require_role(ctx.actor, HR_ROLES)

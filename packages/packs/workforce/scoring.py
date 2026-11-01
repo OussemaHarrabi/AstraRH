@@ -58,8 +58,12 @@ def score(inputs: dict[str, Any]) -> ScoreResult:
     if headcount > 0:
         avg = Decimal(str(inputs["actual_hours"])) / headcount
         overtime = _clamp01(max(Decimal(0), avg - BASELINE_HOURS) / OVERTIME_CAP)
-        coverage = _clamp01((Decimal(str(inputs.get("on_leave_count", 0))) / headcount) / COVERAGE_CAP)
-        open_roles = _clamp01((Decimal(str(inputs.get("open_reqs", 0))) / headcount) / OPEN_ROLES_CAP)
+        coverage = _clamp01(
+            (Decimal(str(inputs.get("on_leave_count", 0))) / headcount) / COVERAGE_CAP
+        )
+        open_roles = _clamp01(
+            (Decimal(str(inputs.get("open_reqs", 0))) / headcount) / OPEN_ROLES_CAP
+        )
     else:
         overtime = coverage = open_roles = Decimal(0)
 

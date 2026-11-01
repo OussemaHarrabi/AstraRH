@@ -8,7 +8,7 @@ look them up by external_id. Reads the CSV/JSON in seed/workforce/.
 
 import csv
 import json
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from pathlib import Path
 from uuid import UUID
@@ -19,10 +19,10 @@ from sqlalchemy.orm import Session
 from kernel.people.models import Employee, OrgUnit
 from packs.workforce.clash import minutes
 from packs.workforce.models import (
+    CapacitySnapshot,
     Case,
     CaseEvent,
     CaseParty,
-    CapacitySnapshot,
     LeaveRequest,
     LeaveType,
     Shift,
@@ -40,7 +40,7 @@ def _rows(name: str) -> list[dict]:
 
 
 def _at(day: str) -> datetime:
-    return datetime.fromisoformat(day).replace(tzinfo=timezone.utc)
+    return datetime.fromisoformat(day).replace(tzinfo=UTC)
 
 
 def seed(session: Session, tenant_id: UUID, world: dict) -> None:
@@ -48,7 +48,9 @@ def seed(session: Session, tenant_id: UUID, world: dict) -> None:
     if session.scalar(select(LeaveType.id).limit(1)):
         return
 
-    employees = {ext: eid for ext, eid in session.execute(select(Employee.external_id, Employee.id))}
+    employees = {
+        ext: eid for ext, eid in session.execute(select(Employee.external_id, Employee.id))
+    }
     orgs = {ext: oid for ext, oid in session.execute(select(OrgUnit.external_id, OrgUnit.id))}
 
     leave_types = {}
@@ -119,7 +121,9 @@ def seed(session: Session, tenant_id: UUID, world: dict) -> None:
                 hours=hours,
             )
         )
-        agg = snapshots.setdefault((row["org_unit_id"], row["week"]), {"hours": Decimal(0), "heads": set()})
+        agg = snapshots.setdefault(
+            (row["org_unit_id"], row["week"]), {"hours": Decimal(0), "heads": set()}
+        )
         agg["hours"] += hours
         agg["heads"].add(row["employee_id"])
 
@@ -157,8 +161,22 @@ def seed(session: Session, tenant_id: UUID, world: dict) -> None:
         session.add(case)
         session.flush()
         for emp_ext in spec["parties"]:
-            session.add(CaseParty(tenant_id=tenant_id, case_id=case.id, employee_id=employees[emp_ext], role="party"))
-        session.add(CaseParty(tenant_id=tenant_id, case_id=case.id, employee_id=employees[spec["mediator"]], role="mediator"))
+            session.add(
+                CaseParty(
+                    tenant_id=tenant_id,
+                    case_id=case.id,
+                    employee_id=employees[emp_ext],
+                    role="party",
+                )
+            )
+        session.add(
+            CaseParty(
+                tenant_id=tenant_id,
+                case_id=case.id,
+                employee_id=employees[spec["mediator"]],
+                role="mediator",
+            )
+        )
         session.add(
             CaseEvent(
                 tenant_id=tenant_id,

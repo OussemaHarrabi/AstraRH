@@ -112,7 +112,7 @@ def detect_shift_clashes(shifts: list[ShiftInterval]) -> list[Clash]:
                         b=b.shift_id,
                         employee_a=a.employee_id,
                         employee_b=b.employee_id,
-                        detail=f"{a.employee_id} double-booked on {a.day}: {a.shift_id} and {b.shift_id}",
+                        detail=f"{a.employee_id} double-booked {a.day}: {a.shift_id}, {b.shift_id}",
                     )
                 )
     return clashes

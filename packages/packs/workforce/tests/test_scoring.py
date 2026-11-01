@@ -9,7 +9,6 @@ team is not. The score is purely team-level — no per-person input exists.
 import csv
 import pathlib
 import sys
-from collections import defaultdict
 from decimal import Decimal
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))

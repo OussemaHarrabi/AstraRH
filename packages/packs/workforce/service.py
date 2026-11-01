@@ -59,7 +59,7 @@ def request_leave(
         raise NotFound("Employee not found")
     leave = LeaveRequest(
         tenant_id=tenant_id,
-        external_id=f"LR-{uuid7().hex}",
+        external_id=f"LR-{uuid7().hex[:12]}",
         employee_id=employee_id,
         leave_type_id=leave_type_id,
         start_date=start,
@@ -96,7 +96,11 @@ def detect_leave_clashes(session: Session) -> list[clash.Clash]:
     rows = session.scalars(select(LeaveRequest).where(LeaveRequest.status.in_(ACTIVE_LEAVE))).all()
     intervals = [
         clash.LeaveInterval(
-            r.external_id, str(r.employee_id), str(org_of.get(r.employee_id)), r.start_date, r.end_date
+            r.external_id,
+            str(r.employee_id),
+            str(org_of.get(r.employee_id)),
+            r.start_date,
+            r.end_date,
         )
         for r in rows
     ]
@@ -126,7 +130,7 @@ def propose_leave_approval(
             "Approving it may leave the team short; a manager decides."
         )
     else:
-        rationale = "No clash detected with same-team leave. A manager still approves every request."
+        rationale = "No same-team clash detected. A manager still approves every request."
     draft = DecisionDraft(
         kind="workforce.leave",
         question=f"Approve leave {leave.external_id}?",
@@ -184,7 +188,9 @@ def refresh_capacity(session: Session, tenant_id: UUID) -> list[CapacitySnapshot
 
 
 def overload_score(snap: CapacitySnapshot):
-    inputs = scoring.team_inputs(snap.headcount, snap.actual_hours, snap.on_leave_count, snap.open_reqs)
+    inputs = scoring.team_inputs(
+        snap.headcount, snap.actual_hours, snap.on_leave_count, snap.open_reqs
+    )
     return inputs, scoring.score(inputs)
 
 
@@ -236,7 +242,12 @@ def raise_overload_alerts(session: Session, tenant_id: UUID) -> list[dict[str, A
             OverloadDetected(org_unit_id=snap.org_unit_id, week=snap.week, score=str(result.score)),
         )
         alerts.append(
-            {"org_unit": ext, "week": snap.week, "score": str(result.score), "decision_record_id": str(record.id)}
+            {
+                "org_unit": ext,
+                "week": snap.week,
+                "score": str(result.score),
+                "decision_record_id": str(record.id),
+            }
         )
     return alerts
 

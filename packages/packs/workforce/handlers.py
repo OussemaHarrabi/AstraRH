@@ -47,7 +47,7 @@ def approve_leave(session: Session, tenant_id: UUID, payload: dict[str, Any], ke
 def open_case(session: Session, tenant_id: UUID, payload: dict[str, Any], key: str) -> str:
     case = Case(
         tenant_id=tenant_id,
-        external_id=f"CASE-{uuid7().hex}",
+        external_id=f"CASE-{uuid7().hex[:12]}",
         org_unit_id=UUID(payload["org_unit_id"]),
         case_type=payload["case_type"],
         status="opened",
@@ -61,7 +61,10 @@ def open_case(session: Session, tenant_id: UUID, payload: dict[str, Any], key: s
         )
     session.add(
         CaseParty(
-            tenant_id=tenant_id, case_id=case.id, employee_id=UUID(payload["mediator"]), role="mediator"
+            tenant_id=tenant_id,
+            case_id=case.id,
+            employee_id=UUID(payload["mediator"]),
+            role="mediator",
         )
     )
     session.add(
@@ -97,7 +100,11 @@ def close_case(session: Session, tenant_id: UUID, payload: dict[str, Any], key: 
         plan.outcome = outcome
     session.add(
         CaseEvent(
-            tenant_id=tenant_id, case_id=case.id, kind="resolution", at=utcnow(), data={"text": outcome}
+            tenant_id=tenant_id,
+            case_id=case.id,
+            kind="resolution",
+            at=utcnow(),
+            data={"text": outcome},
         )
     )
     return f"closed:{case.external_id}"
