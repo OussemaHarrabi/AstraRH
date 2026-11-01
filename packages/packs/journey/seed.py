@@ -10,6 +10,7 @@ import csv
 import json
 from datetime import date, datetime
 from decimal import Decimal
+from os import environ
 from pathlib import Path
 from typing import Any
 from uuid import UUID
@@ -19,7 +20,8 @@ from sqlalchemy.orm import Session
 
 from kernel import explain, trust
 from kernel.db import utcnow
-from kernel.identity.models import UserAccount
+from kernel.identity import hash_password
+from kernel.identity.models import RoleAssignment, UserAccount
 from kernel.people.models import (
     Employee,
     KpiDefinition,
@@ -123,6 +125,25 @@ def _ensure_hero(session: Session, tenant_id: UUID, maps: dict[str, dict[str, An
     session.add(employee)
     session.flush()
     maps["employees"][HERO] = employee
+
+    email = "yasmine@cds.example.test"
+    if session.scalar(select(UserAccount).where(UserAccount.email == email)) is None:
+        user = UserAccount(
+            tenant_id=tenant_id,
+            email=email,
+            password_hash=hash_password(environ["DEMO_PASSWORD"]),
+            display_name=str(roster["display_name"]),
+            person_id=person.id,
+        )
+        session.add(user)
+        session.flush()
+        session.add(
+            RoleAssignment(
+                tenant_id=tenant_id,
+                user_id=user.id,
+                role="employee",
+            )
+        )
 
 
 def seed_templates(session: Session, tenant_id: UUID, maps: dict[str, dict[str, Any]]) -> dict:
@@ -707,5 +728,6 @@ def seed(session: Session, tenant_id: UUID, world: dict) -> None:
         session.add(gap)
         session.flush()
         gap.decision_record_id = _decision_record(session, tenant_id, gap, seed_gap, skill.name)
+
 
 
