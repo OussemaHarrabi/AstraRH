@@ -21,6 +21,10 @@ class BusyBlock(TenantMixin, Base):
     starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     label: Mapped[str] = mapped_column(Text, nullable=False, default="Busy")
+    # manual: typed in by a person. ics: imported from a calendar file, replaced on re-import.
+    source: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="manual", server_default="manual"
+    )
 
 
 class Booking(TenantMixin, Base):

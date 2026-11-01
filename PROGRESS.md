@@ -166,6 +166,13 @@ Committed in small steps. Each step below is one commit.
    - The gateway now drops number and length bounds (`minimum`, `maxLength`...) from schemas sent to the model, because strict structured outputs refuse them; Pydantic still enforces them on every answer. The first eval run failed on exactly this. Provider failures now log their message, not just their type.
    - **Real-model eval** (`slot_picking` in `docs/evals/communications.json`, English, French, Arabic, "option 1", two days, none of these, a time we didn't offer, an injection asking for slot 3): **8/8 read right, 0 wrong bookings proposed, 4/4 unclear answers left to a person.** Same run: inbox 18/20 types, 8/8 needs-a-person, 0/12 false alarms; policy 8/8, 6/6, 0 leaks. AI, communications, inbox and inbound tests 126 passed.
 
+12. **Recruiters manage their own calendar** (2026-11-01). Until now busy time only came from the seed.
+   - New `kernel/schedule/api.py` under `/calendar`: `GET /busy` (busy time, bookings and held offers in one list, with `from`/`to`), `POST /busy` and `DELETE /busy/{id}` for time typed in by hand, `POST /import` for an `.ics` export from Google, Outlook or Apple, `GET /free` (times everyone named is free, nothing held), `GET /bookings` (who is in each meeting).
+   - A recruiter only touches their own calendar. HR and admins can manage anyone's, because they set up panels. Every change is logged as `kernel.calendar.change` (R1).
+   - `kernel/schedule/ics_import.py` keeps only when someone is busy: titles, places and guests are dropped on purpose. It reads UTC, named zones, whole days, durations, folded lines, weekly and other repeats (python-dateutil) with their exceptions, and free/busy files. It skips free and cancelled events and ignores alarms inside events. A new file replaces the last import; hand-entered time stays (`busy_block.source` manual or ics). It refuses non-calendar files, non-UTF-8, unreadable dates or repeat rules, files over 2 MB and more than 5000 blocks.
+   - Outlook writes Windows zone names. Those are read as local time, which is the usual case here.
+   - **Verified:** new `tests/test_calendar_api.py` (UTC, named zones, whole days, durations, repeats with exceptions, free and cancelled events, alarms, free/busy files, folded lines, 5 kinds of bad file, import replaces import but keeps hand-entered time, free time avoids imported busy time, own calendar only for recruiters, HR manages anyone's, roles, nonsense times, bookings with their people, other company's data invisible). Calendar, communications and web tests **98 passed**, ruff clean, migration `9afd7a1820d6` applied.
+
 ### Screening, web shell and two-layer ranking: 2026-10-31
 
 **Built**

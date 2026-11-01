@@ -23,6 +23,9 @@ actions:
   - id: kernel.email.correct
     risk: R1
     description: Correct how the assistant sorted an email.
+  - id: kernel.calendar.change
+    risk: R1
+    description: Add, remove or import someone's busy time.
   - id: kernel.question.answer
     risk: R0
     description: Answer an employee's question from company documents, with citations.

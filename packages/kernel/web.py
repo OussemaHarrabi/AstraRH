@@ -450,6 +450,7 @@ def list_packs(request: Request) -> list[dict[str, Any]]:
 def install(app: FastAPI) -> None:
     from kernel.comms.api import router as comms_router
     from kernel.knowledge.api import router as knowledge_router
+    from kernel.schedule.api import router as calendar_router
 
     @app.exception_handler(KernelError)
     def handle_kernel_error(_: Request, exc: KernelError) -> JSONResponse:
@@ -467,5 +468,6 @@ def install(app: FastAPI) -> None:
         registry_router,
         comms_router,
         knowledge_router,
+        calendar_router,
     ):
         app.include_router(router)

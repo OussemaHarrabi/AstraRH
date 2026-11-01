@@ -18,6 +18,7 @@ from kernel.schedule.models import Booking, BookingSeat, BusyBlock, Hold
 from kernel.trust import AdapterRejected
 
 __all__ = [
+    "replace_imported",
     "Booking",
     "BookingSeat",
     "BusyBlock",
@@ -107,8 +108,34 @@ def find_slots(
     participants: list[str],
     duration: timedelta = DEFAULT_DURATION,
     ignore_owner: str | None = None,
+    count: int = 3,
 ) -> list[Slot]:
-    return free_slots(_busy_for(session, participants, ignore_owner), utcnow(), duration)
+    return free_slots(_busy_for(session, participants, ignore_owner), utcnow(), duration, count)
+
+
+def replace_imported(
+    session: Session,
+    tenant_id: UUID,
+    participant: str,
+    blocks: list[tuple[datetime, datetime]],
+) -> int:
+    """A new calendar file replaces the last one. Hand-entered busy time is kept."""
+    session.execute(
+        delete(BusyBlock).where(BusyBlock.participant == participant, BusyBlock.source == "ics")
+    )
+    for starts_at, ends_at in blocks:
+        session.add(
+            BusyBlock(
+                tenant_id=tenant_id,
+                participant=participant,
+                starts_at=starts_at,
+                ends_at=ends_at,
+                label="Busy",
+                source="ics",
+            )
+        )
+    session.flush()
+    return len(blocks)
 
 
 def hold(
