@@ -1,0 +1,10 @@
+{
+  "employee_id": "EMP-041",
+  "display_name": "Yasmine Trabelsi",
+  "email": "yasmine.trabelsi@cds.example.test",
+  "position_id": "POS-BE",
+  "org_unit_id": "ORG-ENG",
+  "manager_id": "EMP-002",
+  "buddy_id": "EMP-009",
+  "start_date": "2026-11-09"
+}

@@ -25,7 +25,7 @@ HERO = "EMP-041"
 MISSING_EVIDENCE_TASK = "GEN-17"
 
 PLAN_CONFIG = [
-    {"employee_id": "EMP-010", "template": "GENERIC", "start": "2026-12-01", "status": "draft"},
+    {"employee_id": "EMP-010", "template": "POS-AE", "start": "2026-12-01", "status": "draft"},
     {
         "employee_id": "EMP-011",
         "template": "GENERIC",
@@ -34,7 +34,7 @@ PLAN_CONFIG = [
     },
     {
         "employee_id": "EMP-012",
-        "template": "POS-AE",
+        "template": "POS-BE",
         "start": "2026-11-02",
         "status": "in_progress",
     },
@@ -53,12 +53,23 @@ PLAN_CONFIG = [
     },
     {
         "employee_id": "EMP-016",
-        "template": "POS-BE",
+        "template": "POS-AE",
         "start": "2026-10-15",
         "status": "in_progress",
     },
     {"employee_id": HERO, "template": "POS-BE", "start": "2026-11-09", "status": "in_progress"},
 ]
+
+PLAN_BUDDIES = {
+    "EMP-010": "EMP-016",
+    "EMP-011": "EMP-017",
+    "EMP-012": "EMP-009",
+    "EMP-013": "EMP-019",
+    "EMP-014": "EMP-020",
+    "EMP-015": "EMP-021",
+    "EMP-016": "EMP-022",
+    "EMP-041": "EMP-009",
+}
 
 CHECKIN_DAYS = (("day7", 7), ("day30", 30), ("day60", 60), ("day90", 90))
 BASE_ANSWERS = {
@@ -143,6 +154,7 @@ def build_tasks(
         rows.append(
             {
                 "task_id": task_id,
+                "position": int(task["position"]),
                 "title": task["title"],
                 "phase": task["phase"],
                 "task_kind": task["task_kind"],
@@ -369,8 +381,7 @@ def hero_gaps() -> list[dict[str, Any]]:
 
 def background_gaps() -> list[dict[str, Any]]:
     rows = []
-    for number in range(16, 25):
-        employee_id = f"EMP-{number:03d}"
+    for employee_id in ("EMP-012", "EMP-018", "EMP-024", "EMP-030", "EMP-036"):
         rows.append(
             build_gap(
                 employee_id=employee_id,
@@ -405,10 +416,10 @@ def background_gaps() -> list[dict[str, Any]]:
 def plan_gap_for_014() -> dict[str, Any]:
     return build_gap(
         employee_id="EMP-014",
-        skill_id="SKILL-COMM",
-        skill_name="Communication",
-        current=3,
-        required=3,
+        skill_id="SKILL-SQL",
+        skill_name="SQL",
+        current=4,
+        required=4,
         mandatory=True,
         weight=Decimal("1.0"),
         max_weight=Decimal("1.0"),
@@ -417,17 +428,17 @@ def plan_gap_for_014() -> dict[str, Any]:
                 "kind": "assessment",
                 "weight": "1",
                 "summary": "Post-course assessment: 88/100",
-                "ref": "ENR-EMP-014-COMM",
+                "ref": "ENR-EMP-014-SQL",
             },
             {
                 "kind": "applied_evidence",
                 "weight": "1",
-                "summary": "Two stakeholder updates delivered after the course",
+                "summary": "Two slow-query fixes merged after the course",
                 "ref": "PRS-EMP-014",
             },
         ],
         status="closed",
-        decided_by="EMP-003",
+        decided_by="EMP-002",
     )
 
 
@@ -455,48 +466,51 @@ def hero_recommendation() -> dict[str, Any]:
 
 def completed_training() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     recommendation = {
-        "recommendation_id": "REC-EMP-014-COMM",
-        "gap_id": "GAP-EMP-014-COMM",
+        "recommendation_id": "REC-EMP-014-SQL",
+        "gap_id": "GAP-EMP-014-SQL",
         "employee_id": "EMP-014",
         "kind": "course",
-        "course_id": "CRS-COMM-01",
+        "course_id": "CRS-SQL-01",
         "mentor_employee_id": None,
-        "rationale": "Clear Communication closes the level-3 requirement; the manager approved it.",
-        "cost_tnd": "0.00",
-        "hours": 3,
-        "kpi_id": "KPI-90D",
-        "expected_effect": "Clearer check-ins and escalations (hypothesis)",
+        "rationale": (
+            "Query Performance closes the level-4 SQL requirement; "
+            "the manager approved it."
+        ),
+        "cost_tnd": "250.00",
+        "hours": 6,
+        "kpi_id": "KPI-MTTR",
+        "expected_effect": "Fewer slow-query incidents (hypothesis)",
         "status": "completed",
         "approval_id": "APR-EMP-014-REC",
     }
     enrollment = {
-        "enrollment_id": "ENR-EMP-014-COMM",
-        "recommendation_id": "REC-EMP-014-COMM",
+        "enrollment_id": "ENR-EMP-014-SQL",
+        "recommendation_id": "REC-EMP-014-SQL",
         "employee_id": "EMP-014",
-        "course_id": "CRS-COMM-01",
+        "course_id": "CRS-SQL-01",
         "status": "completed",
         "started_at": "2026-09-07T09:00:00",
-        "completed_at": "2026-09-10T17:00:00",
+        "completed_at": "2026-09-15T17:00:00",
         "score": 88,
-        "evidence": {"assessment": 88, "applied": "two stakeholder updates"},
-        "verified_by": "EMP-003",
+        "evidence": {"assessment": 88, "applied": "two slow-query fixes"},
+        "verified_by": "EMP-002",
         "verified_at": "2026-10-02T10:00:00",
     }
     observed = gap_math.observed_delta(
-        treated_baseline="82.0",
-        treated_post="84.0",
-        comparison_baseline="82.0",
-        comparison_post="82.5",
+        treated_baseline="8.4",
+        treated_post="7.6",
+        comparison_baseline="8.2",
+        comparison_post="8.0",
         comparison_n=5,
     )
     impact = {
-        "impact_id": "IMP-EMP-014-COMM",
-        "recommendation_id": "REC-EMP-014-COMM",
-        "kpi_id": "KPI-90D",
-        "baseline_value": "82.0",
-        "post_value": "84.0",
-        "delta": "2.0",
-        "comparison_employee_ids": ["EMP-003", "EMP-033", "EMP-040", "EMP-013", "EMP-032"],
+        "impact_id": "IMP-EMP-014-SQL",
+        "recommendation_id": "REC-EMP-014-SQL",
+        "kpi_id": "KPI-MTTR",
+        "baseline_value": "8.4",
+        "post_value": "7.6",
+        "delta": "-0.8",
+        "comparison_employee_ids": ["EMP-020", "EMP-026", "EMP-032", "EMP-038", "EMP-009"],
         "comparison_n": 5,
         "method": "difference-in-differences over 30 days; no random assignment",
         "observed_delta": str(observed.value),
@@ -538,7 +552,7 @@ def build_plan(
         "position_id": str(employee["position_id"]),
         "org_unit_id": str(employee["org_unit_id"]),
         "manager_id": employee.get("manager_id"),
-        "buddy_id": employee.get("buddy_id"),
+        "buddy_id": PLAN_BUDDIES.get(str(employee["employee_id"])),
         "template_id": str(template["id"]),
         "start_date": str(config["start"]),
         "target_ramp_date": iso(planning.due_at(start, 90)),

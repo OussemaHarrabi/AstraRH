@@ -110,11 +110,15 @@ def test_gap_factors_sum_exactly_to_the_severity_score():
             )
 
 
-def test_nine_background_gaps_power_the_heatmap():
+def test_five_background_gaps_power_the_heatmap():
     gaps = payload()["background_gaps"]
-    assert len(gaps) == 9
+    assert len(gaps) == 5
     assert {gap["employee_id"] for gap in gaps} == {
-        f"EMP-{number:03d}" for number in range(16, 25)
+        "EMP-012",
+        "EMP-018",
+        "EMP-024",
+        "EMP-030",
+        "EMP-036",
     }
     for gap in gaps:
         assert gap["skill_id"] == "SKILL-K8S"
@@ -142,17 +146,17 @@ def test_completed_training_has_verification_and_observed_impact():
     enrollment = plan_014["enrollments"][0]
     assert enrollment["status"] == "completed"
     assert enrollment["score"] == 88
-    assert enrollment["verified_by"] == "EMP-003"
-    assert enrollment["course_id"] == "CRS-COMM-01"
+    assert enrollment["verified_by"] == "EMP-002"
+    assert enrollment["course_id"] == "CRS-SQL-01"
     impact = plan_014["impact_measures"][0]
-    assert Decimal(impact["observed_delta"]) == Decimal("1.5")
+    assert Decimal(impact["observed_delta"]) == Decimal("-0.6")
     assert impact["label"] == "observed"
     assert "not causal" in impact["caveat"].lower()
     dossier = plan_014["dossier"]
     assert dossier["tasks_completed"] == dossier["tasks_total"]
     assert dossier["tasks_with_evidence"] == dossier["tasks_total"] - 1
     assert dossier["missing"] == ["Independent work review"]
-    assert dossier["verified_skills"] == [{"skill_id": "SKILL-COMM", "level": 3}]
+    assert dossier["verified_skills"] == [{"skill_id": "SKILL-SQL", "level": 4}]
     assert "salary" not in dossier
     assert "rating" not in dossier
 
@@ -161,5 +165,6 @@ def test_no_sentiment_or_individual_risk_field_exists():
     text = json.dumps(payload()).lower()
     for forbidden in ("sentiment", "flight_risk", "flight risk", "performance_rating"):
         assert forbidden not in text
+
 
 

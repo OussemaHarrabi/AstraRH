@@ -37,7 +37,7 @@ def test_roster_matches_the_demo_world_ids():
     assert len(ids) == len(set(ids))
     assert ids[:9] == [f"EMP-{number:03d}" for number in range(1, 10)]
     assert HERO in ids
-    assert len(engineering_ids()) == 14
+    assert len(engineering_ids()) == 17
 
 
 def test_employee_skills_cover_every_employee_except_the_hero():
@@ -59,7 +59,7 @@ def test_no_duplicate_employee_skill_pairs():
     assert len(pairs) == len(set(pairs))
 
 
-def test_nine_engineering_kubernetes_gaps_power_the_heatmap():
+def test_five_engineering_kubernetes_gaps_power_the_heatmap():
     rows = read_csv("employee_skills.csv")
     engineering = engineering_ids()
     gaps = {
@@ -69,7 +69,7 @@ def test_nine_engineering_kubernetes_gaps_power_the_heatmap():
         and row["employee_id"] in engineering
         and int(row["level"]) < 3
     }
-    assert gaps == {f"EMP-{number:03d}" for number in range(16, 25)}
+    assert gaps == {"EMP-012", "EMP-018", "EMP-024", "EMP-030", "EMP-036"}
     non_gaps = {
         row["employee_id"]
         for row in rows
@@ -77,7 +77,7 @@ def test_nine_engineering_kubernetes_gaps_power_the_heatmap():
         and row["employee_id"] in engineering
         and int(row["level"]) >= 3
     }
-    assert non_gaps == {"EMP-009", "EMP-025", "EMP-026"}
+    assert non_gaps == {"EMP-009"}
 
 
 def test_emp_009_is_the_only_observability_holder_in_engineering():
@@ -111,3 +111,4 @@ def test_employee_skills_header_is_stable():
     with (SEED / "employee_skills.csv").open(newline="", encoding="utf-8") as handle:
         header = next(csv.reader(handle))
     assert header == ["employee_id", "skill_id", "level", "source", "evidence"]
+

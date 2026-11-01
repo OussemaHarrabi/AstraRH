@@ -1,47 +1,375 @@
 {
-  "version": 1,
-  "note": "Journey-scoped view of the DEMO_WORLD IDs. Workforce owns the master employees.csv; this file only supplies the fields journey needs until that file lands.",
+  "version": 2,
+  "note": "Journey-scoped view mirroring data/world.json; workforce owns the master.",
   "employees": [
-    {"employee_id": "EMP-001", "display_name": "Salma Gharbi", "position_id": "POS-CEO", "org_unit_id": "ORG-HR", "manager_id": null, "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-002", "display_name": "Karim Mansour", "position_id": "POS-MGR", "org_unit_id": "ORG-ENG", "manager_id": "EMP-001", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-003", "display_name": "Ines Ben Salah", "position_id": "POS-PM", "org_unit_id": "ORG-PRD", "manager_id": "EMP-001", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-004", "display_name": "Walid Jebali", "position_id": "POS-AE", "org_unit_id": "ORG-SAL", "manager_id": "EMP-001", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-005", "display_name": "Rim Chaabane", "position_id": "POS-SUP", "org_unit_id": "ORG-OPS", "manager_id": "EMP-001", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-006", "display_name": "Leila Haddad", "position_id": "POS-HRBP", "org_unit_id": "ORG-HR", "manager_id": "EMP-001", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-007", "display_name": "Sami Ferchichi", "position_id": "POS-ACC", "org_unit_id": "ORG-FIN", "manager_id": "EMP-001", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-008", "display_name": "Nadia Bouzid", "position_id": "POS-REC", "org_unit_id": "ORG-HR", "manager_id": "EMP-006", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-009", "display_name": "Mehdi Sassi", "position_id": "POS-BE", "org_unit_id": "ORG-ENG", "manager_id": "EMP-002", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-010", "display_name": "Amine Trabelsi", "position_id": "POS-FE", "org_unit_id": "ORG-PRD", "manager_id": "EMP-003", "start_date": "2026-12-01", "buddy_id": "EMP-014"},
-    {"employee_id": "EMP-011", "display_name": "Sarra Ben Amor", "position_id": "POS-DATA", "org_unit_id": "ORG-ENG", "manager_id": "EMP-002", "start_date": "2026-11-16", "buddy_id": "EMP-009"},
-    {"employee_id": "EMP-012", "display_name": "Youssef Khelifi", "position_id": "POS-AE", "org_unit_id": "ORG-SAL", "manager_id": "EMP-004", "start_date": "2026-11-02", "buddy_id": "EMP-031"},
-    {"employee_id": "EMP-013", "display_name": "Mariem Dridi", "position_id": "POS-DES", "org_unit_id": "ORG-PRD", "manager_id": "EMP-003", "start_date": "2026-10-01", "buddy_id": "EMP-032"},
-    {"employee_id": "EMP-014", "display_name": "Hamza Bouazizi", "position_id": "POS-PM", "org_unit_id": "ORG-PRD", "manager_id": "EMP-003", "start_date": "2026-07-01", "buddy_id": "EMP-003"},
-    {"employee_id": "EMP-015", "display_name": "Farah Jlassi", "position_id": "POS-SUP", "org_unit_id": "ORG-OPS", "manager_id": "EMP-005", "start_date": "2026-09-01", "buddy_id": "EMP-030"},
-    {"employee_id": "EMP-016", "display_name": "Nizar Ayari", "position_id": "POS-BE", "org_unit_id": "ORG-ENG", "manager_id": "EMP-002", "start_date": "2026-10-15", "buddy_id": "EMP-009"},
-    {"employee_id": "EMP-017", "display_name": "Rania Gharbi", "position_id": "POS-BE", "org_unit_id": "ORG-ENG", "manager_id": "EMP-002", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-018", "display_name": "Bilel Mabrouk", "position_id": "POS-BE", "org_unit_id": "ORG-ENG", "manager_id": "EMP-002", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-019", "display_name": "Ons Chaieb", "position_id": "POS-BE", "org_unit_id": "ORG-ENG", "manager_id": "EMP-002", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-020", "display_name": "Ayoub Ferjani", "position_id": "POS-BE", "org_unit_id": "ORG-ENG", "manager_id": "EMP-002", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-021", "display_name": "Salma Kacem", "position_id": "POS-BE", "org_unit_id": "ORG-ENG", "manager_id": "EMP-002", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-022", "display_name": "Wael Ben Youssef", "position_id": "POS-BE", "org_unit_id": "ORG-ENG", "manager_id": "EMP-002", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-023", "display_name": "Ines Zouari", "position_id": "POS-BE", "org_unit_id": "ORG-ENG", "manager_id": "EMP-002", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-024", "display_name": "Anis Rekik", "position_id": "POS-BE", "org_unit_id": "ORG-ENG", "manager_id": "EMP-002", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-025", "display_name": "Dorra Mejri", "position_id": "POS-BE", "org_unit_id": "ORG-ENG", "manager_id": "EMP-002", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-026", "display_name": "Chedi Ben Ali", "position_id": "POS-BE", "org_unit_id": "ORG-ENG", "manager_id": "EMP-002", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-027", "display_name": "Emna Sfaxi", "position_id": "POS-REC", "org_unit_id": "ORG-HR", "manager_id": "EMP-006", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-028", "display_name": "Haithem Guesmi", "position_id": "POS-HRBP", "org_unit_id": "ORG-HR", "manager_id": "EMP-006", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-029", "display_name": "Nesrine Ouali", "position_id": "POS-ACC", "org_unit_id": "ORG-FIN", "manager_id": "EMP-007", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-030", "display_name": "Sabri Hadded", "position_id": "POS-SUP", "org_unit_id": "ORG-OPS", "manager_id": "EMP-005", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-031", "display_name": "Amel Baccouche", "position_id": "POS-AE", "org_unit_id": "ORG-SAL", "manager_id": "EMP-004", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-032", "display_name": "Tarek Jaziri", "position_id": "POS-DES", "org_unit_id": "ORG-PRD", "manager_id": "EMP-003", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-033", "display_name": "Sirine Louati", "position_id": "POS-PM", "org_unit_id": "ORG-PRD", "manager_id": "EMP-003", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-034", "display_name": "Firas Ben Hmida", "position_id": "POS-FE", "org_unit_id": "ORG-PRD", "manager_id": "EMP-003", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-035", "display_name": "Nour Bouhlel", "position_id": "POS-AE", "org_unit_id": "ORG-SAL", "manager_id": "EMP-004", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-036", "display_name": "Zied Chaabeni", "position_id": "POS-SUP", "org_unit_id": "ORG-OPS", "manager_id": "EMP-005", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-037", "display_name": "Hela Riahi", "position_id": "POS-REC", "org_unit_id": "ORG-HR", "manager_id": "EMP-006", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-038", "display_name": "Maher Ben Romdhane", "position_id": "POS-HRBP", "org_unit_id": "ORG-HR", "manager_id": "EMP-006", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-039", "display_name": "Aida Khlifi", "position_id": "POS-ACC", "org_unit_id": "ORG-FIN", "manager_id": "EMP-007", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-040", "display_name": "Omar Chouchane", "position_id": "POS-PM", "org_unit_id": "ORG-PRD", "manager_id": "EMP-003", "start_date": "2024-01-01", "buddy_id": null},
-    {"employee_id": "EMP-041", "display_name": "Yasmine Trabelsi", "position_id": "POS-BE", "org_unit_id": "ORG-ENG", "manager_id": "EMP-002", "start_date": "2026-11-09", "buddy_id": "EMP-009"}
+    {
+      "employee_id": "EMP-001",
+      "display_name": "Salma Gharbi",
+      "position_id": "POS-CEO",
+      "org_unit_id": "ORG-HR",
+      "manager_id": null,
+      "start_date": "2023-05-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-002",
+      "display_name": "Karim Mansour",
+      "position_id": "POS-MGR",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-001",
+      "start_date": "2019-12-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-003",
+      "display_name": "Ines Ben Salah",
+      "position_id": "POS-PM",
+      "org_unit_id": "ORG-PRD",
+      "manager_id": "EMP-001",
+      "start_date": "2022-08-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-004",
+      "display_name": "Walid Jebali",
+      "position_id": "POS-MGR",
+      "org_unit_id": "ORG-SAL",
+      "manager_id": "EMP-001",
+      "start_date": "2025-02-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-005",
+      "display_name": "Rim Chaabane",
+      "position_id": "POS-MGR",
+      "org_unit_id": "ORG-OPS",
+      "manager_id": "EMP-001",
+      "start_date": "2025-10-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-006",
+      "display_name": "Leila Haddad",
+      "position_id": "POS-HRBP",
+      "org_unit_id": "ORG-HR",
+      "manager_id": "EMP-001",
+      "start_date": "2018-10-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-007",
+      "display_name": "Sami Ferchichi",
+      "position_id": "POS-ACC",
+      "org_unit_id": "ORG-FIN",
+      "manager_id": "EMP-001",
+      "start_date": "2022-04-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-008",
+      "display_name": "Nadia Bouzid",
+      "position_id": "POS-REC",
+      "org_unit_id": "ORG-HR",
+      "manager_id": "EMP-006",
+      "start_date": "2024-04-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-009",
+      "display_name": "Mehdi Sassi",
+      "position_id": "POS-BE",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2022-11-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-010",
+      "display_name": "Amel Mansouri",
+      "position_id": "POS-AE",
+      "org_unit_id": "ORG-SAL",
+      "manager_id": "EMP-004",
+      "start_date": "2024-06-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-011",
+      "display_name": "Khalil Riahi",
+      "position_id": "POS-SUP",
+      "org_unit_id": "ORG-OPS",
+      "manager_id": "EMP-005",
+      "start_date": "2020-10-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-012",
+      "display_name": "Ines Mejri",
+      "position_id": "POS-BE",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2023-04-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-013",
+      "display_name": "Ghaith Gharbi",
+      "position_id": "POS-FE",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2020-02-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-014",
+      "display_name": "Amel Zouari",
+      "position_id": "POS-DATA",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2018-11-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-015",
+      "display_name": "Amine Ben Ali",
+      "position_id": "POS-DES",
+      "org_unit_id": "ORG-PRD",
+      "manager_id": "EMP-003",
+      "start_date": "2023-05-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-016",
+      "display_name": "Aziz Ayari",
+      "position_id": "POS-AE",
+      "org_unit_id": "ORG-SAL",
+      "manager_id": "EMP-004",
+      "start_date": "2018-09-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-017",
+      "display_name": "Wael Hammami",
+      "position_id": "POS-SUP",
+      "org_unit_id": "ORG-OPS",
+      "manager_id": "EMP-005",
+      "start_date": "2022-06-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-018",
+      "display_name": "Youssef Ayari",
+      "position_id": "POS-BE",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2019-12-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-019",
+      "display_name": "Ghaith Chebbi",
+      "position_id": "POS-FE",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2024-07-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-020",
+      "display_name": "Khalil Mansouri",
+      "position_id": "POS-DATA",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2022-12-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-021",
+      "display_name": "Marwan Bouazizi",
+      "position_id": "POS-DES",
+      "org_unit_id": "ORG-PRD",
+      "manager_id": "EMP-003",
+      "start_date": "2020-07-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-022",
+      "display_name": "Marwan Bouazizi",
+      "position_id": "POS-AE",
+      "org_unit_id": "ORG-SAL",
+      "manager_id": "EMP-004",
+      "start_date": "2020-02-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-023",
+      "display_name": "Asma Mejri",
+      "position_id": "POS-SUP",
+      "org_unit_id": "ORG-OPS",
+      "manager_id": "EMP-005",
+      "start_date": "2024-07-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-024",
+      "display_name": "Wael Sassi",
+      "position_id": "POS-BE",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2018-01-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-025",
+      "display_name": "Malek Ben Ali",
+      "position_id": "POS-FE",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2025-05-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-026",
+      "display_name": "Khalil Karoui",
+      "position_id": "POS-DATA",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2019-06-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-027",
+      "display_name": "Amine Trabelsi",
+      "position_id": "POS-DES",
+      "org_unit_id": "ORG-PRD",
+      "manager_id": "EMP-003",
+      "start_date": "2023-01-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-028",
+      "display_name": "Youssef Ben Ali",
+      "position_id": "POS-AE",
+      "org_unit_id": "ORG-SAL",
+      "manager_id": "EMP-004",
+      "start_date": "2021-01-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-029",
+      "display_name": "Amel Ayari",
+      "position_id": "POS-SUP",
+      "org_unit_id": "ORG-OPS",
+      "manager_id": "EMP-005",
+      "start_date": "2021-01-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-030",
+      "display_name": "Anis Trabelsi",
+      "position_id": "POS-BE",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2018-04-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-031",
+      "display_name": "Skander Khelifi",
+      "position_id": "POS-FE",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2020-03-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-032",
+      "display_name": "Ines Bouazizi",
+      "position_id": "POS-DATA",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2020-07-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-033",
+      "display_name": "Amine Trabelsi",
+      "position_id": "POS-DES",
+      "org_unit_id": "ORG-PRD",
+      "manager_id": "EMP-003",
+      "start_date": "2019-12-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-034",
+      "display_name": "Khalil Sassi",
+      "position_id": "POS-AE",
+      "org_unit_id": "ORG-SAL",
+      "manager_id": "EMP-004",
+      "start_date": "2020-08-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-035",
+      "display_name": "Mariem Karoui",
+      "position_id": "POS-SUP",
+      "org_unit_id": "ORG-OPS",
+      "manager_id": "EMP-005",
+      "start_date": "2025-10-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-036",
+      "display_name": "Lina Ferjani",
+      "position_id": "POS-BE",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2022-01-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-037",
+      "display_name": "Tarek Ayari",
+      "position_id": "POS-FE",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2019-10-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-038",
+      "display_name": "Marwan Ferjani",
+      "position_id": "POS-DATA",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2018-09-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-039",
+      "display_name": "Ons Ayari",
+      "position_id": "POS-DES",
+      "org_unit_id": "ORG-PRD",
+      "manager_id": "EMP-003",
+      "start_date": "2020-01-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-040",
+      "display_name": "Dorra Mejri",
+      "position_id": "POS-AE",
+      "org_unit_id": "ORG-SAL",
+      "manager_id": "EMP-004",
+      "start_date": "2018-12-01",
+      "buddy_id": null
+    },
+    {
+      "employee_id": "EMP-041",
+      "display_name": "Yasmine Trabelsi",
+      "position_id": "POS-BE",
+      "org_unit_id": "ORG-ENG",
+      "manager_id": "EMP-002",
+      "start_date": "2026-11-09",
+      "buddy_id": "EMP-009"
+    }
   ]
 }

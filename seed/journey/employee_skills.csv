@@ -9,13 +9,12 @@ EMP-003,SKILL-COMM,3,manager,day-30 review
 EMP-003,SKILL-PM,4,self,profile claim
 EMP-003,SKILL-SQL,2,applied_evidence,merged PR or ticket evidence
 EMP-003,SKILL-UX,2,assessment,role assessment
-EMP-004,SKILL-COMM,3,assessment,role assessment
-EMP-004,SKILL-CRM,3,applied_evidence,merged PR or ticket evidence
-EMP-004,SKILL-NEG,4,manager,day-30 review
-EMP-004,SKILL-PM,2,self,profile claim
+EMP-004,SKILL-COMM,3,applied_evidence,merged PR or ticket evidence
+EMP-004,SKILL-LEAD,4,manager,day-30 review
+EMP-004,SKILL-PM,2,assessment,role assessment
 EMP-005,SKILL-COMM,3,assessment,role assessment
-EMP-005,SKILL-CRM,2,self,profile claim
-EMP-005,SKILL-SUPPORT,4,applied_evidence,merged PR or ticket evidence
+EMP-005,SKILL-LEAD,4,applied_evidence,merged PR or ticket evidence
+EMP-005,SKILL-PM,2,self,profile claim
 EMP-006,SKILL-COMM,3,self,profile claim
 EMP-006,SKILL-LABOR,4,assessment,role assessment
 EMP-006,SKILL-RECRUIT,2,manager,day-30 review
@@ -31,139 +30,137 @@ EMP-009,SKILL-K8S,4,applied_evidence,merged deployment manifests; on-call rotati
 EMP-009,SKILL-OBS,4,applied_evidence,on-call owner; incident reviews
 EMP-009,SKILL-PY,4,applied_evidence,merged PR or ticket evidence
 EMP-009,SKILL-SQL,3,assessment,role assessment
-EMP-010,SKILL-COMM,2,applied_evidence,merged PR or ticket evidence
-EMP-010,SKILL-DOCKER,3,assessment,role assessment
-EMP-010,SKILL-REACT,4,assessment,role assessment
-EMP-010,SKILL-TS,3,self,profile claim
-EMP-010,SKILL-UX,2,manager,day-30 review
-EMP-011,SKILL-COMM,3,self,profile claim
-EMP-011,SKILL-DATA,3,applied_evidence,merged PR or ticket evidence
-EMP-011,SKILL-DOCKER,2,assessment,role assessment
-EMP-011,SKILL-PY,4,self,profile claim
-EMP-011,SKILL-SQL,3,manager,day-30 review
-EMP-012,SKILL-COMM,3,assessment,role assessment
-EMP-012,SKILL-CRM,3,applied_evidence,merged PR or ticket evidence
-EMP-012,SKILL-NEG,4,manager,day-30 review
-EMP-012,SKILL-PM,2,self,profile claim
-EMP-013,SKILL-COMM,3,assessment,role assessment
-EMP-013,SKILL-PM,2,self,profile claim
-EMP-013,SKILL-UX,4,applied_evidence,merged PR or ticket evidence
-EMP-014,SKILL-COMM,3,self,profile claim
-EMP-014,SKILL-PM,4,assessment,role assessment
-EMP-014,SKILL-SQL,2,manager,day-30 review
-EMP-014,SKILL-UX,2,applied_evidence,merged PR or ticket evidence
+EMP-010,SKILL-COMM,3,manager,day-30 review
+EMP-010,SKILL-CRM,3,self,profile claim
+EMP-010,SKILL-NEG,4,assessment,role assessment
+EMP-010,SKILL-PM,2,applied_evidence,merged PR or ticket evidence
+EMP-011,SKILL-COMM,3,manager,day-30 review
+EMP-011,SKILL-CRM,2,applied_evidence,merged PR or ticket evidence
+EMP-011,SKILL-SUPPORT,4,self,profile claim
+EMP-012,SKILL-COMM,2,assessment,role assessment
+EMP-012,SKILL-DOCKER,3,manager,day-30 review
+EMP-012,SKILL-FASTAPI,3,assessment,role assessment
+EMP-012,SKILL-K8S,2,manager,day-30 review: no deployment ownership
+EMP-012,SKILL-PY,4,manager,day-30 review
+EMP-012,SKILL-SQL,3,applied_evidence,merged PR or ticket evidence
+EMP-013,SKILL-COMM,2,manager,day-30 review
+EMP-013,SKILL-DOCKER,3,applied_evidence,merged PR or ticket evidence
+EMP-013,SKILL-REACT,4,applied_evidence,merged PR or ticket evidence
+EMP-013,SKILL-TS,3,assessment,role assessment
+EMP-013,SKILL-UX,2,self,profile claim
+EMP-014,SKILL-COMM,3,assessment,role assessment
+EMP-014,SKILL-DATA,3,manager,day-30 review
+EMP-014,SKILL-DOCKER,2,applied_evidence,merged PR or ticket evidence
+EMP-014,SKILL-PY,4,assessment,role assessment
+EMP-014,SKILL-SQL,3,self,profile claim
 EMP-015,SKILL-COMM,3,manager,day-30 review
-EMP-015,SKILL-CRM,2,applied_evidence,merged PR or ticket evidence
-EMP-015,SKILL-SUPPORT,4,self,profile claim
-EMP-016,SKILL-COMM,2,assessment,role assessment
-EMP-016,SKILL-DOCKER,3,manager,day-30 review
-EMP-016,SKILL-FASTAPI,3,assessment,role assessment
-EMP-016,SKILL-K8S,2,manager,day-30 review: no deployment ownership
-EMP-016,SKILL-PY,4,manager,day-30 review
-EMP-016,SKILL-SQL,3,applied_evidence,merged PR or ticket evidence
-EMP-017,SKILL-COMM,2,self,profile claim
-EMP-017,SKILL-DOCKER,3,applied_evidence,merged PR or ticket evidence
-EMP-017,SKILL-FASTAPI,3,self,profile claim
-EMP-017,SKILL-K8S,2,manager,day-30 review: no deployment ownership
-EMP-017,SKILL-PY,4,applied_evidence,merged PR or ticket evidence
-EMP-017,SKILL-SQL,3,assessment,role assessment
+EMP-015,SKILL-PM,2,applied_evidence,merged PR or ticket evidence
+EMP-015,SKILL-UX,4,self,profile claim
+EMP-016,SKILL-COMM,3,assessment,role assessment
+EMP-016,SKILL-CRM,3,applied_evidence,merged PR or ticket evidence
+EMP-016,SKILL-NEG,4,manager,day-30 review
+EMP-016,SKILL-PM,2,self,profile claim
+EMP-017,SKILL-COMM,3,assessment,role assessment
+EMP-017,SKILL-CRM,2,self,profile claim
+EMP-017,SKILL-SUPPORT,4,applied_evidence,merged PR or ticket evidence
 EMP-018,SKILL-COMM,2,manager,day-30 review
 EMP-018,SKILL-DOCKER,3,assessment,role assessment
 EMP-018,SKILL-FASTAPI,3,manager,day-30 review
 EMP-018,SKILL-K8S,2,manager,day-30 review: no deployment ownership
 EMP-018,SKILL-PY,4,assessment,role assessment
 EMP-018,SKILL-SQL,3,self,profile claim
-EMP-019,SKILL-COMM,2,applied_evidence,merged PR or ticket evidence
+EMP-019,SKILL-COMM,2,assessment,role assessment
 EMP-019,SKILL-DOCKER,3,self,profile claim
-EMP-019,SKILL-FASTAPI,3,applied_evidence,merged PR or ticket evidence
-EMP-019,SKILL-K8S,2,manager,day-30 review: no deployment ownership
-EMP-019,SKILL-PY,4,self,profile claim
-EMP-019,SKILL-SQL,3,manager,day-30 review
-EMP-020,SKILL-COMM,2,assessment,role assessment
-EMP-020,SKILL-DOCKER,3,manager,day-30 review
-EMP-020,SKILL-FASTAPI,3,assessment,role assessment
-EMP-020,SKILL-K8S,2,manager,day-30 review: no deployment ownership
+EMP-019,SKILL-REACT,4,self,profile claim
+EMP-019,SKILL-TS,3,manager,day-30 review
+EMP-019,SKILL-UX,2,applied_evidence,merged PR or ticket evidence
+EMP-020,SKILL-COMM,3,manager,day-30 review
+EMP-020,SKILL-DATA,3,assessment,role assessment
+EMP-020,SKILL-DOCKER,2,self,profile claim
 EMP-020,SKILL-PY,4,manager,day-30 review
 EMP-020,SKILL-SQL,3,applied_evidence,merged PR or ticket evidence
-EMP-021,SKILL-COMM,2,self,profile claim
-EMP-021,SKILL-DOCKER,3,applied_evidence,merged PR or ticket evidence
-EMP-021,SKILL-FASTAPI,3,self,profile claim
-EMP-021,SKILL-K8S,2,manager,day-30 review: no deployment ownership
-EMP-021,SKILL-PY,4,applied_evidence,merged PR or ticket evidence
-EMP-021,SKILL-SQL,3,assessment,role assessment
-EMP-022,SKILL-COMM,2,manager,day-30 review
-EMP-022,SKILL-DOCKER,3,assessment,role assessment
-EMP-022,SKILL-FASTAPI,3,manager,day-30 review
-EMP-022,SKILL-K8S,2,manager,day-30 review: no deployment ownership
-EMP-022,SKILL-PY,4,assessment,role assessment
-EMP-022,SKILL-SQL,3,self,profile claim
-EMP-023,SKILL-COMM,2,applied_evidence,merged PR or ticket evidence
-EMP-023,SKILL-DOCKER,3,self,profile claim
-EMP-023,SKILL-FASTAPI,3,applied_evidence,merged PR or ticket evidence
-EMP-023,SKILL-K8S,2,manager,day-30 review: no deployment ownership
-EMP-023,SKILL-PY,4,self,profile claim
-EMP-023,SKILL-SQL,3,manager,day-30 review
+EMP-021,SKILL-COMM,3,assessment,role assessment
+EMP-021,SKILL-PM,2,self,profile claim
+EMP-021,SKILL-UX,4,applied_evidence,merged PR or ticket evidence
+EMP-022,SKILL-COMM,3,manager,day-30 review
+EMP-022,SKILL-CRM,3,self,profile claim
+EMP-022,SKILL-NEG,4,assessment,role assessment
+EMP-022,SKILL-PM,2,applied_evidence,merged PR or ticket evidence
+EMP-023,SKILL-COMM,3,manager,day-30 review
+EMP-023,SKILL-CRM,2,applied_evidence,merged PR or ticket evidence
+EMP-023,SKILL-SUPPORT,4,self,profile claim
 EMP-024,SKILL-COMM,2,assessment,role assessment
 EMP-024,SKILL-DOCKER,3,manager,day-30 review
 EMP-024,SKILL-FASTAPI,3,assessment,role assessment
 EMP-024,SKILL-K8S,2,manager,day-30 review: no deployment ownership
 EMP-024,SKILL-PY,4,manager,day-30 review
 EMP-024,SKILL-SQL,3,applied_evidence,merged PR or ticket evidence
-EMP-025,SKILL-COMM,2,self,profile claim
+EMP-025,SKILL-COMM,2,manager,day-30 review
 EMP-025,SKILL-DOCKER,3,applied_evidence,merged PR or ticket evidence
-EMP-025,SKILL-FASTAPI,3,self,profile claim
-EMP-025,SKILL-K8S,4,applied_evidence,merged deployment manifests; on-call rotation
-EMP-025,SKILL-PY,4,applied_evidence,merged PR or ticket evidence
-EMP-025,SKILL-SQL,3,assessment,role assessment
-EMP-026,SKILL-COMM,2,manager,day-30 review
-EMP-026,SKILL-DOCKER,3,assessment,role assessment
-EMP-026,SKILL-FASTAPI,3,manager,day-30 review
-EMP-026,SKILL-K8S,4,applied_evidence,merged deployment manifests; on-call rotation
+EMP-025,SKILL-REACT,4,applied_evidence,merged PR or ticket evidence
+EMP-025,SKILL-TS,3,assessment,role assessment
+EMP-025,SKILL-UX,2,self,profile claim
+EMP-026,SKILL-COMM,3,assessment,role assessment
+EMP-026,SKILL-DATA,3,manager,day-30 review
+EMP-026,SKILL-DOCKER,2,applied_evidence,merged PR or ticket evidence
 EMP-026,SKILL-PY,4,assessment,role assessment
 EMP-026,SKILL-SQL,3,self,profile claim
 EMP-027,SKILL-COMM,3,manager,day-30 review
-EMP-027,SKILL-LABOR,2,applied_evidence,merged PR or ticket evidence
-EMP-027,SKILL-RECRUIT,4,self,profile claim
-EMP-028,SKILL-COMM,3,applied_evidence,merged PR or ticket evidence
-EMP-028,SKILL-LABOR,4,manager,day-30 review
-EMP-028,SKILL-RECRUIT,2,assessment,role assessment
-EMP-029,SKILL-ACCT,4,applied_evidence,merged PR or ticket evidence
-EMP-029,SKILL-COMM,2,assessment,role assessment
-EMP-030,SKILL-COMM,3,self,profile claim
-EMP-030,SKILL-CRM,2,manager,day-30 review
-EMP-030,SKILL-SUPPORT,4,assessment,role assessment
-EMP-031,SKILL-COMM,3,applied_evidence,merged PR or ticket evidence
-EMP-031,SKILL-CRM,3,manager,day-30 review
-EMP-031,SKILL-NEG,4,self,profile claim
-EMP-031,SKILL-PM,2,assessment,role assessment
-EMP-032,SKILL-COMM,3,applied_evidence,merged PR or ticket evidence
-EMP-032,SKILL-PM,2,assessment,role assessment
-EMP-032,SKILL-UX,4,manager,day-30 review
+EMP-027,SKILL-PM,2,applied_evidence,merged PR or ticket evidence
+EMP-027,SKILL-UX,4,self,profile claim
+EMP-028,SKILL-COMM,3,assessment,role assessment
+EMP-028,SKILL-CRM,3,applied_evidence,merged PR or ticket evidence
+EMP-028,SKILL-NEG,4,manager,day-30 review
+EMP-028,SKILL-PM,2,self,profile claim
+EMP-029,SKILL-COMM,3,assessment,role assessment
+EMP-029,SKILL-CRM,2,self,profile claim
+EMP-029,SKILL-SUPPORT,4,applied_evidence,merged PR or ticket evidence
+EMP-030,SKILL-COMM,2,manager,day-30 review
+EMP-030,SKILL-DOCKER,3,assessment,role assessment
+EMP-030,SKILL-FASTAPI,3,manager,day-30 review
+EMP-030,SKILL-K8S,2,manager,day-30 review: no deployment ownership
+EMP-030,SKILL-PY,4,assessment,role assessment
+EMP-030,SKILL-SQL,3,self,profile claim
+EMP-031,SKILL-COMM,2,assessment,role assessment
+EMP-031,SKILL-DOCKER,3,self,profile claim
+EMP-031,SKILL-REACT,4,self,profile claim
+EMP-031,SKILL-TS,3,manager,day-30 review
+EMP-031,SKILL-UX,2,applied_evidence,merged PR or ticket evidence
+EMP-032,SKILL-COMM,3,manager,day-30 review
+EMP-032,SKILL-DATA,3,assessment,role assessment
+EMP-032,SKILL-DOCKER,2,self,profile claim
+EMP-032,SKILL-PY,4,manager,day-30 review
+EMP-032,SKILL-SQL,3,applied_evidence,merged PR or ticket evidence
 EMP-033,SKILL-COMM,3,assessment,role assessment
-EMP-033,SKILL-PM,4,applied_evidence,merged PR or ticket evidence
-EMP-033,SKILL-SQL,2,self,profile claim
-EMP-033,SKILL-UX,2,manager,day-30 review
-EMP-034,SKILL-COMM,2,applied_evidence,merged PR or ticket evidence
-EMP-034,SKILL-DOCKER,3,assessment,role assessment
-EMP-034,SKILL-REACT,4,assessment,role assessment
-EMP-034,SKILL-TS,3,self,profile claim
-EMP-034,SKILL-UX,2,manager,day-30 review
-EMP-035,SKILL-COMM,3,applied_evidence,merged PR or ticket evidence
-EMP-035,SKILL-CRM,3,manager,day-30 review
-EMP-035,SKILL-NEG,4,self,profile claim
-EMP-035,SKILL-PM,2,assessment,role assessment
-EMP-036,SKILL-COMM,3,applied_evidence,merged PR or ticket evidence
-EMP-036,SKILL-CRM,2,assessment,role assessment
-EMP-036,SKILL-SUPPORT,4,manager,day-30 review
-EMP-037,SKILL-COMM,3,assessment,role assessment
-EMP-037,SKILL-LABOR,2,self,profile claim
-EMP-037,SKILL-RECRUIT,4,applied_evidence,merged PR or ticket evidence
-EMP-038,SKILL-COMM,3,self,profile claim
-EMP-038,SKILL-LABOR,4,assessment,role assessment
-EMP-038,SKILL-RECRUIT,2,manager,day-30 review
-EMP-039,SKILL-ACCT,4,self,profile claim
-EMP-039,SKILL-COMM,2,manager,day-30 review
-EMP-040,SKILL-COMM,3,applied_evidence,merged PR or ticket evidence
-EMP-040,SKILL-PM,4,manager,day-30 review
-EMP-040,SKILL-SQL,2,assessment,role assessment
-EMP-040,SKILL-UX,2,self,profile claim
+EMP-033,SKILL-PM,2,self,profile claim
+EMP-033,SKILL-UX,4,applied_evidence,merged PR or ticket evidence
+EMP-034,SKILL-COMM,3,manager,day-30 review
+EMP-034,SKILL-CRM,3,self,profile claim
+EMP-034,SKILL-NEG,4,assessment,role assessment
+EMP-034,SKILL-PM,2,applied_evidence,merged PR or ticket evidence
+EMP-035,SKILL-COMM,3,manager,day-30 review
+EMP-035,SKILL-CRM,2,applied_evidence,merged PR or ticket evidence
+EMP-035,SKILL-SUPPORT,4,self,profile claim
+EMP-036,SKILL-COMM,2,assessment,role assessment
+EMP-036,SKILL-DOCKER,3,manager,day-30 review
+EMP-036,SKILL-FASTAPI,3,assessment,role assessment
+EMP-036,SKILL-K8S,2,manager,day-30 review: no deployment ownership
+EMP-036,SKILL-PY,4,manager,day-30 review
+EMP-036,SKILL-SQL,3,applied_evidence,merged PR or ticket evidence
+EMP-037,SKILL-COMM,2,manager,day-30 review
+EMP-037,SKILL-DOCKER,3,applied_evidence,merged PR or ticket evidence
+EMP-037,SKILL-REACT,4,applied_evidence,merged PR or ticket evidence
+EMP-037,SKILL-TS,3,assessment,role assessment
+EMP-037,SKILL-UX,2,self,profile claim
+EMP-038,SKILL-COMM,3,assessment,role assessment
+EMP-038,SKILL-DATA,3,manager,day-30 review
+EMP-038,SKILL-DOCKER,2,applied_evidence,merged PR or ticket evidence
+EMP-038,SKILL-PY,4,assessment,role assessment
+EMP-038,SKILL-SQL,3,self,profile claim
+EMP-039,SKILL-COMM,3,manager,day-30 review
+EMP-039,SKILL-PM,2,applied_evidence,merged PR or ticket evidence
+EMP-039,SKILL-UX,4,self,profile claim
+EMP-040,SKILL-COMM,3,assessment,role assessment
+EMP-040,SKILL-CRM,3,applied_evidence,merged PR or ticket evidence
+EMP-040,SKILL-NEG,4,manager,day-30 review
+EMP-040,SKILL-PM,2,self,profile claim

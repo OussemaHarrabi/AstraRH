@@ -16,7 +16,7 @@ SEED = ROOT / "seed" / "journey"
 # The nine Engineering employees with a confirmed Kubernetes gap. This powers the
 # read-only team heatmap (9 of 14 Engineering staff). EMP-009/025/026 are the
 # non-gap backend engineers; EMP-002 is the manager and EMP-011 is data.
-K8S_GAP_IDS = {f"EMP-{number:03d}" for number in range(16, 25)}
+K8S_GAP_IDS = {"EMP-012", "EMP-018", "EMP-024", "EMP-030", "EMP-036"}
 OBS_ONLY_HOLDER = "EMP-009"
 HERO_ID = "EMP-041"
 
@@ -144,5 +144,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 
 
