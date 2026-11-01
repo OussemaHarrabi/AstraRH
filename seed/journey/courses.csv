@@ -1,0 +1,11 @@
+course_id,title,provider,cost_tnd,hours,skill_id,level_gained,kpi_id,expected_effect,format,url
+CRS-K8S-01,Kubernetes Fundamentals,CDS Academy,0.00,6,SKILL-K8S,1,KPI-MTTR,Lower MTTR for deployment incidents (hypothesis),self_paced,https://cds.example.test/learning/crs-k8s-01
+CRS-K8S-02,Kubernetes Operations (CKA prep),CDS Academy,450.00,12,SKILL-K8S,1,KPI-MTTR,Deployment ownership and faster restore (hypothesis),course,https://cds.example.test/learning/crs-k8s-02
+CRS-OBS-01,OpenTelemetry for Services,CDS Academy,0.00,5,SKILL-OBS,1,KPI-MTTR,Faster incident diagnosis (hypothesis),workshop,https://cds.example.test/learning/crs-obs-01
+CRS-DOCKER-01,Docker Deep Dive,OER Commons demo,0.00,4,SKILL-DOCKER,1,KPI-RAMP,Faster environment setup (hypothesis),self_paced,https://cds.example.test/learning/crs-docker-01
+CRS-PY-01,Advanced Python for Services,CDS Academy,300.00,8,SKILL-PY,1,KPI-RAMP,Independent service changes (hypothesis),course,https://cds.example.test/learning/crs-py-01
+CRS-SQL-01,Query Performance,CDS Academy,250.00,6,SKILL-SQL,1,KPI-MTTR,Fewer slow-query incidents (hypothesis),course,https://cds.example.test/learning/crs-sql-01
+CRS-FASTAPI-01,Production FastAPI,CDS Academy,0.00,5,SKILL-FASTAPI,1,KPI-RAMP,First owned endpoint (hypothesis),self_paced,https://cds.example.test/learning/crs-fastapi-01
+CRS-REACT-01,React Patterns,OER Commons demo,0.00,6,SKILL-REACT,1,KPI-RAMP,Independent UI delivery (hypothesis),self_paced,https://cds.example.test/learning/crs-react-01
+CRS-TS-01,TypeScript for Teams,CDS Academy,200.00,5,SKILL-TS,1,KPI-RAMP,Fewer type regressions (hypothesis),course,https://cds.example.test/learning/crs-ts-01
+CRS-COMM-01,Clear Communication,CDS Academy,0.00,3,SKILL-COMM,1,KPI-90D,Clearer check-ins and escalations (hypothesis),workshop,https://cds.example.test/learning/crs-comm-01

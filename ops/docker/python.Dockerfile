@@ -43,6 +43,7 @@ with_code_formula=False, with_picture_classifier=False, with_rapidocr=False)" &&
 COPY apps ./apps
 COPY packages ./packages
 COPY data ./data
+COPY seed ./seed
 
 RUN useradd --uid 10001 --no-create-home --shell /usr/sbin/nologin astra
 USER astra
