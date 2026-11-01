@@ -69,7 +69,7 @@ The full table, with tables, risk class, size and demo proof, is §5 of the v3 d
 
 1. **Probation dossier.** A computed Day-90 export: milestones, evidence, check-ins, verified skills, missing items. No new table. The legal artifact, assembled by the agent, decided by the manager.
 2. **Manager readiness pack.** Pre-start checklist (access, first task, calendar, buddy briefed) plus a **first-win ladder** of three escalating tasks. The #1 onboarding failure is an unprepared manager.
-3. **Team gap heatmap (Horizon preview).** Aggregate confirmed gaps by team and skill at `k >= 5`. "9 of 14 backend engineers have a K8s gap." The workforce-wide story without the campaign tables we do not have.
+3. **Team gap heatmap (Horizon preview).** Aggregate confirmed gaps by team and skill at `k >= 5`. "6 of 7 backend engineers have a K8s gap (5 before Yasmine)." The workforce-wide story without the campaign tables we do not have.
 4. **Reverse doc feedback.** "This doc is wrong / this step was useless" becomes a `support_flag(kind=doc_feedback)` for HR; the knowledge owner decides. A feedback loop nobody builds.
 5. **Day-90 verified baseline.** `journey.onboarding.completed.v1` carries verified skills, so the same employee can enter a future Horizon lane without re-learning.
 6. **Cohort display, not a table.** Group new hires by start date and team in the portal. Pure read; no new model.
@@ -141,3 +141,4 @@ The conflict register at the end of the v3 doc lists 18 places where this pack c
 ---
 
 > **AstraRH's `journey` pack owns the 90 days after the offer and the skills after that: it drafts, evidences and proposes; a human approves every action that touches a person's record.**
+

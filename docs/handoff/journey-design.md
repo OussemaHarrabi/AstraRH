@@ -66,7 +66,7 @@ The important part is not the list of features. It is that **nothing is learned 
 
 Two supporting stories, both cheap and demo-able:
 
-- **Team gap heatmap (Horizon preview).** Aggregate confirmed gaps by team and skill at `k >= 5`. It shows the workforce-wide lane — "9 of 14 Engineering staff have a Kubernetes gap" — **without** the campaign tables the schema does not have.
+- **Team gap heatmap (Horizon preview).** Aggregate confirmed gaps by team and skill at `k >= 5`. It shows the workforce-wide lane — "6 of 7 backend engineers have a Kubernetes gap (5 before Yasmine)" — **without** the campaign tables the schema does not have.
 - **No sentiment, no ranking, no flight-risk score.** Say it on stage. We show facts and a reason; a human decides what to do. This is the legal line and a differentiator, not a limitation.
 
 ### 1.4 What the judge sees, by criterion
@@ -237,7 +237,7 @@ Code is table stakes; every team will have AI-written code. The score is the **t
 |---|---|---|---|---|---|
 | **D1** | **Probation dossier (Day 90)** | Computed export: milestones, evidence, check-ins, verified skills, missing items; manager review pack | Tunisia's trial period is a legal artifact. The agent assembles; the human decides. No new table | read-only over plan/tasks/check-ins/gaps | S |
 | **D2** | **Manager readiness pack** | Pre-start checklist (access, first task, calendar, buddy briefed), **first-win ladder** (3 escalating tasks), cohort line | The #1 onboarding failure is an unprepared manager. Time-to-first-contribution becomes demo-able | `template_task`, `onboarding_task` | S |
-| **D3** | **Team gap heatmap — Horizon preview** | Aggregate confirmed/proposed gaps by org unit + skill at `k >= 5`; no individual ranking; no campaign tables | Shows the workforce-wide lane today: "9 of 14 Engineering staff have a K8s gap." The second lane without the deferred schema | `skill_requirement`, `skill_gap` + core reads | M |
+| **D3** | **Team gap heatmap — Horizon preview** | Aggregate confirmed/proposed gaps by org unit + skill at `k >= 5`; no individual ranking; no campaign tables | Shows the workforce-wide lane today: "6 of 7 backend engineers have a K8s gap (5 before Yasmine)." The second lane without the deferred schema | `skill_requirement`, `skill_gap` + core reads | M |
 | **D4** | **Explainability pack** | `<WhyPanel>` on plan/gap; evidence drawer; edit-then-approve diff; "No evidence found" wording | Reliability and fairness in one click. The shared UI renders; journey supplies the record | shared `explain` + proposal envelope | S |
 | **D5** | **Manager weekly briefing** | 3 actions this week + a 1:1 packet from facts; LLM narrates validated numbers | Manager cockpit value: coordination time down, conversation quality up | read-only + prompt | M |
 | **D6** | **Reverse doc feedback** | Portal button "this doc is wrong / this step was useless" -> `support_flag(kind=doc_feedback)` -> HR queue; knowledge owner decides | Nobody builds the reverse feedback loop. It improves the RAG corpus without the agent editing docs | `support_flag` | S |
@@ -765,12 +765,12 @@ Location: `seed/journey/`. Fictional, deterministic, committed as JSON/CSV.
 | `employee_skills.csv` | `employee_id, skill_id, level, source, evidence` for `EMP-001..040`; **`EMP-009` is the only `SKILL-OBS` holder in Engineering** |
 | `courses.csv` | 10 courses: `course_id, title, cost_tnd, hours, skill_id, level_gained, kpi_id, expected_effect`; must include `CRS-K8S-01` |
 | `pulse_survey.json` | D7/30/60/90 structured questions (clarity, access, buddy contact, workload, blockers); optional free text; **no mood/sentiment question** |
-| `plans.json` | 8 journeys: 1 hero + 7 background; tasks, check-ins, flags, gaps, recommendations, one impact measure, one dossier; plus 9 background confirmed K8s gaps for the heatmap |
+| `plans.json` | 8 journeys: 1 hero + 7 background; tasks, check-ins, flags, gaps, recommendations, one impact measure, one dossier; plus 5 background confirmed K8s gaps for the heatmap (the hero adds a sixth) |
 | `scenarios.md` | Given/when/then acceptance checks for this pack |
 
 **Hero story (locked):** `CAND-001` Yasmine Trabelsi is hired as `POS-BE` in `ORG-ENG`, manager `EMP-002`, buddy `EMP-009`, start date fixed in seed. Screening found **Kubernetes** (`SKILL-K8S`) and **observability** (`SKILL-OBS`) gaps. She is **`EMP-041`** on hire — emitted by `talent` (decision 1). Plan approved by `EMP-006`. Recommendation `CRS-K8S-01`, 6 h, 0 TND internal, KPI `KPI-MTTR`, mentor alternative `EMP-009`.
 
-**Volumes:** 8 journeys (1 draft with a pending activation proposal) | 10 submitted check-ins | 3 open support flags + 1 resolved doc-feedback | **9 background confirmed K8s gaps in Engineering** | 2 hero gaps (1 confirmed, 1 proposed) | 1 closed training gap | 2 recommendations (1 proposed, 1 completed+verified) | 1 impact measure with comparison group n=5 | 1 dossier with 21 of 22 tasks evidenced | 0 sentiment fields.
+**Volumes:** 8 journeys (1 draft with a pending activation proposal) | 10 submitted check-ins | 3 open support flags + 1 resolved doc-feedback | **5 background confirmed K8s gaps; the hero adds a sixth** | 2 hero gaps (1 confirmed, 1 proposed) | 1 closed training gap | 2 recommendations (1 proposed, 1 completed+verified) | 1 impact measure with comparison group n=5 | 1 dossier with 21 of 22 tasks evidenced | 0 sentiment fields.
 
 **20-second demo beat:** open Yasmine's journey -> attention card: "Day-7 pulse: staging access not ready; first task blocked" with facts -> gap card: "Kubernetes required 3, evidence 1 — 14 PRs touched manifests, zero deployment ownership" -> recommendation: `CRS-K8S-01` (6 h, 0 TND, should move `KPI-MTTR`) plus `EMP-009` as mentor -> approve.
 
@@ -1070,4 +1070,5 @@ This is kept at the end on purpose. It is the list of places where the journey p
 ---
 
 *End of the implementation reference. The next commit is code: `seed/journey/` first, then the pack skeleton.*
+
 
