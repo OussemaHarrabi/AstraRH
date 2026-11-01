@@ -10,4 +10,6 @@ from pathlib import Path
 PACKAGES_ROOT = Path(__file__).resolve().parents[3]
 if str(PACKAGES_ROOT) not in sys.path:
     sys.path.insert(0, str(PACKAGES_ROOT))
-Renamed from conftest.py: it shadowed the root tests/conftest.py when pytest collected packages/. The root pytest config already adds packages to pythonpath.
+
+# Renamed from conftest.py: it shadowed the root tests/conftest.py when pytest collected packages.
+# The root pytest config already adds packages to pythonpath.
