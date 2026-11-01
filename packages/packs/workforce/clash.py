@@ -46,9 +46,12 @@ class Clash:
     detail: str
 
 
-def _overlaps(a_start: date, a_end: date, b_start: date, b_end: date) -> bool:
+def overlaps(a_start: date, a_end: date, b_start: date, b_end: date) -> bool:
     """Inclusive date-range overlap."""
     return a_start <= b_end and b_start <= a_end
+
+
+_overlaps = overlaps  # internal alias
 
 
 def minutes(hhmm: str) -> int:
