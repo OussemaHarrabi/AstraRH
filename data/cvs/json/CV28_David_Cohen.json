@@ -1,0 +1,50 @@
+{
+  "id": "CV28",
+  "source_id": "24647794",
+  "name": "David Cohen",
+  "slug": "David_Cohen",
+  "title": "Electrical Engineer",
+  "field": "embedded",
+  "layout": "classic",
+  "job": "J10",
+  "location": "Tel Aviv, Israel",
+  "email": "david_cohen@example.com",
+  "phone": "+33 6 00 00 28",
+  "portfolio": "portfolio.example.com/david_cohen",
+  "summary": "Electrical Engineer with hands-on experience in C, C++ and RF. Strong on debugging, test rigs and documentation from prototype to production.",
+  "skills": [
+    "C",
+    "C++",
+    "RF",
+    "Electronics",
+    "MATLAB",
+    "Testing",
+    "Embedded Systems",
+    "Debugging"
+  ],
+  "experience": [
+    "Mosaic Ridge July 2015 Conducted a successful research project on innovative use of Active Noise Control (ANC), 3-D Noise Mapping and Passive Noise Control systems as a solution for acoustical noise control issues in fast growing cities.",
+    "Mosaic Ridge October 2014 Successfully engineered a new transmission line to feed a new load in a city's transmission system using PowerWorld simulation software, and ETAP.",
+    "Performed Three-Phase Power Systems circuit analysis of the new system.",
+    "Performed cost analysis and allocation for the project.",
+    "Mosaic Ridge September 2014 to August 2015 Engineering Intern Lead AutoCAD Drafting team of 3 in drafting 2D maps of Oil and Gas production sites.",
+    "Contributed in building Spill Prevention, Control and Countermeasure (SPCC) plans for Oil and Gas Production Facilities, data entry, and various office duties assigned by my manager.",
+    "Enhanced my communication and leadership skills within my team and my manager."
+  ],
+  "education": [
+    [
+      "MSc Electrical Engineering",
+      "Meridia Institute of Technology",
+      "2012 – 2014"
+    ]
+  ],
+  "certifications": [
+    "Certified Electronics Technician"
+  ],
+  "languages": [
+    "Hebrew (native)",
+    "English (C2)"
+  ],
+  "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+  "license": "CC0-1.0"
+}

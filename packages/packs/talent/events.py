@@ -43,3 +43,21 @@ class StageChanged(BaseModel):
     job_id: UUID
     from_stage: str
     to_stage: str
+
+
+@event_type("talent.followup.due.v1")
+class FollowupDue(BaseModel):
+    application_id: UUID
+    thread_id: UUID
+    sequence: int
+
+
+@event_type("talent.interview.requested.v1")
+class InterviewRequested(BaseModel):
+    interview_id: UUID
+
+
+@event_type("talent.interview.booked.v1")
+class InterviewBooked(BaseModel):
+    interview_id: UUID
+    booking_id: UUID

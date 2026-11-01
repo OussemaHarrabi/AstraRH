@@ -9,9 +9,11 @@ import pytest
 from packs.talent import scoring
 from packs.talent.blind import BLIND_TOKEN, blind
 from packs.talent.signals import (
+    bm25_scores,
     chunk_text,
     compute_signal,
     find_sentence,
+    lexical_document,
     role_years,
     verified_years,
 )
@@ -281,6 +283,29 @@ def test_related_skill_used_when_no_direct_proof():
     outcome = compute_signal(criterion, {}, "Shipped with Docker.", None, related, None, "cv")
     assert outcome.signal["related"] == "0.5"
     assert outcome.evidence[0]["kind"] == "related:Docker"
+
+
+def test_two_layers_sum_to_the_score():
+    base = inputs({"direct": True, "years": "4"}, {"direct": True})
+    base["match"] = {"dense": "0.60", "lexical": "0.80"}
+    result = scoring.score(base)
+    assert result.score == Decimal("0.70") + Decimal("0.30") * Decimal("0.7000")
+    assert result.factors[-1].key == scoring.MATCH_KEY
+    assert sum(f.contribution for f in result.factors) == result.score
+
+
+def test_bm25_rewards_real_terms_and_is_deterministic():
+    docs = {"a": "python fastapi postgres services", "b": "sales negotiation crm", "c": "python"}
+    first = bm25_scores("python fastapi", docs)
+    assert first == bm25_scores("python fastapi", docs)
+    assert first["a"] == Decimal(1)
+    assert first["b"] == Decimal(0)
+    assert first["a"] > first["c"] > first["b"]
+
+
+def test_keyword_list_lines_are_excluded_from_bm25():
+    text = "Support technician.\nPython PostgreSQL FastAPI Docker Kubernetes"
+    assert lexical_document(text, ALL_KEYWORDS) == "Support technician."
 
 
 def test_chunks_group_lines_and_stay_readable():

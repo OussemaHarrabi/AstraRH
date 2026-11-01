@@ -5,7 +5,21 @@ owner: oussema
 status: live
 description: Identity, trust ledger, explainability, events, AI runtime and graph.
 
+ui:
+  route: /inbox
+  nav_label: Inbox
+  roles: [admin, hr, recruiter]
+
 actions:
+  - id: kernel.email.classify
+    risk: R0
+    description: Sort an inbound email by type and urgency.
+  - id: kernel.email.digest
+    risk: R0
+    description: Build the daily inbox digest.
+  - id: kernel.question.answer
+    risk: R0
+    description: Answer an employee's question from company documents, with citations.
   - id: kernel.email.send
     risk: R2
     channel: external
@@ -13,6 +27,18 @@ actions:
     approver_roles: [admin, hr, recruiter]
     view_roles: [admin, hr, recruiter, auditor]
     description: Send an email that a person has reviewed.
+
+agents:
+  - id: inbox_triage
+    title: Sort the inbox
+    events: [comms.message.received.v1]
+    entry: kernel.comms.agents:build_triage
+    description: Groups emails by type and urgency, and flags those needing a person.
+  - id: policy_answers
+    title: Answer employee questions
+    events: [knowledge.question.asked.v1]
+    entry: kernel.knowledge.agents:build
+    description: Answers from company documents with citations, or passes the question to HR.
 
 graph:
   - event: ai.agent_run.completed.v1

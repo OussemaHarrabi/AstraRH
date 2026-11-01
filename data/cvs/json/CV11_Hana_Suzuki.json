@@ -1,0 +1,48 @@
+{
+  "id": "CV11",
+  "source_id": "43311839",
+  "name": "Hana Suzuki",
+  "slug": "Hana_Suzuki",
+  "title": "Software Engineer",
+  "field": "backend",
+  "layout": "table",
+  "job": "J12",
+  "location": "Tokyo, Japan",
+  "email": "hana_suzuki@example.com",
+  "phone": "+33 6 00 00 11",
+  "portfolio": "portfolio.example.com/hana_suzuki",
+  "summary": "Software Engineer with hands-on experience in C#, ASP.NET and SQL Server. Builds maintainable services with strong review and testing habits.",
+  "skills": [
+    "C#",
+    "ASP.NET",
+    "SQL Server",
+    "REST APIs",
+    "JavaScript",
+    "Entity Framework",
+    "Git",
+    "Azure"
+  ],
+  "experience": [
+    "SDLC) including requirements, logical and physical architecture modeling, design, development, implementation, and support.",
+    "Ability to work in a fast paced, collaborative environment and handle multiple concurrent projects.",
+    "Collaborate with partners to understand high-level conceptual flow and develop prototypes to review with business partners.",
+    "Functional Domain experience involves HealthCare, Life Sciences and Transportation.",
+    "Moved to Application Support team and leading an offshore team in Triaging production related issues since six months"
+  ],
+  "education": [
+    [
+      "BSc Software Engineering",
+      "Northvale University",
+      "2015 – 2017"
+    ]
+  ],
+  "certifications": [
+    "Microsoft Certified: Azure Developer Associate"
+  ],
+  "languages": [
+    "Japanese (native)",
+    "English (C1)"
+  ],
+  "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+  "license": "CC0-1.0"
+}

@@ -1,0 +1,50 @@
+# Sofia Rossi
+**IT Auditor**
+
+Milan, Italy · sofia_rossi@example.com · +33 6 00 00 03 · portfolio.example.com/sofia_rossi
+
+## Summary
+IT Auditor with hands-on experience in SIEM, Incident Response and MITRE ATT&CK. Focused on detection quality, incident response and clear documentation.
+
+## Core skills
+
+- SIEM
+- Incident Response
+- MITRE ATT&CK
+- EDR
+- Vulnerability Management
+- Python
+- Splunk
+- ISO 27001
+
+## Experience
+
+- 10/2016 to Current Information Technology Auditor Juniper Lane - Milan, Italy Participate in the annual risk assessment and audit planning process covering IT, financial, operational, and contract areas.
+- Assist with IT audits and reviews including user access, database and service configurations, security, and policy and procedural compliance.
+- Perform IT project pre and post audit assessments.
+- Participate in external cyber related audits and assessments.
+- Assist with IT portion of annual assessment of internal controls over financial reporting (Sarbanes Oxley - SOX).
+- Includes risk assessment, control walkthroughs, control testing, remediation assistance, report of results to IT management and other management, and collaboration with our external financial IT auditors.
+- Consult on IT matters within non-IT focused audits and reviews performed internal audit.
+- Assist and consult with IT management on upgrades, implementations, and action plans resulting from various audits and assessments.
+- Assists and provides support to others auditing the Association as needed.
+- Train and educate members of the internal audit team and other personnel on IT audit methods and emerging IT risks.
+- Coordinates work of internal auditors when assigned to assist with special/complex audits.
+- 04/2015 to 10/2016 PeopleSoft Security Administrator III Juniper Lane - Milan, Italy Work closely with the internal and external audit department to provide reports and documentation for compliance.
+
+## Education
+
+- **BSc Cybersecurity** — Atlas Polytechnic · 2016 – 2018
+
+## Certifications
+
+- CompTIA Security+
+- CISSP (in progress)
+
+## Languages
+
+- Italian (native)
+- English (B2)
+
+---
+*Synthetic demo CV — fictional identity. Source text CC0-1.0.*

@@ -1,0 +1,44 @@
+# David Cohen
+**Electrical Engineer**
+
+Tel Aviv, Israel · david_cohen@example.com · +33 6 00 00 28 · portfolio.example.com/david_cohen
+
+## Summary
+Electrical Engineer with hands-on experience in C, C++ and RF. Strong on debugging, test rigs and documentation from prototype to production.
+
+## Core skills
+
+- C
+- C++
+- RF
+- Electronics
+- MATLAB
+- Testing
+- Embedded Systems
+- Debugging
+
+## Experience
+
+- Mosaic Ridge July 2015 Conducted a successful research project on innovative use of Active Noise Control (ANC), 3-D Noise Mapping and Passive Noise Control systems as a solution for acoustical noise control issues in fast growing cities.
+- Mosaic Ridge October 2014 Successfully engineered a new transmission line to feed a new load in a city's transmission system using PowerWorld simulation software, and ETAP.
+- Performed Three-Phase Power Systems circuit analysis of the new system.
+- Performed cost analysis and allocation for the project.
+- Mosaic Ridge September 2014 to August 2015 Engineering Intern Lead AutoCAD Drafting team of 3 in drafting 2D maps of Oil and Gas production sites.
+- Contributed in building Spill Prevention, Control and Countermeasure (SPCC) plans for Oil and Gas Production Facilities, data entry, and various office duties assigned by my manager.
+- Enhanced my communication and leadership skills within my team and my manager.
+
+## Education
+
+- **MSc Electrical Engineering** — Meridia Institute of Technology · 2012 – 2014
+
+## Certifications
+
+- Certified Electronics Technician
+
+## Languages
+
+- Hebrew (native)
+- English (C2)
+
+---
+*Synthetic demo CV — fictional identity. Source text CC0-1.0.*

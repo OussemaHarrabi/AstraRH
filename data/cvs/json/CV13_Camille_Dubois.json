@@ -1,0 +1,57 @@
+{
+  "id": "CV13",
+  "source_id": "22605864",
+  "name": "Camille Dubois",
+  "slug": "Camille_Dubois",
+  "title": "Software Engineering Team Lead",
+  "field": "management",
+  "layout": "classic",
+  "job": "J08",
+  "location": "Montreal, Canada",
+  "email": "camille_dubois@example.com",
+  "phone": "+33 6 00 00 13",
+  "portfolio": "portfolio.example.com/camille_dubois",
+  "summary": "Software Engineering Team Lead with a track record of leading teams across Architecture, Team Leadership and Hiring. Focused on delivery predictability, hiring and healthy on-call.",
+  "skills": [
+    "Architecture",
+    "Team Leadership",
+    "Hiring",
+    "Delivery",
+    "Incident Management",
+    "OKRs",
+    "Coaching",
+    "Stakeholders"
+  ],
+  "experience": [
+    "July 2008 to January 2015 Juniper Lane Software Engineering Team Lead Joined as part of the Helios Forge IO capability.",
+    "Helios Forge is a joint venture between Microsoft and Accenture and specializes on Microsoft product solutions.",
+    "Project 1: Stanford Hospital and Clinics Tenure: March 2012 Till date I am currently the onshore technical lead and subject matter expert for our monitoring solution called Microsoft System Center Operations Manager (SCOM 2012).",
+    "I was part of designing and implementing the SCOM solution for our client.",
+    "Some of the key activities that I have been leading here are: Designing, configuring and operating SCOM.",
+    "Expand monitoring to non-trusted domains and cross platform servers.",
+    "Building new management packs using VSAE, VMPD, Authoring Tools Migration/ upgrade of SCOM 2012 RTM to Release 2.",
+    "Working on SLA and other reports and dashboards.",
+    "Application monitoring/ Synthetic transactions Prior to joining the monitoring team, I was working for their core infrastructure.",
+    "My role in the team was to identify flaws and remediate core IO services such as AD, DNS, DHCP, WINS, File/ Print, etc.",
+    "I also provided escalation support for critical incidents.",
+    "We worked on decommissioning Windows 2003 domain controllers out of the environment."
+  ],
+  "education": [
+    [
+      "MSc Software Engineering",
+      "Cedar Valley University",
+      "2010 – 2012"
+    ]
+  ],
+  "certifications": [
+    "ITIL v3 Foundations certified.",
+    "MCSE",
+    "SCCM certified."
+  ],
+  "languages": [
+    "French (native)",
+    "English (C1)"
+  ],
+  "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+  "license": "CC0-1.0"
+}

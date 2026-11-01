@@ -10,19 +10,21 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from kernel import trust
+from kernel import explain, trust
 from kernel.ai.models import SecurityEvent
 from kernel.authz import require_role
 from kernel.errors import Conflict, KernelError, NotFound, ValidationFailed
+from kernel.explain import DecisionDraft
 from kernel.explain.models import DecisionRecord
 from kernel.web import request_context
-from packs.talent import scoring, service
+from packs.talent import communications, scoring, service
 from packs.talent.models import (
     Application,
     CandidateIdentity,
     CriterionOverride,
     CvDocument,
     ExtractedProfile,
+    Interview,
     Job,
     RankingRun,
     Rubric,
@@ -50,6 +52,15 @@ class OverrideBody(BaseModel):
     criterion_id: str
     value: Decimal = Field(ge=0, le=1)
     reason: str = Field(min_length=3)
+
+
+class InterviewBody(BaseModel):
+    interviewer_email: str | None = None
+
+
+class BookBody(BaseModel):
+    starts_at: str
+    ends_at: str
 
 
 class RejectBody(BaseModel):
@@ -276,6 +287,16 @@ def shortlist(job_id: UUID, request: Request) -> dict[str, Any]:
                     "score": str(row.score) if row.score is not None else None,
                     "meets_must_haves": row.meets_must_haves,
                     "missing_must_haves": scoring.missing_must_haves(row.inputs),
+                    "factors": [
+                        {
+                            "key": factor.key,
+                            "label": factor.label,
+                            "weight": str(factor.weight),
+                            "value": str(factor.value),
+                            "contribution": str(factor.contribution),
+                        }
+                        for factor in scoring.score(row.inputs).factors
+                    ],
                     "stage": application.stage,
                     "decision_record_id": str(row.decision_record_id)
                     if row.decision_record_id
@@ -400,3 +421,100 @@ def propose_reject(application_id: UUID, body: RejectBody, request: Request) -> 
             requested_by=ctx.actor.user_id,
         )
         return {"proposal_id": str(proposal.id), "status": proposal.status}
+
+
+DEFAULT_INTERVIEWER = "karim@cds.example.test"
+
+
+def _interview_json(interview: Interview) -> dict[str, Any]:
+    return {
+        "id": str(interview.id),
+        "application_id": str(interview.application_id),
+        "status": interview.status,
+        "slots": interview.slots,
+        "participants": interview.participants,
+        "starts_at": interview.starts_at.isoformat() if interview.starts_at else None,
+    }
+
+
+@router.post(
+    "/applications/{application_id}/interviews",
+    status_code=202,
+    summary="Find free times in the calendars and prepare the email",
+)
+def request_interview(
+    application_id: UUID, body: InterviewBody, request: Request
+) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, WRITE_ROLES)
+        _application_or_404(ctx.session, application_id)
+        participants = communications.recruiter_emails(
+            ctx.session, ctx.actor.user_id, body.interviewer_email or DEFAULT_INTERVIEWER
+        )
+        interview = communications.request_interview(
+            ctx.session, ctx.actor.tenant_id, application_id, participants
+        )
+        return _interview_json(interview)
+
+
+@router.get("/jobs/{job_id}/interviews", summary="Interviews for this job")
+def list_interviews(job_id: UUID, request: Request) -> list[dict[str, Any]]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, READ_ROLES)
+        rows = ctx.session.scalars(
+            select(Interview)
+            .join(Application, Application.id == Interview.application_id)
+            .where(Application.job_id == job_id)
+            .order_by(Interview.created_at.desc())
+        )
+        return [_interview_json(row) for row in rows]
+
+
+@router.post(
+    "/interviews/{interview_id}/book",
+    status_code=202,
+    summary="Propose booking one of the offered times. A person approves it.",
+)
+def propose_booking(interview_id: UUID, body: BookBody, request: Request) -> dict[str, str]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, WRITE_ROLES)
+        session = ctx.session
+        interview = session.get(Interview, interview_id)
+        if interview is None:
+            raise NotFound("Interview not found")
+        chosen = {"starts_at": body.starts_at, "ends_at": body.ends_at}
+        if chosen not in interview.slots:
+            raise ValidationFailed("Choose one of the offered times")
+        decision = explain.record(
+            session,
+            ctx.actor.tenant_id,
+            DecisionDraft(
+                kind="talent.interview_booking",
+                question="Should this interview be booked?",
+                subject={"interview_id": str(interview_id)},
+                outcome={"starts_at": body.starts_at},
+                rationale="The candidate chose this time from those offered.",
+                limits=["Checked again against the calendars when it is booked."],
+            ),
+        )
+        proposal = trust.propose(
+            session,
+            ctx.actor.tenant_id,
+            "talent.interview.book",
+            {"interview_id": str(interview_id), **chosen},
+            "Book the interview at the chosen time",
+            decision.id,
+            f"book:{interview_id}:{body.starts_at}",
+            requested_by=ctx.actor.user_id,
+            target={"application_id": str(interview.application_id)},
+        )
+        return {"proposal_id": str(proposal.id), "status": proposal.status}
+
+
+@router.post("/followups/check", summary="Check now for candidates who went quiet")
+def check_followups(request: Request) -> dict[str, int]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, WRITE_ROLES)
+        return {
+            "prepared": communications.sweep_followups(ctx.session, ctx.actor.tenant_id),
+        }

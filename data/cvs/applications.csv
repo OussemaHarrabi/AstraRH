@@ -1,0 +1,41 @@
+application_id,candidate_id,job_id,applied_at,status,source,note
+A001,CV01,J01,2026-10-01,applied,careers_page,Synthetic application
+A001b,CV01,J02,2026-10-02,applied,job_board,Synthetic second application
+A002,CV02,J01,2026-10-02,screening,linkedin,Synthetic application
+A003,CV03,J01,2026-10-03,interview,referral,Synthetic application
+A004,CV04,J02,2026-10-04,offer,agency,Synthetic application
+A004b,CV04,J03,2026-10-05,applied,job_board,Synthetic second application
+A005,CV05,J02,2026-10-05,rejected,careers_page,Synthetic application
+A006,CV06,J02,2026-10-06,withdrawn,linkedin,Synthetic application
+A007,CV07,J02,2026-10-07,applied,referral,Synthetic application
+A007b,CV07,J03,2026-10-08,applied,job_board,Synthetic second application
+A008,CV08,J03,2026-10-08,screening,agency,Synthetic application
+A009,CV09,J03,2026-10-09,interview,careers_page,Synthetic application
+A010,CV10,J03,2026-10-10,offer,linkedin,Synthetic application
+A010b,CV10,J02,2026-10-11,applied,job_board,Synthetic second application
+A011,CV11,J12,2026-10-11,rejected,referral,Synthetic application
+A012,CV12,J08,2026-10-12,withdrawn,agency,Synthetic application
+A013,CV13,J08,2026-10-13,applied,careers_page,Synthetic application
+A013b,CV13,J02,2026-10-14,applied,job_board,Synthetic second application
+A014,CV14,J05,2026-10-14,screening,linkedin,Synthetic application
+A015,CV15,J05,2026-10-15,interview,referral,Synthetic application
+A016,CV16,J05,2026-10-16,offer,agency,Synthetic application
+A016b,CV16,J02,2026-10-17,applied,job_board,Synthetic second application
+A017,CV17,J06,2026-10-17,rejected,careers_page,Synthetic application
+A018,CV18,J06,2026-10-18,withdrawn,linkedin,Synthetic application
+A019,CV19,J07,2026-10-19,applied,referral,Synthetic application
+A019b,CV19,J02,2026-10-20,applied,job_board,Synthetic second application
+A020,CV20,J07,2026-10-20,screening,agency,Synthetic application
+A021,CV21,J07,2026-10-21,interview,careers_page,Synthetic application
+A022,CV22,J04,2026-10-22,offer,linkedin,Synthetic application
+A022b,CV22,J02,2026-10-23,applied,job_board,Synthetic second application
+A023,CV23,J04,2026-10-23,rejected,referral,Synthetic application
+A024,CV24,J04,2026-10-24,withdrawn,agency,Synthetic application
+A025,CV25,J04,2026-10-25,applied,careers_page,Synthetic application
+A025b,CV25,J02,2026-10-26,applied,job_board,Synthetic second application
+A026,CV26,J12,2026-10-01,screening,linkedin,Synthetic application
+A027,CV27,J10,2026-10-02,interview,referral,Synthetic application
+A028,CV28,J10,2026-10-03,offer,agency,Synthetic application
+A028b,CV28,J02,2026-10-04,applied,job_board,Synthetic second application
+A029,CV29,J09,2026-10-04,rejected,careers_page,Synthetic application
+A030,CV30,J11,2026-10-05,withdrawn,linkedin,Synthetic application

@@ -1,0 +1,34 @@
+LUCAS MOREAU
+Information Security Officer
+Lyon, France | lucas_moreau@example.com | +33 6 00 00 02 | portfolio.example.com/lucas_moreau
+
+SUMMARY
+Information Security Officer with hands-on experience in SIEM, Incident Response and MITRE ATT&CK. Focused on detection quality, incident response and clear documentation.
+
+CORE SKILLS
+SIEM, Incident Response, MITRE ATT&CK, EDR, Vulnerability Management, Python, Splunk, ISO 27001
+
+EXPERIENCE
+- Information Technology Specialist Information Security Officer October 2010 to July 2015 Cobalt Harbor - Lyon, France Installing and configuring Oracle software versions 10g-12c.
+- Creating Risk Assessment template based on NIST 800-30R1 to facilitate and evaluate secure software development practice.
+- Building automated database risk/security models for quantifying degrees of database risk and enabling the standardization and prioritization of remediation efforts.
+- Managing/mentoring support staff and participating in 24X7 production support and security monitoring rotation for large scale, mission critical applications.
+- Developing, implementing and supporting enterprise backup and recovery, change control, security and audit procedures.
+- Performing database, server and application performance and security monitoring and tuning.
+- Implementing vendor and customized database auditing and analysis packages.
+- Develop pattern recognition triggers for Anti-Money laundering systems.
+- Working closely with Corporate Security to ensure that application and database server procedures and controls support all government regulations and corporate policies.
+- Designing and implementing least-privilege database administration model and application development templates.
+- Providing support and guidance for the modeling, development and testing of enterprise applications to ensure that applications are secure, highly available and fully meet the needs of our end user communities.
+- Develop ITS Enterprise Database installation, configuration, monitoring and security standards and procedures.
+
+EDUCATION
+- BSc Cybersecurity — Atlas Polytechnic (2016 – 2018)
+
+CERTIFICATIONS
+- Oracle Certified Professional (OCP)
+
+LANGUAGES
+French (native), English (C1)
+
+Synthetic demo CV — fictional identity. Source text CC0-1.0.

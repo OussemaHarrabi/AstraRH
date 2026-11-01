@@ -8,3 +8,6 @@ docs
 **/.next
 **/__pycache__
 **/.venv
+data/source
+data/*.zip
+data/cvs/*.zip

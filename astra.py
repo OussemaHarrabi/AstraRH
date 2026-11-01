@@ -152,7 +152,13 @@ def cmd_seed(args: argparse.Namespace) -> int:
     code = compose("run", "--rm", "--no-deps", "migrate", "python", "-m", "kernel.seed").returncode
     if code or args.no_cvs:
         return code
-    return compose("exec", "-T", "worker", "python", "-m", "packs.talent.load_demo").returncode
+    code = compose("exec", "-T", "worker", "python", "-m", "packs.talent.load_demo").returncode
+    if code:
+        return code
+    code = compose("exec", "-T", "worker", "python", "-m", "kernel.knowledge.load_demo").returncode
+    if code:
+        return code
+    return compose("exec", "-T", "worker", "python", "-m", "kernel.comms.load_demo").returncode
 
 
 def cmd_export_api(_: argparse.Namespace) -> int:
@@ -171,31 +177,28 @@ def cmd_export_api(_: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_evals(_: argparse.Namespace) -> int:
-    """Measure ranking quality on the labelled CVs, with the real model. Costs about a cent."""
-    require_env()
-    result = compose(
-        "run",
-        "--rm",
-        "--no-deps",
-        "tests",
-        "python",
-        "-m",
-        "packs.talent.evals.screening",
-        capture=True,
-    )
+def _run_eval(module: str, filename: str) -> int:
+    result = compose("run", "--rm", "--no-deps", "tests", "python", "-m", module, capture=True)
     print(result.stdout)
     if result.returncode:
         print(result.stderr[-3000:])
         return result.returncode
     marker = "EVAL_RESULT_JSON:"
     line = next(x for x in result.stdout.splitlines() if x.startswith(marker))
-    target = ROOT / "docs" / "evals" / "screening.json"
+    target = ROOT / "docs" / "evals" / filename
     target.parent.mkdir(exist_ok=True)
-    report = json.dumps(json.loads(line[len(marker) :]), indent=2)
+    report = json.dumps(json.loads(line[len(marker) :]), indent=2, ensure_ascii=False)
     target.write_text(f"{report}\n", encoding="utf-8", newline="\n")
     print(f"Saved {target}")
     return 0
+
+
+def cmd_evals(_: argparse.Namespace) -> int:
+    """Measure ranking, inbox and policy answers with the real model. Costs about 3 cents."""
+    require_env()
+    return _run_eval("packs.talent.evals.screening", "screening.json") or _run_eval(
+        "packs.talent.evals.communications", "communications.json"
+    )
 
 
 def cmd_live(_: argparse.Namespace) -> int:

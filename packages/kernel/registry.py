@@ -55,6 +55,7 @@ class ActionSpec(BaseModel):
 
 class AgentSpec(BaseModel):
     id: str
+    title: str = ""
     events: list[str]
     entry: str
     description: str = ""
@@ -105,6 +106,9 @@ def import_all_models() -> None:
         "kernel.trust.models",
         "kernel.explain.models",
         "kernel.ai.models",
+        "kernel.comms.models",
+        "kernel.schedule.models",
+        "kernel.knowledge.models",
     ):
         import_module(module)
     for manifest in load_manifests():
@@ -156,6 +160,11 @@ def sync_catalogue() -> None:
     log.info("Action catalogue synced, policy version %s", version[:12])
 
 
+def install_kernel_consumers() -> None:
+    """Importing registers the consumers."""
+    import_module("kernel.comms")
+
+
 def install_graph_projections() -> None:
     for manifest in active_packs():
         for projection in manifest.graph:
@@ -204,7 +213,10 @@ def pack_listing() -> list[dict[str, Any]]:
             "actions": [
                 {"id": a.id, "risk": a.risk, "description": a.description} for a in manifest.actions
             ],
-            "agents": [{"id": a.id, "description": a.description} for a in manifest.agents],
+            "agents": [
+                {"id": a.id, "title": a.title or a.id, "description": a.description}
+                for a in manifest.agents
+            ],
         }
         for manifest in active_packs()
     ]

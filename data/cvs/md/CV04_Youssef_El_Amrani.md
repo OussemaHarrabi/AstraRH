@@ -1,0 +1,46 @@
+# Youssef El Amrani
+**Systems Administrator**
+
+Paris, France · youssef_el_amrani@example.com · +33 6 00 00 04 · portfolio.example.com/youssef_el_amrani
+
+## Summary
+Systems Administrator with hands-on experience in Windows Server, Active Directory and Backup. Strong on reliable operations, troubleshooting and tidy runbooks.
+
+## Core skills
+
+- Windows Server
+- Active Directory
+- Backup
+- Networking
+- Microsoft 365
+- PowerShell
+- VMware
+- Linux
+
+## Experience
+
+- I am a trainer for new employee's coming into the group on details and 4 new permanent employees into the CIS group.
+- I am required a basic working understanding of 7 projects and to be able to step in for other SA's at a moment's notice of well over 500 servers.
+- The work may involve developing and presenting training on the operation and maintenance of new systems to the IRS IT staff including IT specialists in other specialty areas, to insure that new systems are properly managed.
+- The employee may adapt and implement systems diagnostic and maintenance tools to ensure the availability and functionality of systems required to support organizational Objectives and evaluate and recommend selection of new systems diagnostic tools.
+- This work affects the availability of IRS IT systems needed to meets the mission requirements.
+- My main duties are to maintain server's operation, security, and analyze and diagnose system hardware and software components.
+- I also write up problem tickets with server's hardware and software and get clearance for vendors to have access to the servers for hardware repair as well as scheduling times with local I.R.S.
+- personal and vendor to accomplish the repairs.
+- I make sure when new server are to be put on the Domain I do all of the appropriate paper work which includes requesting UWR's, KISAM asset management to include all of the new servers information from serial numbers, bar code, make, model and location just to them.
+- I also file out the Server Compliance checklist, software license forms.
+- In addition, I image or re-image server with the proper Windows Operating System and software needed to run the server e.g.
+- Contact Recording, Contact Analytics, TOS, RTS among other servers.
+
+## Education
+
+- **BSc Information Technology** — Northvale University · 2015 – 2017
+
+## Languages
+
+- Arabic (native)
+- French (C1)
+- English (C1)
+
+---
+*Synthetic demo CV — fictional identity. Source text CC0-1.0.*

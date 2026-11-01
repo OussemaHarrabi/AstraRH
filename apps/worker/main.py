@@ -12,14 +12,15 @@ import time
 import httpx
 from opentelemetry import trace
 
-from kernel import registry
+from kernel import comms, registry
 from kernel.ai.graphs import setup_checkpoints
 from kernel.ai.runner import install_agent_task
-from kernel.db import active_tenant_ids
+from kernel.db import active_tenant_ids, tenant_session
 from kernel.events import relay_once
 from kernel.heartbeat import beat
 from kernel.jobs import WORKER_QUEUES, get_job_app
 from kernel.obs import setup_telemetry
+from packs.talent.communications import sweep_all_tenants
 
 HEARTBEAT_SECONDS = 30
 RELAY_IDLE_SECONDS = 1
@@ -56,8 +57,25 @@ def heartbeat_loop() -> None:
         time.sleep(HEARTBEAT_SECONDS)
 
 
+def install_periodic(app) -> None:
+    """Durable timers. Survive restarts, because the schedule lives in Postgres."""
+
+    @app.periodic(cron="*/30 * * * *")
+    @app.task(name="talent.followups.sweep", queue="default")
+    def sweep(timestamp: int) -> None:
+        sweep_all_tenants(active_tenant_ids())
+
+    @app.periodic(cron="0 7 * * *")
+    @app.task(name="comms.digest.daily", queue="default")
+    def daily_digest(timestamp: int) -> None:
+        for tenant_id in active_tenant_ids():
+            with tenant_session(tenant_id) as session:
+                comms.build_digest(session, tenant_id)
+
+
 def main() -> None:
     setup_telemetry()
+    registry.install_kernel_consumers()
     registry.install_graph_projections()
     registry.wire_agents()
     setup_checkpoints()
@@ -67,6 +85,7 @@ def main() -> None:
     app = get_job_app()
     install_agent_task(app)
     # The relay defers jobs synchronously while the worker below runs them on its own connection.
+    install_periodic(app)
     app.open()
     app.run_worker(
         queues=WORKER_QUEUES, concurrency=AGENT_CONCURRENCY, install_signal_handlers=True

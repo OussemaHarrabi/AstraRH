@@ -1,0 +1,48 @@
+# Priya Nair
+**Senior Network Engineer**
+
+Berlin, Germany · priya_nair@example.com · +33 6 00 00 05 · portfolio.example.com/priya_nair
+
+## Summary
+Senior Network Engineer with hands-on experience in BGP, OSPF and Cisco. Strong on troubleshooting, documentation and keeping complex networks boring.
+
+## Core skills
+
+- BGP
+- OSPF
+- Cisco
+- Firewalls
+- MPLS
+- VPN
+- Wireshark
+- Network Automation
+
+## Experience
+
+- Network Engineer Nov 2011 to Aug 2014 Quartz River - Berlin, Germany Responsible for maintaining network with over 5000 users.
+- Responsible for setup and install of switches and routers.
+- Includes Configuration and Hardening for both Cisco and Brocade.
+- Responsible for activating user, printer, VTC ports and troubleshooting link inactivity on a daily basis, as well as issues with 802.1x, MAB issues, port-channeling, link-aggregation, VTP issues, RSA Key issues.
+- Used Knowledge base to find solutions for issues that arose with customers networks using Pro-series network program running on Windows Server 2000 and Windows Server 2003 R2.
+- Communicated with team members to successfully keep customer downtime to a minimum.
+- Includes Configuration and Hardening for Cisco.
+
+## Education
+
+- **BSc Network Engineering** — Meridia Institute of Technology · 2014 – 2016
+
+## Certifications
+
+- CCT Data Center
+- CCNP
+- CCNA
+- MCSE
+
+## Languages
+
+- English (native)
+- German (B1)
+- Malayalam (native)
+
+---
+*Synthetic demo CV — fictional identity. Source text CC0-1.0.*

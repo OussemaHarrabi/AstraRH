@@ -1,0 +1,50 @@
+{
+  "id": "CV16",
+  "source_id": "41152404",
+  "name": "Noah Williams",
+  "slug": "Noah_Williams",
+  "title": "QA Test Analyst",
+  "field": "qa",
+  "layout": "classic",
+  "job": "J05",
+  "location": "Austin, United States",
+  "email": "noah_williams@example.com",
+  "phone": "+33 6 00 00 16",
+  "portfolio": "portfolio.example.com/noah_williams",
+  "summary": "QA Test Analyst with hands-on experience in TECHNICAL, Test Automation and Selenium. Focused on automation that shortens releases and catches the regressions that matter.",
+  "skills": [
+    "TECHNICAL",
+    "Test Automation",
+    "Selenium",
+    "Jira",
+    "Agile",
+    "Playwright",
+    "API Testing",
+    "CI/CD",
+    "Test Design"
+  ],
+  "experience": [
+    "August 2014 to February 2015 Glacier Cloud Test Analyst-Intern/Contractor Responsibilities: System testing and functional testing on E-commerce websites.",
+    "This involves testing it against the functional specification and integration testing the system in case of website is integrated.",
+    "Conducting cross browser and cross platform testing on different desktop browsers, Mobile phones and various Tablets.",
+    "Analyzing the Requirements provided by client in Functional and Technical requirements specification and Communicating with BA, Developers and Project coordinators.",
+    "Writing functional and non-functional requirement test cases based of functional specification.",
+    "Performing integration testing in co-ordination with client for the site, which is integrated with external system."
+  ],
+  "education": [
+    [
+      "BSc Information Systems",
+      "Meridia Institute of Technology",
+      "2014 – 2016"
+    ]
+  ],
+  "certifications": [
+    "ISTQB Certified Tester"
+  ],
+  "languages": [
+    "English (native)",
+    "Spanish (B1)"
+  ],
+  "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+  "license": "CC0-1.0"
+}

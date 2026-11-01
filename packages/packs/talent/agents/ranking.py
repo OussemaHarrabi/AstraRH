@@ -12,7 +12,7 @@ from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel
 from sqlalchemy import select
 
-from kernel import ml_client
+from kernel import ml_client, trust
 from kernel.ai import AgentContext, load_prompt
 from kernel.ai.graphs import AgentState, agent_node
 from kernel.canonical import canonical_json, sha256_hex
@@ -27,6 +27,7 @@ from kernel.explain import (
 )
 from kernel.people import skill_relations
 from kernel.people.models import Skill
+from kernel.trust.models import Proposal
 from packs.talent import scoring
 from packs.talent.events import RankingCompleted
 from packs.talent.models import (
@@ -38,7 +39,14 @@ from packs.talent.models import (
     Rubric,
     Score,
 )
-from packs.talent.signals import best_similarities, compute_signal, criterion_text
+from packs.talent.signals import (
+    best_similarities,
+    bm25_scores,
+    compute_signal,
+    criterion_text,
+    lexical_document,
+    weighted_dense_match,
+)
 
 EXPLAIN_BATCH = 8
 JUSTIFY_TOP = 15
@@ -127,6 +135,17 @@ def collect_signals(ctx: AgentContext, state: dict) -> dict:
         }
         for c in criteria
     ]
+    job = session.get(Job, ranking.job_id)
+    query = " ".join(
+        [job.title, job.description]
+        + [
+            f"{c['label']} {c.get('description', '')} {' '.join(c.get('keywords', []))}"
+            for c in criteria
+        ]
+    )
+    lexical = bm25_scores(
+        query, {cv.id: lexical_document(cv.blind_text or "", all_keywords) for cv in cvs}
+    )
     for cv in cvs:
         signals, evidence = {}, []
         for criterion in criteria:
@@ -147,7 +166,19 @@ def collect_signals(ctx: AgentContext, state: dict) -> dict:
                 tenant_id=ctx.tenant_id,
                 ranking_id=ranking.id,
                 application_id=cv.application_id,
-                inputs={"criteria": public_criteria, "signals": signals},
+                inputs={
+                    "criteria": public_criteria,
+                    "signals": signals,
+                    "match": {
+                        "dense": str(
+                            weighted_dense_match(
+                                public_criteria,
+                                {k: v.get("similarity") for k, v in signals.items()},
+                            )
+                        ),
+                        "lexical": str(lexical.get(cv.id, 0)),
+                    },
+                },
                 evidence=evidence,
                 tiebreak=cv.sha256,
             )
@@ -179,14 +210,15 @@ def score_and_rank(ctx: AgentContext, state: dict) -> dict:
 
 def _template_narrative(row: Score, factors: list, refs: dict[str, str]) -> str:
     """Always available, and always true, because it is generated from the record itself."""
-    strongest = sorted(factors, key=lambda f: f.contribution, reverse=True)
-    parts = []
-    for factor in strongest[:2]:
-        if factor.contribution > 0 and factor.key in refs:
-            parts.append(f"{factor.label} contributes most here [{refs[factor.key]}].")
-    if not parts:
-        return ""
-    return " ".join(parts)
+    strongest = sorted(factors, key=lambda f: (-f.contribution, -f.weight, f.key))
+    supported = [f for f in strongest[:2] if f.contribution > 0 and f.key in refs]
+    if not supported:
+        return "No evidence found for any criterion in this job."
+    labels = " and ".join(f.label for f in supported)
+    citations = "".join(f"[{refs[f.key]}]" for f in supported)
+    unproven = [f.label for f in sorted(factors, key=lambda f: -f.weight) if f.contribution == 0]
+    note = f" No evidence found for {unproven[0]}." if unproven else ""
+    return f"Best supported by {labels} {citations}.{note}"
 
 
 def _justify(ctx: AgentContext, draft: DecisionDraft, row: Score, refs: dict[str, str]) -> str:
@@ -230,7 +262,7 @@ def explain_batch(ctx: AgentContext, state: dict) -> dict:
                     source_type="cv",
                     source_id=item["source_id"],
                     quote=item["quote"],
-                    locator={"kind": item["kind"]},
+                    locator={"kind": item["kind"], "years": item.get("years")},
                 )
             )
         missing = [f for f in result.factors if f.contribution == 0 and f.weight > 0]
@@ -244,7 +276,7 @@ def explain_batch(ctx: AgentContext, state: dict) -> dict:
         # The biggest gain available: what full proof of one criterion would do to the rank.
         gaps = sorted(result.factors, key=lambda f: f.weight * (1 - f.value), reverse=True)
         for factor in gaps[:2]:
-            if factor.value >= 1:
+            if factor.value >= 1 or factor.key == scoring.MATCH_KEY:
                 continue
             change = {"signals": {factor.key: {"override": "1"}}}
             changed_inputs = {
@@ -319,6 +351,15 @@ def propose_shortlist(ctx: AgentContext, state: dict) -> dict:
     top = [r for r in rows if r.meets_must_haves][:SHORTLIST_SIZE]
     ranking.status = "completed"
     ranking.finished_at = utcnow()
+    stale = session.scalars(
+        select(Proposal).where(
+            Proposal.action_type == "talent.shortlist.confirm",
+            Proposal.status == "pending_approval",
+            Proposal.target["job_id"].astext == str(job.id),
+        )
+    ).all()
+    for proposal in stale:
+        trust.supersede(session, proposal, "talent.ranking", "A newer ranking replaced this")
     publish(
         session,
         ctx.tenant_id,

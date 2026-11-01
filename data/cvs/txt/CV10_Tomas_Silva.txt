@@ -1,0 +1,34 @@
+TOMÁS SILVA
+Drupal Developer
+Lisbon, Portugal | tomas_silva@example.com | +33 6 00 00 10 | portfolio.example.com/tomas_silva
+
+SUMMARY
+Drupal Developer with hands-on experience in JavaScript, C# and ASP.NET. Builds maintainable services with strong review and testing habits.
+
+CORE SKILLS
+JavaScript, C#, ASP.NET, SQL Server, REST APIs, Entity Framework, Azure, Git
+
+EXPERIENCE
+- Information Technology Specialist III (Drupal Dev) / Umbra Shield - Lisbon, Portugal 08/2015 - Current
+- Lead Drupal Developer for the NYSED.GOV redesign project.
+- Completely re-architecting the NYSED.GOV's website and content strategy.
+- Migrating all data, building and configuring the new site, and creating the custom Responsive Drupal theme.
+- Streamlining the authoring experience for content creators and auditors.
+- Designing, coding, architecting and testing various themes, modules and processes to extend Drupal to meet the Department needs.
+- Developing the NYSED's Drupal-based websites using HTML5 and CSS3.
+- Supervising the H-BITS Consultant and providing guidance according to the project plan.
+- Analyzing client request to develop, test, and deploy functional software requirements.
+- Providing support and assistance to webmasters to publish and update content to the NYSED's websites.
+- Coordinating activities with ITS infrastructure support units related to the configuration of the NYSED's websites, as well as the establishing and maintaining file access rights.
+- Executing tasks associated with generating website analytics.
+
+EDUCATION
+- BSc Software Engineering — Northvale University (2015 – 2017)
+
+CERTIFICATIONS
+- Microsoft Certified: Azure Developer Associate
+
+LANGUAGES
+Portuguese (native), English (C1), Spanish (B2)
+
+Synthetic demo CV — fictional identity. Source text CC0-1.0.

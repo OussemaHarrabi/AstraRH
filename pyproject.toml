@@ -17,6 +17,7 @@ dependencies = [
     "python-multipart>=0.0.18",
     "pyyaml>=6",
     "sqlalchemy>=2.0.36",
+    "tzdata>=2024.1",
     "opentelemetry-exporter-otlp-proto-http>=1.30",
     "opentelemetry-instrumentation-fastapi>=0.51b0",
     "opentelemetry-instrumentation-httpx>=0.51b0",
@@ -72,6 +73,9 @@ ignore = ["S101", "B008", "UP046", "UP047"]
 "packages/packs/talent/signals.py" = ["S608"]
 "packages/packs/talent/evals/*" = ["S608"]
 "tools/*" = ["E501", "S311"]
+"packages/kernel/comms/__init__.py" = ["E501"]
+"packages/packs/talent/communications.py" = ["E501"]
+"packages/kernel/knowledge/__init__.py" = ["S608"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "packages"]

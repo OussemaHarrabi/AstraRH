@@ -1,0 +1,34 @@
+ERIK JOHANSSON
+Data & Marketing Technology Lead
+Stockholm, Sweden | erik_johansson@example.com | +33 6 00 00 30 | portfolio.example.com/erik_johansson
+
+SUMMARY
+Data & Marketing Technology Lead with hands-on experience in Data Quality, SQL and Python. Turns operational data into decisions and measurable outcomes.
+
+CORE SKILLS
+Data Quality, SQL, Python, Tableau, Power BI, Analytics, ETL, Stakeholders
+
+EXPERIENCE
+- 04/2017 to Current Vice-President Data and Marketing Technology Umbra Shield - Stockholm, Sweden Driving evolution of the firm into a data-driven marketing company, leading the design and delivery of data-driven products, services, strategies, and platforms.
+- Setting the strategy and direction for a newly formed Data Division while hitting ambitious growth targets.
+- Leadership of in-house startup Orchestrate, which is a marketing funnel automation and lead nurturing platform for B2B markets that capitalizes on content marketing.
+- Leading full life cycle product development for data & data-driven products, including market research, positioning, processes, and technology.
+- Acting as product owner for data and martech across all platforms in our Agile processes.
+- Ensuring compliance with data privacy legislation functioning as Data Protection Officer.
+- 03/2011 to 03/2017 Vice-President Digital Media Umbra Shield - Stockholm, Sweden Responsible for shaping and executing product vision and strategy and driving digital business transformation.
+- Led product management, digital marketing, and digital strategy.
+- Responsible for 35 reports, budget of $5 million, 100+ web sites, 80+ mobile apps, matrix P&L owner for $25+ million digital business.
+- Led product development, market research, digital strategy, internal digital consulting, web production, online marketing, video production, and directory management.
+- Founded and co-led an in-house business startup at the junction of marketing technology, machine learning, and data.
+- Led extensive market research and co-wrote business plan.
+
+EDUCATION
+- MSc Data Science — Cedar Valley University (2016 – 2018)
+
+CERTIFICATIONS
+- Google Data Analytics
+
+LANGUAGES
+Swedish (native), English (C2), German (B1)
+
+Synthetic demo CV — fictional identity. Source text CC0-1.0.

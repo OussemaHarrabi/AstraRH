@@ -1,0 +1,35 @@
+CHIARA BIANCHI
+Database Administrator
+Rome, Italy | chiara_bianchi@example.com | +33 6 00 00 17 | portfolio.example.com/chiara_bianchi
+
+SUMMARY
+Database Administrator with hands-on experience in SQL Server, Oracle and Performance Tuning. Focused on performance, recoverability and zero-drama migrations.
+
+CORE SKILLS
+SQL Server, Oracle, Performance Tuning, Backup/Recovery, Replication, SQL, Linux, PostgreSQL
+
+EXPERIENCE
+- Information Technology Specialist 03/2018 to Current Lantern Retail Rome, Italy Primary responsibilities include production support, installation and configuration, migration, backup and recovery, performance tuning, cloning, security, upgrades, and patches.
+- Planned, installed and upgraded multiple Oracle databases from 11.2.0.4 to 12.2.0.
+- Added targets to OEM 13c and used OEM 13c to monitored databases.
+- Created rules, security profiles using OEM 13c.
+- Performed Hot/Cold Backup, Recovery and Cloning of databases using RMAN Planned and implemented Backup strategies, used RMAN and Crontab to schedule backup.
+- Installed and upgraded databases from MySQL 5.6 to 5.7 and implemented mysqld_multi for better performance.
+- Migrated databases from on-premise to AWS using Database migration services.
+- Launched and maintained RDS and EC2 instances in AWS.
+- Created Snapshots, Elastic IPs, EBS Volumes, Security Groups per clients/costumers request.
+- Created security groups to manage inbound and outbound rules.
+- Database Administrator 12/2014 to Current Lantern Retail Rome, Italy Troubleshot and resolved web application issues escalated from customer support and other departments with a 100% success rate.
+- Worked with clients to analyze computing and network needs and implemented appropriate solutions within each department's budget.
+
+EDUCATION
+- MSc Database Systems — Atlas Polytechnic (2011 – 2013)
+
+CERTIFICATIONS
+- PostgreSQL Associate
+- Oracle Certified Professional
+
+LANGUAGES
+Italian (native), English (C1)
+
+Synthetic demo CV — fictional identity. Source text CC0-1.0.

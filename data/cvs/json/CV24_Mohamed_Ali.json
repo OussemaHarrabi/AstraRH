@@ -1,0 +1,57 @@
+{
+  "id": "CV24",
+  "source_id": "94417768",
+  "name": "Mohamed Ali",
+  "slug": "Mohamed_Ali",
+  "title": "Senior Product Designer",
+  "field": "design",
+  "layout": "compact",
+  "job": "J04",
+  "location": "Tunis, Tunisia",
+  "email": "mohamed_ali@example.com",
+  "phone": "+33 6 00 00 24",
+  "portfolio": "portfolio.example.com/mohamed_ali",
+  "summary": "Senior Product Designer with hands-on experience in Team leadership, Figma and Design Systems. Turns complex workflows into accessible, shipped interfaces.",
+  "skills": [
+    "Team leadership",
+    "Figma",
+    "Design Systems",
+    "Usability Research",
+    "Prototyping",
+    "Accessibility",
+    "HTML/CSS",
+    "Adobe CC",
+    "Wireframing"
+  ],
+  "experience": [
+    "Senior Product Designer April 1984 to Current Helios Forge - Tunis, Tunisia Conceived, developed and specified product components for new product development.",
+    "Worked with product planners and industrial designers to conceptualize and refine product concepts.",
+    "Developed and tested models of alternate designs and processing methods to assess cost and manufacturing feasibility.",
+    "Created solid model component and assembly files for virtual representation of designs.",
+    "Ordered rapid prototypes and supervised testing and ongoing development and performance of design.",
+    "Supported product designs through test analysis and simulation.",
+    "Coordinated project tooling release of injection molded components.",
+    "Evaluated pre-production mold shot samples and refined for improved assembly and performance.",
+    "Coordinated any special secondary operations, fixturing or manufacturing sensitive mandates.",
+    "Developed internal processes and plans for mechanical verification, product development and factory processes.",
+    "Recommended design modifications to eliminate machine and system malfunctions.",
+    "Created detailed engineering drawings, technical drawings, schematics and computer-generated reports for new product development."
+  ],
+  "education": [
+    [
+      "BA Interaction Design",
+      "Cedar Valley University",
+      "2014 – 2016"
+    ]
+  ],
+  "certifications": [
+    "Nielsen Norman Group UX Certification"
+  ],
+  "languages": [
+    "Arabic (native)",
+    "French (C1)",
+    "English (B2)"
+  ],
+  "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+  "license": "CC0-1.0"
+}

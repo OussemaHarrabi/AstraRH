@@ -146,6 +146,7 @@ def compute_signal(
                 {
                     "factor_key": criterion["id"],
                     "kind": "listed" if listed else "direct",
+                    "years": signal["years"],
                     "quote": quote,
                     "source_id": cv_id,
                 }
@@ -181,6 +182,69 @@ def compute_signal(
     if override is not None:
         signal["override"] = str(override)
     return SignalResult(signal, evidence)
+
+
+TOKEN = re.compile(r"[^\W_]+", re.UNICODE)
+BM25_K1 = Decimal("1.5")
+BM25_B = Decimal("0.75")
+MATCH_PLACES = Decimal("0.0001")
+
+
+def tokenize(value: str) -> list[str]:
+    return [token.casefold() for token in TOKEN.findall(value)]
+
+
+def lexical_document(blind_text: str, all_keywords: list[str]) -> str:
+    """Lines that are only a list of the job's keywords don't count, so stuffing can't game BM25."""
+    return "\n".join(
+        line for line in blind_text.splitlines() if not looks_like_keyword_list(line, all_keywords)
+    )
+
+
+def bm25_scores(query: str, documents: dict[Any, str]) -> dict[Any, Decimal]:
+    """BM25 of each CV against the job, scaled so the best CV in this run is 1. Exact decimals."""
+    tokens = {key: tokenize(text_value) for key, text_value in documents.items()}
+    count = len(tokens)
+    if count == 0:
+        return {}
+    average = Decimal(sum(len(t) for t in tokens.values())) / Decimal(count) or Decimal(1)
+    terms = sorted(set(tokenize(query)))
+    raw: dict[Any, Decimal] = {}
+    for key, doc in tokens.items():
+        total = Decimal(0)
+        length = Decimal(len(doc))
+        for term in terms:
+            frequency = Decimal(doc.count(term))
+            if not frequency:
+                continue
+            with_term = sum(1 for other in tokens.values() if term in other)
+            idf = (
+                (Decimal(count - with_term) + Decimal("0.5"))
+                / (Decimal(with_term) + Decimal("0.5"))
+                + 1
+            ).ln()
+            denominator = frequency + BM25_K1 * (1 - BM25_B + BM25_B * length / average)
+            total += idf * frequency * (BM25_K1 + 1) / denominator
+        raw[key] = total
+    best = max(raw.values())
+    if best <= 0:
+        return {key: Decimal(0) for key in raw}
+    return {
+        key: (value / best).quantize(MATCH_PLACES, rounding=ROUND_HALF_UP)
+        for key, value in raw.items()
+    }
+
+
+def weighted_dense_match(
+    criteria: list[dict[str, Any]], similarities: dict[str, str | None]
+) -> Decimal:
+    """Criterion-weighted average of each criterion's closest passage in this CV."""
+    total = Decimal(0)
+    for criterion in criteria:
+        value = similarities.get(criterion["id"])
+        if value is not None:
+            total += Decimal(str(criterion["weight"])) * max(Decimal(0), Decimal(str(value)))
+    return total.quantize(MATCH_PLACES, rounding=ROUND_HALF_UP)
 
 
 def criterion_text(criterion: dict[str, Any]) -> str:

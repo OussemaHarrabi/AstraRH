@@ -1,0 +1,49 @@
+{
+  "id": "CV21",
+  "source_id": "40018190",
+  "name": "Inès Lemaire",
+  "slug": "Ines_Lemaire",
+  "title": "IT Support Technician",
+  "field": "support",
+  "layout": "modern",
+  "job": "J07",
+  "location": "Grenoble, France",
+  "email": "ines_lemaire@example.com",
+  "phone": "+33 6 00 00 21",
+  "portfolio": "portfolio.example.com/ines_lemaire",
+  "summary": "IT Support Technician with hands-on experience in Active Directory, Hardware and Customer Service. Calm with users, precise with evidence, and disciplined about documentation.",
+  "skills": [
+    "Active Directory",
+    "Hardware",
+    "Customer Service",
+    "Windows",
+    "Microsoft 365",
+    "Ticketing",
+    "Networking",
+    "ITIL"
+  ],
+  "experience": [
+    "in network/hardware/operating system troubleshooting, web page design, PC assembly, technical support,and customer service.",
+    "Analytical Helpdesk technician adept at resolving complex issues.",
+    "Delivered production work using Active Directory and Hardware, with tests, documentation and a clean handover.",
+    "Partnered with product, design and operations on scoping, delivery and post-release support.",
+    "Improved team standards through code review, runbooks and incident follow-ups."
+  ],
+  "education": [
+    [
+      "BSc Information Technology",
+      "Lakeside University",
+      "2018 – 2020"
+    ]
+  ],
+  "certifications": [
+    "CompTIA A+",
+    "Microsoft 365 Fundamentals"
+  ],
+  "languages": [
+    "French (native)",
+    "English (C1)"
+  ],
+  "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+  "license": "CC0-1.0"
+}

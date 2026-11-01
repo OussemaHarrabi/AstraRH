@@ -460,6 +460,18 @@ def test_agent_proposes_and_nothing_moves_until_a_human_approves(ranked):
     assert ranking_row.status == "completed"
 
 
+def test_a_new_ranking_replaces_the_old_pending_shortlist(ranked):
+    tenant, job_id, reader, _, _ = ranked
+    rank(tenant, job_id, reader)
+    with tenant_session(tenant) as session:
+        statuses = session.scalars(
+            select(Proposal.status)
+            .where(Proposal.action_type == "talent.shortlist.confirm")
+            .order_by(Proposal.created_at)
+        ).all()
+    assert statuses == ["superseded", "pending_approval"]
+
+
 def test_recruiter_cannot_reject_alone(ranked):
     tenant, _, _, ranking_row, names = ranked
     scores = scores_by_file(tenant, ranking_row.id)

@@ -1,0 +1,56 @@
+{
+  "id": "CV23",
+  "source_id": "34317538",
+  "name": "Anna Kowalska",
+  "slug": "Anna_Kowalska",
+  "title": "Lead Interaction Designer",
+  "field": "design",
+  "layout": "classic",
+  "job": "J04",
+  "location": "Krakow, Poland",
+  "email": "anna_kowalska@example.com",
+  "phone": "+33 6 00 00 23",
+  "portfolio": "portfolio.example.com/anna_kowalska",
+  "summary": "Lead Interaction Designer with hands-on experience in User Centered Design, Prototyping and Figma. Turns complex workflows into accessible, shipped interfaces.",
+  "skills": [
+    "User Centered Design",
+    "Prototyping",
+    "Figma",
+    "Design Systems",
+    "Usability Research",
+    "Accessibility",
+    "HTML/CSS",
+    "Adobe CC",
+    "Wireframing"
+  ],
+  "experience": [
+    "Lead Interaction Designer 05/2012 to Current Juniper Lane Krakow, Poland Tim is the lead interaction designer on a nine person Agile software development team creating software for use in healthcare facilities.",
+    "His role as one of three BAs on the team has him conducting user testing and interviews, data gathering, persona development, wire-framing, story writing, interface analysis, and being the general usability evangelist.",
+    "He acts as the NHSN point of contact, keeping the software compliant with evolving CDC requirements.",
+    "His team produces incremental updates to the code base on a two week sprint cycle and the velocity of his team has increased steadily over the last six months.",
+    "Tim also serves on the Wellness committee and the Safety Committee as a floor warden and first responder.",
+    "VP of Engineering / Product Development Director 09/2009 to 04/2012 Juniper Lane Krakow, Poland Tim worked as the VP of Engineering and product development.",
+    "His responsibilities included managing the current suite of virtual reality software, designing the future software and hardware offerings, vendor relations, client support, systems design, sensor design, quality control and quality assurance, technology specialist, and usability evangelist.",
+    "Other responsibilities included bringing new technology and opportunities to the company, driving the new vision for the company, and developing an on-line community around the new products.",
+    "Innovation Engineer 09/2009 to 04/2012 Juniper Lane Krakow, Poland Tim worked as an innovation engineer, bridging the gap between need and technology.",
+    "He utilized his skills as an engineer to create unique solutions for client needs.",
+    "Intoxiclock: Took third generation product and migrated it from simple input device to multimedia application on a netbook.",
+    "Upgraded poster sized input panel to USB HID device."
+  ],
+  "education": [
+    [
+      "BA Interaction Design",
+      "Cedar Valley University",
+      "2014 – 2016"
+    ]
+  ],
+  "certifications": [
+    "Nielsen Norman Group UX Certification"
+  ],
+  "languages": [
+    "Polish (native)",
+    "English (C1)"
+  ],
+  "source_url": "https://huggingface.co/datasets/opensporks/resumes",
+  "license": "CC0-1.0"
+}
