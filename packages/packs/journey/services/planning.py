@@ -28,6 +28,7 @@ DEMO_HOLIDAYS: frozenset[date] = frozenset(
 
 OPEN_STATUSES = frozenset({"pending", "in_progress", "blocked"})
 LOW_ANSWER_KEYS = ("access_ready", "role_clarity", "manager_support")
+CHECKIN_DAYS = (("day7", 7), ("day30", 30), ("day60", 60), ("day90", 90))
 
 
 def is_working_day(day: date, holidays: Iterable[date] = DEMO_HOLIDAYS) -> bool:
@@ -61,6 +62,14 @@ def due_at(
 ) -> datetime:
     """A task due on a working day at 09:00. Day 0 is the start anchor."""
     return datetime.combine(add_working_days(start, due_day, holidays), at)
+
+
+def checkin_schedule(
+    start: date,
+    holidays: Iterable[date] = DEMO_HOLIDAYS,
+) -> list[tuple[str, datetime]]:
+    """The four check-in milestones, anchored on working days from the start date."""
+    return [(kind, due_at(start, day, holidays)) for kind, day in CHECKIN_DAYS]
 
 
 def phase_for_day(day: int) -> str:

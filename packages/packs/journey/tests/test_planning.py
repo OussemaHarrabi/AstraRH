@@ -5,6 +5,7 @@ from datetime import date, datetime
 from packs.journey.services.planning import (
     add_working_days,
     attention,
+    checkin_schedule,
     dossier,
     due_at,
     expand_template,
@@ -173,3 +174,11 @@ def test_dossier_counts_evidence_and_missing_items_without_salary():
     assert result["verified_skills"] == [{"skill_id": "SKILL-K8S", "level": 2}]
     assert "salary" not in result
     assert "rating" not in result
+
+def test_checkin_schedule_is_four_working_day_milestones():
+    rows = checkin_schedule(MONDAY, holidays=())
+    assert [kind for kind, _ in rows] == ["day7", "day30", "day60", "day90"]
+    assert [moment.date() for _, moment in rows] == [
+        add_working_days(MONDAY, days, holidays=()) for days in (7, 30, 60, 90)
+    ]
+    assert all(moment.hour == 9 and moment.minute == 0 for _, moment in rows)

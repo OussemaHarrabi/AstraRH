@@ -4,7 +4,7 @@ The worker calls these only after the trust gate has passed. An external action
 (email) stays in the executor; these are the internal writes.
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
 from uuid import UUID
@@ -12,17 +12,21 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from kernel import trust
 from kernel.db import utcnow
 from kernel.events import publish
 from packs.journey.events import PlanActivated, SkillGapConfirmed, TrainingCompleted
 from packs.journey.models import (
     BuddyAssignment,
+    Checkin,
     Enrollment,
     OnboardingPlan,
     OnboardingTask,
+    PulseSurvey,
     SkillGap,
     TrainingRecommendation,
 )
+from packs.journey.services import planning
 
 
 def _uuid(value: Any) -> UUID | None:
@@ -58,6 +62,41 @@ def activate_plan(session: Session, tenant_id: UUID, payload: dict[str, Any], ke
             task.due_at = datetime.fromisoformat(str(item["due_at"]))
         task.mandatory = bool(item.get("mandatory", False))
         task.evidence_required = str(item.get("evidence_required", "Evidence"))
+    created_checkins: list[UUID] = []
+    for kind, scheduled_at in planning.checkin_schedule(plan.start_date):
+        existing = session.scalar(
+            select(Checkin.id).where(Checkin.plan_id == plan.id, Checkin.kind == kind)
+        )
+        if existing is not None:
+            continue
+        checkin = Checkin(
+            tenant_id=tenant_id,
+            plan_id=plan.id,
+            kind=kind,
+            scheduled_at=scheduled_at.replace(tzinfo=UTC),
+            status="pending",
+        )
+        session.add(checkin)
+        session.flush()
+        session.add(
+            PulseSurvey(
+                tenant_id=tenant_id,
+                checkin_id=checkin.id,
+                version=1,
+                questions=[],
+            )
+        )
+        created_checkins.append(checkin.id)
+    if created_checkins:
+        trust.log_action(
+            session,
+            tenant_id,
+            "journey.checkin.schedule",
+            "system",
+            "worker",
+            plan_id=str(plan.id),
+            checkins=len(created_checkins),
+        )
     buddy_id = _uuid(payload.get("buddy_id"))
     if buddy_id is not None:
         buddy = session.scalar(
@@ -205,4 +244,5 @@ def verify_training(
         ),
     )
     return f"training_verified:{enrollment.id}"
+
 
