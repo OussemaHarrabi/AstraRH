@@ -57,7 +57,7 @@ class DecisionEvidence(TenantMixin, Base):
     record_id: Mapped[UUID] = mapped_column(
         PG_UUID(as_uuid=True), ForeignKey("trust.decision_record.id"), nullable=False, index=True
     )
-    ref: Mapped[str] = mapped_column(String(16), nullable=False)
+    ref: Mapped[str] = mapped_column(String(128), nullable=False)
     factor_key: Mapped[str | None] = mapped_column(String(128))
     source_type: Mapped[str] = mapped_column(String(64), nullable=False)
     source_id: Mapped[str] = mapped_column(String(128), nullable=False)

@@ -68,7 +68,9 @@ def _dt(value: str | None) -> datetime | None:
 
 
 def _date(value: str | None) -> date | None:
-    return date.fromisoformat(value) if value else None
+    if not value:
+        return None
+    return date.fromisoformat(value[:10])
 
 
 def _uuid(value: str | None) -> UUID | None:
@@ -441,7 +443,20 @@ def seed(session: Session, tenant_id: UUID, world: dict) -> None:
             ).all()
         }
         for seed_task in seed_plan["tasks"]:
-            template_task = template_tasks.get(int(seed_task["position"]))
+            template_task = None
+            raw_position = seed_task.get("position")
+            if raw_position is not None:
+                template_task = template_tasks.get(int(raw_position))
+            else:
+                template_task = next(
+                    (task for task in template_tasks.values() if task.title == seed_task["title"]),
+                    None,
+                )
+            position = (
+                template_task.position
+                if template_task is not None
+                else int(str(seed_task.get("task_id", "0")).rsplit("-", 1)[-1])
+            )
             owner = (
                 maps["employees"].get(str(seed_task["owner_employee_id"]))
                 if seed_task.get("owner_employee_id")
@@ -458,7 +473,7 @@ def seed(session: Session, tenant_id: UUID, world: dict) -> None:
                     plan_id=plan.id,
                     template_task_id=template_task.id if template_task else None,
                     phase=str(seed_task["phase"]),
-                    position=int(seed_task["position"]),
+                    position=position,
                     title=str(seed_task["title"]),
                     task_kind=str(seed_task["task_kind"]),
                     owner_role=str(seed_task["owner_role"]),

@@ -5,6 +5,7 @@ import os
 import httpx
 import psycopg
 from fastapi import FastAPI, Response
+from fastapi.openapi.utils import get_openapi
 from neo4j import GraphDatabase
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
@@ -27,6 +28,50 @@ app = FastAPI(
 FastAPIInstrumentor.instrument_app(app)
 web.install(app)
 registry.mount_pack_routers(app)
+
+
+def _contract_openapi() -> dict:
+    """The exported contract, including the cookie/CSRF scheme FastAPI cannot infer."""
+    if app.openapi_schema is not None:
+        return app.openapi_schema
+    schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+    components = schema.setdefault("components", {})
+    components["securitySchemes"] = {
+        "sessionCookie": {
+            "type": "apiKey",
+            "in": "cookie",
+            "name": "astra_session",
+            "description": "HttpOnly session cookie set by POST /auth/login.",
+        },
+        "csrfHeader": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "x-csrf-token",
+            "description": "Value of the readable astra_csrf cookie. Required on state-changing calls.",
+        },
+    }
+    safe = {"get", "head", "options"}
+    public = {"/auth/login", "/auth/logout", "/healthz", "/readyz"}
+    for path, operations in schema.get("paths", {}).items():
+        for method, operation in operations.items():
+            if method not in (safe | {"post", "put", "patch", "delete"}):
+                continue
+            if path in public:
+                operation["security"] = []
+            elif method in safe:
+                operation["security"] = [{"sessionCookie": []}]
+            else:
+                operation["security"] = [{"sessionCookie": [], "csrfHeader": []}]
+    app.openapi_schema = schema
+    return schema
+
+
+app.openapi = _contract_openapi  # type: ignore[method-assign]
 
 
 def _postgres_ok() -> bool:
