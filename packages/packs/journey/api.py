@@ -20,6 +20,7 @@ from packs.journey.models import (
     ImpactMeasure,
     OnboardingPlan,
     OnboardingTask,
+    PulseSurvey,
     SkillGap,
     SupportFlag,
     TrainingRecommendation,
@@ -79,7 +80,9 @@ def _task_json(task: OnboardingTask) -> dict[str, Any]:
     }
 
 
-def _checkin_json(checkin: Checkin) -> dict[str, Any]:
+def _checkin_json(
+    checkin: Checkin, questions: list[dict[str, Any]] | None = None
+) -> dict[str, Any]:
     return {
         "id": str(checkin.id),
         "kind": checkin.kind,
@@ -87,6 +90,7 @@ def _checkin_json(checkin: Checkin) -> dict[str, Any]:
         "completed_at": _iso(checkin.completed_at),
         "status": checkin.status,
         "escalation": checkin.escalation,
+        "questions": questions or [],
     }
 
 
@@ -221,6 +225,15 @@ def get_plan(plan_id: UUID, request: Request) -> dict[str, Any]:
         checkins = ctx.session.scalars(
             select(Checkin).where(Checkin.plan_id == plan.id).order_by(Checkin.scheduled_at)
         ).all()
+        checkin_ids = [checkin.id for checkin in checkins]
+        surveys = (
+            ctx.session.scalars(
+                select(PulseSurvey).where(PulseSurvey.checkin_id.in_(checkin_ids))
+            ).all()
+            if checkin_ids
+            else []
+        )
+        questions_by_checkin = {survey.checkin_id: survey.questions for survey in surveys}
         flags = ctx.session.scalars(
             select(SupportFlag)
             .where(SupportFlag.plan_id == plan.id)
@@ -269,7 +282,10 @@ def get_plan(plan_id: UUID, request: Request) -> dict[str, Any]:
         return {
             **_plan_json(plan),
             "tasks": [_task_json(task) for task in tasks],
-            "checkins": [_checkin_json(checkin) for checkin in checkins],
+            "checkins": [
+                _checkin_json(checkin, questions_by_checkin.get(checkin.id))
+                for checkin in checkins
+            ],
             "support_flags": [_flag_json(flag) for flag in flags],
             "gaps": [_gap_json(gap) for gap in gaps],
             "recommendations": [_recommendation_json(item) for item in recommendations],
@@ -408,5 +424,6 @@ def get_heatmap(
                 continue
             result.append({**cell, "suppressed": False})
         return sorted(result, key=lambda item: (item["org_unit_id"], item["skill_id"]))
+
 
 

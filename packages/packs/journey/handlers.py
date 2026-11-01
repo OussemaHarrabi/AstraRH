@@ -26,7 +26,7 @@ from packs.journey.models import (
     SkillGap,
     TrainingRecommendation,
 )
-from packs.journey.services import planning
+from packs.journey.services import planning, pulse
 
 
 def _uuid(value: Any) -> UUID | None:
@@ -83,7 +83,7 @@ def activate_plan(session: Session, tenant_id: UUID, payload: dict[str, Any], ke
                 tenant_id=tenant_id,
                 checkin_id=checkin.id,
                 version=1,
-                questions=[],
+                questions=pulse.questions_for(kind),
             )
         )
         created_checkins.append(checkin.id)
@@ -244,5 +244,6 @@ def verify_training(
         ),
     )
     return f"training_verified:{enrollment.id}"
+
 
 
