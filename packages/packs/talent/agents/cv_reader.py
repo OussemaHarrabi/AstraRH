@@ -96,7 +96,7 @@ def parse_and_blind(ctx: AgentContext, state: dict) -> dict:
     except ValidationFailed as exc:
         return _quarantine(ctx, cv, exc.message)
 
-    blinded = blind(parsed.text)
+    blinded = blind(parsed.text, parsed.lines)
     application = ctx.session.get(Application, cv.application_id)
     identity = ctx.session.scalar(
         select(CandidateIdentity).where(CandidateIdentity.candidate_id == application.candidate_id)

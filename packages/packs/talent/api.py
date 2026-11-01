@@ -177,7 +177,9 @@ def activate_rubric(job_id: UUID, rubric_id: UUID, request: Request) -> dict[str
         return _rubric_json(rubric)
 
 
-@router.post("/jobs/{job_id}/cvs", status_code=202, summary="Upload CVs (PDF, DOCX or TXT)")
+@router.post(
+    "/jobs/{job_id}/cvs", status_code=202, summary="Upload CVs (PDF, DOCX, HTML, Markdown or TXT)"
+)
 async def upload_cvs(
     job_id: UUID, request: Request, files: list[UploadFile] = File()
 ) -> dict[str, Any]:

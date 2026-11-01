@@ -1,7 +1,7 @@
 {
   "inbox": {
     "emails": 20,
-    "type_correct": "18/20",
+    "type_correct": "17/20",
     "needs_person_caught": "8/8",
     "needs_person_false_alarms": "0/12",
     "missed_needs_person": [],
@@ -13,6 +13,10 @@
       "e10": {
         "expected": "legal_or_complaint",
         "got": "other"
+      },
+      "e16": {
+        "expected": "question",
+        "got": "availability"
       }
     }
   },

@@ -4,6 +4,7 @@ Same idea as CV ranking: vector similarity for meaning, plus full-text search fo
 combined by reciprocal rank fusion. A person can't retrieve text they couldn't read.
 """
 
+import logging
 import re
 from dataclasses import dataclass
 from datetime import date
@@ -17,6 +18,7 @@ from sqlalchemy.orm import Session
 
 from kernel import ml_client
 from kernel.db import utcnow
+from kernel.errors import ProviderUnavailable
 from kernel.events import EventOutbox, event_type, subscribe
 from kernel.knowledge.models import Chunk, Document, Question, Ticket
 
@@ -31,9 +33,14 @@ __all__ = [
     "search",
 ]
 
+log = logging.getLogger("kernel.knowledge")
+
 RRF_K = 60
 TOP_K = 5
 CANDIDATES = 20
+# The cross-encoder reorders the best fused candidates. It reads question and passage
+# together, so it tells "annual leave" from "sick leave" better than either search.
+RERANK_CANDIDATES = 10
 SECTION = re.compile(r"^#{1,3}\s+(.+)$", re.MULTILINE)
 
 
@@ -69,6 +76,7 @@ class Hit:
     text: str
     similarity: Decimal
     score: Decimal
+    relevance: Decimal | None = None  # reranker score; None if it was unavailable
 
     def as_json(self, ref: str) -> dict[str, Any]:
         return {
@@ -78,6 +86,7 @@ class Hit:
             "version": self.document_version,
             "section": self.section,
             "text": self.text,
+            "relevance": str(self.relevance) if self.relevance is not None else None,
         }
 
 
@@ -201,17 +210,22 @@ def search(session: Session, question: str, roles: list[str], top_k: int = TOP_K
         row.id: Decimal(str(row.similarity)).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
         for row in dense
     }
-    top = sorted(fused, key=lambda chunk_id: (-fused[chunk_id], str(chunk_id)))[:top_k]
-    if not top:
+    candidates = sorted(fused, key=lambda chunk_id: (-fused[chunk_id], str(chunk_id)))
+    candidates = candidates[: max(top_k, RERANK_CANDIDATES)]
+    if not candidates:
         return []
     rows = session.execute(
         text(
             "SELECT c.id, c.section, c.text, d.title, d.version FROM knowledge.chunk c "
             "JOIN knowledge.document d ON d.id = c.document_id WHERE c.id = ANY(:ids)"
         ),
-        {"ids": top},
+        {"ids": candidates},
     ).all()
     by_id = {row.id: row for row in rows}
+    relevance = _rerank(question, [(c, by_id[c]) for c in candidates])
+    if relevance:
+        candidates.sort(key=lambda c: (-relevance[c], -fused[c], str(c)))
+    top = candidates[:top_k]
     return [
         Hit(
             chunk_id=chunk_id,
@@ -221,9 +235,25 @@ def search(session: Session, question: str, roles: list[str], top_k: int = TOP_K
             text=by_id[chunk_id].text,
             similarity=similarity.get(chunk_id, Decimal(0)),
             score=fused[chunk_id],
+            relevance=relevance.get(chunk_id),
         )
         for chunk_id in top
     ]
+
+
+def _rerank(question: str, rows: list[tuple[UUID, Any]]) -> dict[UUID, Decimal]:
+    """Reranker scores by chunk. If the reranker is down, the fused order is kept and logged."""
+    try:
+        scores = ml_client.rerank(
+            question, [f"{row.title}. {row.section}. {row.text}" for _, row in rows]
+        )
+    except ProviderUnavailable:
+        log.warning("reranker unavailable, keeping the hybrid search order")
+        return {}
+    return {
+        chunk_id: Decimal(str(value)).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+        for (chunk_id, _), value in zip(rows, scores, strict=True)
+    }
 
 
 def _or_query(question: str) -> str:
