@@ -523,6 +523,8 @@ def propose_slots(ctx: AgentContext, state: dict) -> dict:
     )
     job = session.get(Job, application.job_id)
     owner = hold_owner(interview.id)
+    # Candidates shortlisted together are scheduled at once: each must see the others' holds.
+    schedule.lock_calendars(session, interview.participants)
     slots = schedule.find_slots(session, interview.participants, ignore_owner=owner)
     if not slots or not identity.email:
         interview.status = "no_slots"

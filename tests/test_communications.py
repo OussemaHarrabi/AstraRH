@@ -498,6 +498,21 @@ def test_offered_slots_are_held_from_other_candidates(tenant):
         assert len(holds.all()) == 3
 
 
+def test_two_offers_at_once_cannot_read_the_same_free_time(tenant):
+    from sqlalchemy import text
+    from sqlalchemy.exc import OperationalError
+
+    from kernel import schedule
+
+    with tenant_session(tenant) as first:
+        schedule.lock_calendars(first, ["nadia@x.test", "karim@x.test"])
+        with tenant_session(tenant) as second:
+            second.execute(text("SET LOCAL lock_timeout = '100ms'"))
+            with pytest.raises(OperationalError):
+                schedule.lock_calendars(second, ["karim@x.test"])
+            second.rollback()
+
+
 def test_booking_releases_the_other_held_slots(tenant):
     interview = offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
     chosen = interview.slots[0]

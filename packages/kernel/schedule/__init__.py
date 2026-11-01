@@ -9,7 +9,7 @@ from typing import Any
 from uuid import UUID
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -101,6 +101,15 @@ def _busy_for(
         holds_query = holds_query.where(Hold.owner != ignore_owner)
     holds = session.execute(holds_query).all()
     return [(row[0], row[1]) for row in [*blocks, *seats, *holds]]
+
+
+def lock_calendars(session: Session, participants: list[str]) -> None:
+    """Until commit, nobody else can offer these people's time. Sorted, so two callers can't deadlock."""
+    for participant in sorted(set(participants)):
+        session.execute(
+            text("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))"),
+            {"key": f"calendar:{participant}"},
+        )
 
 
 def find_slots(

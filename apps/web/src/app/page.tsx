@@ -37,8 +37,11 @@ const RESULTS = [
 ];
 
 function Nav() {
+  const { scrollY } = useScroll();
+  const [solid, setSolid] = useState(false);
+  useMotionValueEvent(scrollY, "change", (value) => setSolid(value > 40));
   return (
-    <header className="fixed inset-x-0 top-0 z-30 mix-blend-normal">
+    <header className={`fixed inset-x-0 top-0 z-30 transition-colors duration-200 ${solid ? "bg-[#10142e]/80 backdrop-blur-md" : ""}`}>
       <div className="mx-auto flex h-16 max-w-[1240px] items-center gap-8 px-5 text-white">
         <Link href="/" className="flex items-center gap-2 text-[17px] font-[600] tracking-tight">
           <Logo size={24} /> AstraRH
@@ -167,7 +170,7 @@ function Work() {
               ))}
             </ul>
           </div>
-          <div className="light-tokens hidden h-[min(470px,70vh)] overflow-hidden rounded-2xl border border-white/15 bg-surface shadow-[0_30px_90px_-20px_rgb(0_0_0/70%)] md:block">
+          <div className="light-tokens hidden h-[min(390px,66vh)] overflow-hidden rounded-2xl border border-white/15 bg-surface shadow-[0_30px_90px_-20px_rgb(0_0_0/70%)] md:block">
             <AnimatePresence mode="wait">
               <motion.div key={active} initial={{ opacity: 0, scale: 0.99 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.22 }} className="h-full">
                 <Film />

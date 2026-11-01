@@ -5,7 +5,6 @@ adds a second job from the CV corpus, approves a shortlist and books interviews.
 Run with: python tools/demo_state.py. It costs a few cents in model calls.
 """
 
-import csv
 import http.cookiejar
 import json
 import mimetypes
@@ -26,6 +25,7 @@ PASSWORD = next(
 BASE = "http://127.0.0.1:8080/api"
 jar = http.cookiejar.CookieJar()
 opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+CLEAN_OFFERS = "--withdraw-offers" in sys.argv
 
 
 def call(path, body=None, files=None):
@@ -95,14 +95,21 @@ def corpus_job():
     detail = wait(lambda: (lambda row: row if row["rubrics"] else None)(call(f"/packs/talent/jobs/{job_id}")), "criteria")
     if not detail["active_rubric_id"]:
         call(f"/packs/talent/jobs/{job_id}/rubrics/{detail['rubrics'][0]['id']}/activate", {})
-    if not call(f"/packs/talent/jobs/{job_id}/cvs"):
-        with (ROOT / "data/cvs/applications.csv").open(encoding="utf-8") as handle:
-            ids = sorted({row["candidate_id"] for row in csv.DictReader(handle) if row["job_id"] == "J01"})
-        pdfs = [next((ROOT / "data/cvs/pdf").glob(f"{candidate}_*")) for candidate in ids]
+    # Everyone in the corpus applies, so the ranking has to separate real fits from the rest.
+    have = {cv["filename"] for cv in call(f"/packs/talent/jobs/{job_id}/cvs")}
+    pdfs = [path for path in sorted((ROOT / "data/cvs/pdf").glob("CV*")) if path.name not in have]
+    if pdfs:
         result = call(f"/packs/talent/jobs/{job_id}/cvs", files=pdfs)
         print(f"Uploaded {len(result['accepted'])} CVs for Security Analyst")
-    wait(lambda: all(cv["status"] != "uploaded" for cv in call(f"/packs/talent/jobs/{job_id}/cvs")), "CV reading")
-    rank(job_id)
+    wait(lambda: all(cv["status"] != "uploaded" for cv in call(f"/packs/talent/jobs/{job_id}/cvs")), "CV reading", 900)
+    shortlist = call(f"/packs/talent/jobs/{job_id}/shortlist")["candidates"]
+    if len(shortlist) < len(call(f"/packs/talent/jobs/{job_id}/cvs")):
+        call(f"/packs/talent/jobs/{job_id}/rankings", {})
+        wait(
+            lambda: (call(f"/packs/talent/jobs/{job_id}/shortlist")["ranking"] or {}).get("status") == "completed",
+            "ranking",
+            900,
+        )
     return job_id
 
 
@@ -123,24 +130,33 @@ def book_interviews(job_id, how_many):
         lambda: any(row["stage"] == "shortlisted" for row in call(f"/packs/talent/jobs/{job_id}/shortlist")["candidates"]),
         "shortlist",
     )
-    known = {row["application_id"]: row for row in call(f"/packs/talent/jobs/{job_id}/interviews")}
+    # An earlier run may have left clashing offers: withdraw them through the normal approval.
+    for row in call(f"/packs/talent/jobs/{job_id}/interviews"):
+        if row["status"] == "slots_proposed" and CLEAN_OFFERS:
+            call(f"/packs/talent/interviews/{row['id']}/cancel", {"reason": "Offer withdrawn", "reschedule": False})
+    while approve("talent.interview.cancel", limit=10):
+        time.sleep(4)
+    wait(
+        lambda: all(row["status"] != "slots_proposed" for row in call(f"/packs/talent/jobs/{job_id}/interviews")) or not CLEAN_OFFERS,
+        "offers withdrawn",
+    )
+    known = {
+        row["application_id"]: row
+        for row in call(f"/packs/talent/jobs/{job_id}/interviews")
+        if row["status"] != "cancelled"
+    }
     for candidate in candidates[:how_many]:
         application = candidate["application_id"]
         if application not in known:
             call(f"/packs/talent/applications/{application}/interviews", {"interviewer_email": "karim@cds.example.test"})
     for index, candidate in enumerate(candidates[:how_many]):
         application = candidate["application_id"]
-        interview = wait(
-            lambda: next(
-                (
-                    row
-                    for row in call(f"/packs/talent/jobs/{job_id}/interviews")
-                    if row["application_id"] == application and row["status"] != "requested"
-                ),
-                None,
-            ),
-            "interview times",
-        )
+        def latest():
+            rows = [row for row in call(f"/packs/talent/jobs/{job_id}/interviews") if row["application_id"] == application]
+            newest = max(rows, key=lambda row: row["created_at"])
+            return None if newest["status"] == "requested" else newest
+
+        interview = wait(latest, "interview times")
         # The last one stays at three held times, so the demo can show that state.
         if interview["status"] != "slots_proposed" or index == how_many - 1:
             continue
