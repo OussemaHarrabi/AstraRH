@@ -32,11 +32,14 @@ export default function LoginPage() {
 
   return (
     <main className="grid min-h-screen md:grid-cols-[1.2fr_1fr]">
-      <section className="flex flex-col justify-end bg-[var(--rail)] p-8 text-white md:p-14">
+      <section
+        className="flex flex-col justify-end p-8 text-white md:p-14"
+        style={{ background: "linear-gradient(160deg, var(--door-deep), var(--door))" }}
+      >
         <h1 className="max-w-lg text-4xl leading-tight font-bold md:text-6xl">
           AI does the HR work. People decide about people.
         </h1>
-        <p className="mt-5 max-w-md text-lg text-[var(--rail-text)]">
+        <p className="mt-5 max-w-md text-lg text-white/80">
           Every suggestion comes with its evidence, and nothing leaves until someone approves it.
         </p>
       </section>

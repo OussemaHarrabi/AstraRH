@@ -4,11 +4,12 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 /** The small shared kit: every module uses these, so the product reads as one. */
 
-type Variant = "primary" | "secondary" | "quiet" | "danger";
+type Variant = "primary" | "secondary" | "soft" | "quiet" | "danger";
 
 const VARIANTS: Record<Variant, string> = {
   primary: "bg-door text-white hover:bg-door-deep dark:text-plaster",
   secondary: "bg-surface text-ink border border-line hover:border-door",
+  soft: "bg-door-wash text-door-deep hover:opacity-90",
   quiet: "text-door hover:underline",
   danger: "bg-surface text-brick border border-brick hover:bg-brick-wash",
 };
@@ -22,7 +23,7 @@ export function Button({
     <button
       type="button"
       {...props}
-      className={`rounded-md px-3.5 py-2 text-[15px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${VARIANTS[variant]} ${className}`}
+      className={`rounded-full px-4 py-2 text-[15px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${VARIANTS[variant]} ${className}`}
     />
   );
 }
@@ -88,7 +89,7 @@ export function Tag({
     info: "bg-door-wash text-door-deep",
   };
   return (
-    <span className={`inline-block rounded px-2 py-0.5 text-sm font-medium ${tones[tone]}`}>
+    <span className={`inline-block rounded-full px-2.5 py-0.5 text-sm font-medium ${tones[tone]}`}>
       {children}
     </span>
   );

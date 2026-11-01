@@ -24,13 +24,15 @@ function NavLink({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`flex items-center justify-between rounded-md px-3 py-2 font-medium ${
-        active ? "bg-white/15 text-white" : "text-[var(--rail-text)] hover:bg-white/10"
+      className={`flex items-center justify-between rounded-md px-3 py-2 font-medium transition-colors ${
+        active
+          ? "bg-door-wash text-door-deep"
+          : "text-ink-soft hover:bg-[var(--plaster)] hover:text-ink"
       }`}
     >
       {label}
       {badge ? (
-        <span className="tabular rounded-full bg-white px-2 text-sm font-bold text-[#12233f]">
+        <span className="tabular rounded-full bg-door px-2 text-sm font-bold text-white">
           {badge}
         </span>
       ) : null}
@@ -83,8 +85,8 @@ export function Shell({ children }: { children: ReactNode }) {
   return (
     <MeContext.Provider value={me}>
       <div className="flex min-h-screen flex-col md:flex-row">
-        <aside className="flex flex-col bg-[var(--rail)] p-4 md:sticky md:top-0 md:h-screen md:w-60 md:shrink-0">
-          <Link href="/" className="px-3 py-2 font-display text-2xl font-bold text-white">
+        <aside className="flex flex-col border-b border-[var(--rail-line)] bg-[var(--rail)] p-4 md:sticky md:top-0 md:h-screen md:w-60 md:shrink-0 md:border-b-0 md:border-r">
+          <Link href="/" className="px-3 py-2 font-display text-2xl font-bold text-ink">
             AstraRH
           </Link>
           <nav aria-label="Main" className="mt-4 flex flex-wrap gap-1 md:flex-col">
@@ -108,9 +110,9 @@ export function Shell({ children }: { children: ReactNode }) {
               <NavLink href="/audit" label="History" active={pathname.startsWith("/audit")} />
             ) : null}
           </nav>
-          <div className="mt-auto hidden px-3 pt-6 text-[var(--rail-text)] md:block">
-            <p className="font-medium text-white">{me.display_name}</p>
-            <button type="button" onClick={signOut} className="mt-1 hover:underline">
+          <div className="mt-auto hidden px-3 pt-6 text-ink-soft md:block">
+            <p className="font-medium text-ink">{me.display_name}</p>
+            <button type="button" onClick={signOut} className="mt-1 hover:text-ink hover:underline">
               Sign out
             </button>
           </div>

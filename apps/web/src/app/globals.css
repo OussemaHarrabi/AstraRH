@@ -1,64 +1,67 @@
 @import "tailwindcss";
 
-/* AstraRH tokens. Blue doors on white plaster, with ochre kept for warnings only. */
+/* AstraRH tokens — Mercury system: warm off-white ground, indigo accent, soft lavender tints. */
 :root {
-  --plaster: #f4f6fa;
+  --plaster: #f7f7f3;
   --surface: #ffffff;
-  --ink: #12233f;
-  --ink-soft: #4f5f78;
-  --line: #d8dfea;
-  --door: #0f5fc2;
-  --door-deep: #0a3f85;
-  --door-wash: #e3edfb;
-  --ochre: #9a6200;
-  --ochre-wash: #fbf1dc;
-  --olive: #26704f;
-  --olive-wash: #e0f1e9;
-  --brick: #a92f24;
-  --brick-wash: #fae6e3;
-  --rail: #12233f;
-  --rail-text: #d4dff0;
-  --radius: 10px;
+  --ink: #34343b;
+  --ink-soft: #73737c;
+  --line: #e8e7ee;
+  --door: #6663f5;
+  --door-deep: #5551df;
+  --door-wash: #ecebfb;
+  --ochre: #8f6410;
+  --ochre-wash: #f8eed6;
+  --olive: #1f8c63;
+  --olive-wash: #e3f3ea;
+  --brick: #b23a52;
+  --brick-wash: #f8e7ea;
+  --rail: #f3f1fa;
+  --rail-line: #e7e4f2;
+  --rail-text: #73737c;
+  --radius: 8px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --plaster: #0e1727;
-    --surface: #16233a;
-    --ink: #e9eff9;
-    --ink-soft: #a5b4cc;
-    --line: #2b3b57;
-    --door: #6aa7f2;
-    --door-deep: #a6ccf8;
-    --door-wash: #1b3355;
-    --ochre: #e5b45d;
-    --ochre-wash: #3a2c10;
-    --olive: #74cda6;
-    --olive-wash: #15352a;
-    --brick: #f19a90;
-    --brick-wash: #3f1c18;
-    --rail: #0a1120;
-    --rail-text: #c3d0e5;
+    --plaster: #0e0d16;
+    --surface: #17161f;
+    --ink: #f0eff7;
+    --ink-soft: #acabc0;
+    --line: #272535;
+    --door: #8f8cff;
+    --door-deep: #aba8ff;
+    --door-wash: #201d3c;
+    --ochre: #dcb366;
+    --ochre-wash: #2f2412;
+    --olive: #67ce9c;
+    --olive-wash: #112c20;
+    --brick: #f0909f;
+    --brick-wash: #351820;
+    --rail: #131220;
+    --rail-line: #24222f;
+    --rail-text: #acabc0;
   }
 }
 
 :root[data-theme="dark"] {
-  --plaster: #0e1727;
-  --surface: #16233a;
-  --ink: #e9eff9;
-  --ink-soft: #a5b4cc;
-  --line: #2b3b57;
-  --door: #6aa7f2;
-  --door-deep: #a6ccf8;
-  --door-wash: #1b3355;
-  --ochre: #e5b45d;
-  --ochre-wash: #3a2c10;
-  --olive: #74cda6;
-  --olive-wash: #15352a;
-  --brick: #f19a90;
-  --brick-wash: #3f1c18;
-  --rail: #0a1120;
-  --rail-text: #c3d0e5;
+  --plaster: #0e0d16;
+  --surface: #17161f;
+  --ink: #f0eff7;
+  --ink-soft: #acabc0;
+  --line: #272535;
+  --door: #8f8cff;
+  --door-deep: #aba8ff;
+  --door-wash: #201d3c;
+  --ochre: #dcb366;
+  --ochre-wash: #2f2412;
+  --olive: #67ce9c;
+  --olive-wash: #112c20;
+  --brick: #f0909f;
+  --brick-wash: #351820;
+  --rail: #131220;
+  --rail-line: #24222f;
+  --rail-text: #acabc0;
 }
 
 @theme inline {
