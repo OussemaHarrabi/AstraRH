@@ -694,21 +694,11 @@ def test_finance_documents_and_engagements_are_tenant_scoped(tenant, other_tenan
     assert http.get(f"{BASE}/engagements/{uuid4()}").status_code == 404
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="K9: the API role cannot insert proposals, so a person cannot propose over HTTP yet. "
-    "See docs/FINANCE_PAYMENT_DESIGN.md. Remove this marker once the kernel allows it.",
-)
 def test_activation_can_be_proposed_over_http(tenant, slug):
     http, _, engagement_id = approved_engagement(tenant, slug)
     assert http.post(f"{BASE}/engagements/{engagement_id}/activate").status_code == 202
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="K9: the API role cannot insert proposals, so a person cannot propose over HTTP yet. "
-    "See docs/FINANCE_PAYMENT_DESIGN.md. Remove this marker once the kernel allows it.",
-)
 def test_an_amendment_can_be_proposed_over_http(tenant, slug):
     http, _, engagement_id = active_engagement(tenant, slug)
     body = {

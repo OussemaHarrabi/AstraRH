@@ -61,6 +61,9 @@ agents:
     entry: kernel.knowledge.agents:build
     description: Answers from company documents with citations, or passes the question to HR.
 
+publishes:
+  - core.employee.created.v1
+
 graph:
   - event: ai.agent_run.completed.v1
     nodes:

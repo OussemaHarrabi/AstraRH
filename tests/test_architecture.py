@@ -1,6 +1,7 @@
 """Architecture rules enforced by tests, so they hold as the team adds code."""
 
 import ast
+from importlib import import_module
 from pathlib import Path
 
 from conftest import as_role
@@ -109,3 +110,18 @@ def test_manifests_are_valid():
     for manifest in active_packs():
         for action in manifest.actions:
             assert action.id.startswith(f"{manifest.id}."), f"{action.id} is outside its pack"
+
+
+def test_every_declared_module_imports():
+    """A manifest can only advertise code that actually loads."""
+    for manifest in active_packs():
+        if manifest.api:
+            module, attribute = manifest.api.split(":", 1)
+            assert getattr(import_module(module), attribute)
+        for action in manifest.actions:
+            if action.handler:
+                module, function = action.handler.split(":", 1)
+                assert callable(getattr(import_module(module), function))
+        for agent in manifest.agents:
+            module, function = agent.entry.split(":", 1)
+            assert callable(getattr(import_module(module), function))

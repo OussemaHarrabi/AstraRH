@@ -13,6 +13,7 @@ from uuid import UUID
 from sqlalchemy import select
 
 from kernel.ai import AgentContext
+from kernel.ai.graphs import AgentState, agent_node
 from kernel.events.models import EventOutbox
 from kernel.explain import DecisionDraft, Factor
 from kernel.explain import Evidence as DecisionEvidence
@@ -32,8 +33,10 @@ SOURCE_MAP = {
 }
 
 
-def run(ctx: AgentContext, event: EventOutbox | None) -> None:
-    payload: dict[str, Any] = dict(event.payload) if event else {}
+def run(ctx: AgentContext, event: EventOutbox | dict[str, Any] | None) -> None:
+    payload: dict[str, Any] = dict(event.get("event", event)) if isinstance(event, dict) else (
+        dict(event.payload) if event else {}
+    )
     employee_id = payload.get("employee_id")
     if not employee_id:
         return
@@ -178,3 +181,18 @@ def run(ctx: AgentContext, event: EventOutbox | None) -> None:
         proposed += 1
         if proposed >= 3:
             break
+
+
+def _node(ctx: AgentContext, state: dict[str, Any]) -> dict[str, Any]:
+    run(ctx, state.get("event"))
+    return {}
+
+
+def build():
+    from langgraph.graph import END, START, StateGraph
+
+    graph = StateGraph(AgentState)
+    graph.add_node("gaps", agent_node(_node))
+    graph.add_edge(START, "gaps")
+    graph.add_edge("gaps", END)
+    return graph

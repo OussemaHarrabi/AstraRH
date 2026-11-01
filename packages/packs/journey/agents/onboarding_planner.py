@@ -13,6 +13,7 @@ from uuid import UUID
 from sqlalchemy import select
 
 from kernel.ai import AgentContext
+from kernel.ai.graphs import AgentState, agent_node
 from kernel.events.models import EventOutbox
 from kernel.explain import DecisionDraft, Evidence
 from kernel.people.models import Employee
@@ -27,9 +28,11 @@ from packs.journey.service import employee_target
 from packs.journey.services import planning
 
 
-def _payload(event: EventOutbox | None) -> dict[str, Any]:
+def _payload(event: EventOutbox | dict[str, Any] | None) -> dict[str, Any]:
     if event is None:
         return {}
+    if isinstance(event, dict):
+        return dict(event)
     return dict(event.payload)
 
 
@@ -56,7 +59,7 @@ def _employee_for_payload(ctx: AgentContext, payload: dict[str, Any]) -> Employe
     return None
 
 
-def run(ctx: AgentContext, event: EventOutbox | None) -> None:
+def run(ctx: AgentContext, event: EventOutbox | dict[str, Any] | None) -> None:
     payload = _payload(event)
     employee = _employee_for_payload(ctx, payload)
     if employee is None:
@@ -194,3 +197,18 @@ def run(ctx: AgentContext, event: EventOutbox | None) -> None:
         f"journey-plan:{employee.id}:{start.isoformat()}",
         target=employee_target(ctx.session, employee),
     )
+
+
+def _node(ctx: AgentContext, state: dict[str, Any]) -> dict[str, Any]:
+    run(ctx, state.get("event"))
+    return {}
+
+
+def build():
+    from langgraph.graph import END, START, StateGraph
+
+    graph = StateGraph(AgentState)
+    graph.add_node("plan", agent_node(_node))
+    graph.add_edge(START, "plan")
+    graph.add_edge("plan", END)
+    return graph

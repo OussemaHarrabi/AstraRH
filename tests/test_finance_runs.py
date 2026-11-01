@@ -927,11 +927,6 @@ def test_the_api_cannot_write_payslips_or_calculated_results(tenant, slug):
             session.execute(text("DELETE FROM finance.payroll_run_input"))
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="K9: the API role cannot insert proposals, so a person cannot submit over HTTP yet. "
-    "See docs/FINANCE_PAYMENT_DESIGN.md. Remove this marker once the kernel allows it.",
-)
 def test_a_run_can_be_submitted_over_http(tenant, slug):
     http, _, _, run = one_run(tenant, slug, {})
     calculate(http, tenant, run["id"])

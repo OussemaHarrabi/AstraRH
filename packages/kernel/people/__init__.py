@@ -1,12 +1,15 @@
 """Public API of the shared people records."""
 
+from datetime import date
 from decimal import Decimal
 from uuid import UUID
 
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from kernel.errors import NotFound
+from kernel.events import event_type
 from kernel.people.models import (
     Employee,
     KpiDefinition,
@@ -19,8 +22,20 @@ from kernel.people.models import (
     SkillRelation,
 )
 
+
+@event_type("core.employee.created.v1")
+class EmployeeCreated(BaseModel):
+    """A candidate became an employee. Packs use the UUID; no personal data in the event."""
+
+    employee_id: UUID
+    person_id: UUID
+    external_id: str
+    start_date: date
+
+
 __all__ = [
     "Employee",
+    "EmployeeCreated",
     "KpiDefinition",
     "KpiObservation",
     "OrgUnit",

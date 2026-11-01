@@ -398,11 +398,6 @@ def test_the_api_cannot_change_a_rule_sets_status_directly(tenant):
             session.flush()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="K9: the API role cannot insert proposals, so a person cannot propose over HTTP yet. "
-    "See docs/FINANCE_PAYMENT_DESIGN.md. Remove this marker once the kernel allows it.",
-)
 def test_activation_can_be_proposed_over_http(tenant, slug):
     record_id = stored(tenant, definition(), status="draft")
     http = signed_in(slug, make_user(tenant, ("finance",)))

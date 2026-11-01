@@ -49,7 +49,7 @@ The OpenAPI document declares two security schemes:
 | Explain | `GET /explain/{decision_id}`; `POST /explain/{decision_id}/verify` | roles on the decision |
 | AI runs | `GET /ai/runs`, `/ai/runs/{id}` — tokens, cost, steps, trace | admin, hr, recruiter, auditor |
 | Graph | `GET /graph/{view}`, `/graph/decision/{id}` — 503 if Neo4j is down | view-specific roles |
-| People | `GET /people/employees`, `/people/org` | people roles |
+| People | `GET /people/employees`, `/people/org`; `POST /people/employees` — turn a hired person into an employee and emit `core.employee.created.v1` | people roles; HR/admin for create |
 | Inbox | `GET/POST /comms/digest`; `GET /comms/stats`; `GET /comms/threads`; `GET /comms/threads/{id}`; `POST .../handled`, `/reopen`; `PUT /comms/messages/{id}/sorting` | admin, hr, recruiter |
 | Knowledge | `POST/GET /knowledge/questions`; `GET /knowledge/questions/{id}`; `POST .../feedback`; HR ticket queue and actions; `GET/POST /knowledge/documents`; `GET /knowledge/stats` | everyone; HR for queue/docs |
 | Calendar | `GET/POST /calendar/busy`; `DELETE /calendar/busy/{id}`; `POST /calendar/import`; `GET /calendar/free`; `GET /calendar/bookings` | admin, hr, recruiter |

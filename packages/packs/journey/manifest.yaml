@@ -89,16 +89,19 @@ actions:
 
 agents:
   - id: onboarding_planner
-    events: [talent.candidate.hired.v1, finance.engagement.activated.v1]
-    entry: packs.journey.agents.onboarding_planner:run
+    events:
+      - talent.candidate.hired.v1
+      - core.employee.created.v1
+      - finance.engagement.activated.v1
+    entry: packs.journey.agents.onboarding_planner:build
     description: Drafts a 30/60/90 plan from the role template and the hire's screening gaps.
   - id: skill_gap_analyst
     events: [journey.plan.activated.v1, journey.evidence.recorded.v1]
-    entry: packs.journey.agents.skill_gap_analyst:run
+    entry: packs.journey.agents.skill_gap_analyst:build
     description: Turns skill evidence into proposed gaps with a DecisionRecord.
   - id: training_planner
     events: [journey.skill_gap.confirmed.v1]
-    entry: packs.journey.agents.training_planner:run
+    entry: packs.journey.agents.training_planner:build
     description: Proposes an ordered training step and an internal mentor alternative.
 
 publishes:
@@ -112,6 +115,7 @@ publishes:
 
 consumes:
   - talent.candidate.hired.v1
+  - core.employee.created.v1
   - finance.engagement.activated.v1
   - trust.action.executed.v1
 

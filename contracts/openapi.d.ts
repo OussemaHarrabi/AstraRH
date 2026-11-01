@@ -309,7 +309,11 @@ export interface paths {
         /** List Employees */
         get: operations["list_employees_people_employees_get"];
         put?: never;
-        post?: never;
+        /**
+         * Create Employee
+         * @description Turn a hired person into an employee. HR/admin only; emits core.employee.created.v1.
+         */
+        post: operations["create_employee_people_employees_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2112,6 +2116,37 @@ export interface components {
             /** Reason */
             reason?: string | null;
         };
+        /** EmployeeBody */
+        EmployeeBody: {
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Display Name */
+            display_name: string;
+            /** Email */
+            email: string;
+            /**
+             * Org Unit Id
+             * Format: uuid
+             */
+            org_unit_id: string;
+            /**
+             * Position Id
+             * Format: uuid
+             */
+            position_id: string;
+            /** Manager Id */
+            manager_id?: string | null;
+            /**
+             * Start Date
+             * Format: date
+             */
+            start_date: string;
+            /** External Id */
+            external_id?: string | null;
+        };
         /** EngagementBody */
         EngagementBody: {
             /**
@@ -2971,6 +3006,41 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     }[];
+                };
+            };
+        };
+    };
+    create_employee_people_employees_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmployeeBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

@@ -8,6 +8,7 @@ from uuid import UUID
 from sqlalchemy import select
 
 from kernel.ai import AgentContext
+from kernel.ai.graphs import AgentState, agent_node
 from kernel.events.models import EventOutbox
 from kernel.explain import DecisionDraft
 from kernel.explain import Evidence as DecisionEvidence
@@ -18,8 +19,10 @@ from packs.journey.service import employee_target
 from packs.journey.services import gap as gap_math
 
 
-def run(ctx: AgentContext, event: EventOutbox | None) -> None:
-    payload: dict[str, Any] = dict(event.payload) if event else {}
+def run(ctx: AgentContext, event: EventOutbox | dict[str, Any] | None) -> None:
+    payload: dict[str, Any] = dict(event.get("event", event)) if isinstance(event, dict) else (
+        dict(event.payload) if event else {}
+    )
     gap_id = payload.get("gap_id")
     if not gap_id:
         return
@@ -142,3 +145,18 @@ def run(ctx: AgentContext, event: EventOutbox | None) -> None:
         f"journey-training:{gap.id}",
         target=employee_target(ctx.session, employee),
     )
+
+
+def _node(ctx: AgentContext, state: dict[str, Any]) -> dict[str, Any]:
+    run(ctx, state.get("event"))
+    return {}
+
+
+def build():
+    from langgraph.graph import END, START, StateGraph
+
+    graph = StateGraph(AgentState)
+    graph.add_node("training", agent_node(_node))
+    graph.add_edge(START, "training")
+    graph.add_edge("training", END)
+    return graph

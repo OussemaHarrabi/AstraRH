@@ -52,7 +52,10 @@ def _contract_openapi() -> dict:
             "type": "apiKey",
             "in": "header",
             "name": "x-csrf-token",
-            "description": "Value of the readable astra_csrf cookie. Required on state-changing calls.",
+            "description": (
+                "Value of the readable astra_csrf cookie. "
+                "Required on state-changing calls."
+            ),
         },
     }
     safe = {"get", "head", "options"}
