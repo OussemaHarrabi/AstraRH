@@ -225,7 +225,7 @@ class Gateway:
                 )
             except (ProviderUnavailable, KeyError) as exc:
                 last_error = exc
-                log.warning("Provider failed for %s: %s", model, type(exc).__name__)
+                log.warning("Provider failed for %s: %s: %s", model, type(exc).__name__, exc)
                 continue
             return response, index > 0, int((time.monotonic() - started) * 1000)
         raise ProviderUnavailable("All model providers are unavailable") from last_error

@@ -46,6 +46,18 @@ class Provider(Protocol):
     ) -> LlmResponse: ...
 
 
+# Strict structured outputs reject these. Pydantic still enforces them on every response.
+UNSUPPORTED_BOUNDS = (
+    "minimum",
+    "maximum",
+    "exclusiveMinimum",
+    "exclusiveMaximum",
+    "multipleOf",
+    "minLength",
+    "maxLength",
+)
+
+
 def strict_json_schema(schema: dict[str, Any]) -> dict[str, Any]:
     """Make a Pydantic schema acceptable to strict structured outputs."""
     node = json.loads(json.dumps(schema))
@@ -59,6 +71,8 @@ def strict_json_schema(schema: dict[str, Any]) -> dict[str, Any]:
             return
         item.pop("title", None)
         item.pop("default", None)
+        for bound in UNSUPPORTED_BOUNDS:
+            item.pop(bound, None)
         if item.get("type") == "object" or "properties" in item:
             item["additionalProperties"] = False
             item["required"] = list(item.get("properties", {}))

@@ -3,6 +3,7 @@ Only the LLM is faked. `astra.py evals` measures these with the real one."""
 
 import json
 from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
@@ -18,6 +19,7 @@ from kernel.ai.providers import LlmResponse
 from kernel.comms import agents as comms_agents
 from kernel.comms.models import Classification, Message, Thread
 from kernel.db import tenant_session, utcnow
+from kernel.explain.models import DecisionEvidence
 from kernel.knowledge.agents import Cited, PolicyAnswer, check_answer
 from kernel.knowledge.agents import build as build_policy
 from kernel.knowledge.models import Question, Ticket
@@ -41,7 +43,7 @@ OTHER = "bo@mail.example.test"
 class Fake:
     """Returns a fixed answer per schema, and records every prompt."""
 
-    def __init__(self, triage=None, draft=None, policy=None):
+    def __init__(self, triage=None, draft=None, policy=None, slot=None):
         self.triage = triage or {
             "type": "availability",
             "urgency": "normal",
@@ -55,6 +57,7 @@ class Fake:
             "body": "Hello {name}, thank you. The recruitment team",
         }
         self.policy = policy
+        self.slot = slot or {"choice": None, "evidence": {"quote": ""}}
         self.prompts: list[str] = []
 
     def complete(self, model, system, user, schema, max_tokens):
@@ -64,6 +67,8 @@ class Fake:
             body = self.triage
         elif "can_answer" in properties:
             body = self.policy
+        elif "choice" in properties:
+            body = self.slot
         else:
             body = self.draft
         return LlmResponse(json.dumps(body), 10, 10, "fake", model)
@@ -876,3 +881,107 @@ def test_check_answer_rules():
     assert check_answer(missing, {"C1": hit}) == "a citation points at no passage"
     with pytest.raises(ValidationError):
         Cited(ref="C1")
+
+
+# ----- A candidate's answer about times -----
+
+
+def answer(tenant, body, kind="availability", slot=None):
+    declare_action("talent.interview.book", channel="internal")
+    declare_action("talent.interview.cancel", channel="internal")
+    message = receive(tenant, CANDIDATE, "Re: Interview for Backend Engineer", body)
+    triage(
+        tenant, message, Fake(triage={**Fake().triage, "type": kind, "evidence": {"quote": body}})
+    )
+    fake = Fake(slot=slot)
+    proposals = draft(tenant, message, fake)
+    return message, fake, proposals
+
+
+def by_action(proposals, action):
+    return [p for p in proposals if p.action_type == action]
+
+
+def test_a_clear_choice_of_an_offered_time_becomes_a_booking_to_approve(tenant):
+    interview = offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
+    body = "Thank you! The second time works best for me."
+    message, fake, proposals = answer(
+        tenant, body, slot={"choice": 2, "evidence": {"quote": "The second time works best"}}
+    )
+    [booking] = by_action(proposals, "talent.interview.book")
+    assert booking.status == "pending_approval"
+    assert booking.payload == {"interview_id": str(interview.id), **interview.slots[1]}
+    assert booking.target["thread_id"] == str(message.thread_id)
+    assert "2. " in fake.prompts[-1] and "Ana Ali" not in fake.prompts[-1]
+    # No reply draft as well: the confirmation follows the booking, once a person approves it.
+    assert [p.idempotency_key for p in by_action(proposals, "kernel.email.send")] == [
+        f"interview_slots:{interview.id}"
+    ]
+    with tenant_session(tenant) as session:
+        quotes = session.scalars(
+            select(DecisionEvidence.quote).where(
+                DecisionEvidence.record_id == booking.decision_record_id
+            )
+        ).all()
+    assert quotes == ["The second time works best"]
+
+
+@pytest.mark.parametrize(
+    "slot",
+    [
+        {"choice": None, "evidence": {"quote": ""}},  # no clear choice
+        {"choice": 7, "evidence": {"quote": "works for me"}},  # not an offered time
+        {"choice": 1, "evidence": {"quote": "Monday at 9 is perfect"}},  # quote not in the reply
+    ],
+)
+def test_an_unclear_answer_gets_a_normal_reply_draft_not_a_booking(tenant, slot):
+    offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
+    _, _, proposals = answer(tenant, "Hmm, any of them works for me I think.", slot=slot)
+    assert by_action(proposals, "talent.interview.book") == []
+    assert any(p.idempotency_key.startswith("reply:") for p in proposals)
+
+
+def test_a_request_to_move_a_booked_interview_becomes_a_reschedule_to_approve(tenant):
+    interview = booked(tenant)
+    message, _, proposals = answer(tenant, "Something came up, could we move it?", "reschedule")
+    [move] = by_action(proposals, "talent.interview.cancel")
+    assert move.payload == {
+        "interview_id": str(interview.id),
+        "reason": "The candidate asked to move it",
+        "reschedule": True,
+    }
+    assert move.idempotency_key == f"cancel:{interview.id}"
+    assert move.target["thread_id"] == str(message.thread_id)
+
+
+def test_a_moved_interview_is_announced_as_moved_not_cancelled(tenant):
+    interview = booked(tenant)
+    with tenant_session(tenant) as session:
+        talent_comms.cancel_interview(
+            session,
+            tenant,
+            {"interview_id": str(interview.id), "reason": "Asked", "reschedule": True},
+            "key",
+        )
+        notice = session.scalar(
+            select(Proposal).where(Proposal.idempotency_key == f"interview_cancel:{interview.id}")
+        )
+    assert notice.payload["subject"].startswith("Interview moved")
+    assert "New times will follow" in notice.payload["body"]
+
+
+def test_an_approved_booking_from_a_conversation_marks_it_handled(tenant):
+    offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
+    message, _, proposals = answer(
+        tenant, "The first one is great.", slot={"choice": 1, "evidence": {"quote": "first one"}}
+    )
+    [booking] = by_action(proposals, "talent.interview.book")
+    event = SimpleNamespace(
+        tenant_id=tenant,
+        payload={"proposal_id": str(booking.id), "action_type": "talent.interview.book"},
+    )
+    with tenant_session(tenant) as session:
+        comms.record_outbound(session, event)
+        thread = session.get(Thread, message.thread_id)
+        assert thread.status == "handled"
+        assert thread.handled_note.startswith("Done: Book")

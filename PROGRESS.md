@@ -157,6 +157,15 @@ Committed in small steps. Each step below is one commit.
    - The subject names a job by exact reference first (J1 never matches J12), and by title only when exactly one open job has it. Two matches mean a person files it.
    - **Verified:** new `tests/test_inbound_mail.py` (a live round trip through Mailpit, CV to application, waiting CVs filed by a recruiter, known candidates, upload gate on attachments, own and automatic mail ignored, HTML-only mail, executor privileges, reference matching). **Full suite 351 passed, 2 skipped**, ruff clean, migration applied with `astra.py up`.
 
+11. **A candidate's answer about times becomes a booking or a move to approve** (2026-11-01).
+   - In the reply drafter (`talent/communications.py`, `answer_about_times`): when a known candidate who was offered times writes about availability, a slot picker reads their reply through `read_untrusted` (prompt `agents/prompts/slot_picker.md`). The model can only return the number of an offered time and a quote. Code checks the number is one of the offered times and the quote is really in the candidate's words, then proposes `talent.interview.book` (R2) with a decision record quoting them. A person approves, the booking is re-checked against the calendars, and the confirmation with its invite follows for approval.
+   - Anything unclear (no clear choice, a time not offered, two days at once, a quote that isn't in the reply, a flagged message) gets the normal reply draft instead, so a person answers.
+   - A candidate asking to move a booked interview gets `talent.interview.cancel` with `reschedule: true` proposed (R2). Once approved, the candidate's email reads "Interview moved ... New times will follow", and new times are offered.
+   - Any approved action that came from a conversation (booking, move) now marks that thread handled with "Done: ...", not only approved emails.
+   - **Verified:** 5 new tests (clear choice to booking, 3 unclear cases to a reply draft, reschedule, wording, thread handled). Communications, inbox and inbound tests 80 passed.
+   - The gateway now drops number and length bounds (`minimum`, `maxLength`...) from schemas sent to the model, because strict structured outputs refuse them; Pydantic still enforces them on every answer. The first eval run failed on exactly this. Provider failures now log their message, not just their type.
+   - **Real-model eval** (`slot_picking` in `docs/evals/communications.json`, English, French, Arabic, "option 1", two days, none of these, a time we didn't offer, an injection asking for slot 3): **8/8 read right, 0 wrong bookings proposed, 4/4 unclear answers left to a person.** Same run: inbox 18/20 types, 8/8 needs-a-person, 0/12 false alarms; policy 8/8, 6/6, 0 leaks. AI, communications, inbox and inbound tests 126 passed.
+
 ### Screening, web shell and two-layer ranking: 2026-10-31
 
 **Built**

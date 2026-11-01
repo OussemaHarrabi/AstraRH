@@ -257,9 +257,13 @@ def digest_view(session: Session, digest: Digest) -> dict[str, Any]:
 @subscribe("trust.action.executed.v1", "comms.record_outbound")
 def record_outbound(session: Session, event: EventOutbox) -> None:
     """An approved email that went out belongs in its thread, which also stops its follow-ups."""
-    if event.payload["action_type"] != "kernel.email.send":
-        return
     proposal = session.get(Proposal, UUID(event.payload["proposal_id"]))
+    if event.payload["action_type"] != "kernel.email.send":
+        thread_id = proposal.target.get("thread_id")
+        thread = session.get(Thread, UUID(thread_id)) if thread_id else None
+        if thread is not None and thread.status != "handled":
+            mark_handled(thread, None, f"Done: {proposal.summary}")
+        return
     payload = proposal.payload
     sent = ingest(
         session,

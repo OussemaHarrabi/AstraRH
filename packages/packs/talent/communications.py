@@ -10,13 +10,14 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from langgraph.graph import END, START, StateGraph
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from kernel import explain, schedule, trust
 from kernel.ai import AgentContext, load_prompt
 from kernel.ai.graphs import AgentState, agent_node
+from kernel.ai.reader import EvidenceSpan
 from kernel.comms.models import Attachment, Classification, Message, Thread
 from kernel.db import tenant_session, utcnow
 from kernel.errors import Conflict, ValidationFailed
@@ -125,6 +126,10 @@ def draft_reply(ctx: AgentContext, state: dict) -> dict:
     ):
         return {"skip": True}
     application, identity, job = found
+    if classification.type in TIME_TYPES and answer_about_times(
+        ctx, message, classification, application, identity, job
+    ):
+        return {}
 
     # The candidate's own file and nothing else. Their message arrives as validated fields.
     facts = "\n".join(
@@ -192,6 +197,159 @@ def draft_reply(ctx: AgentContext, state: dict) -> dict:
         },
     )
     return {}
+
+
+# ----- A candidate's answer about times -----
+
+TIME_TYPES = {"availability", "reschedule"}
+TIME_LIMIT = "Read from the candidate's email by an AI. Check their message before approving."
+
+
+class SlotChoice(BaseModel):
+    choice: int | None = Field(default=None, ge=1, le=10)
+    evidence: EvidenceSpan
+
+
+def _numbered_slots(slots: list[dict[str, str]]) -> str:
+    return "\n".join(
+        f"{index}. "
+        + datetime.fromisoformat(slot["starts_at"])
+        .astimezone(schedule.TIMEZONE)
+        .strftime("%A %d %B at %H:%M")
+        + " (Tunis time)"
+        for index, slot in enumerate(slots, start=1)
+    )
+
+
+def _latest_interview(session: Session, application_id: UUID, status: str) -> Interview | None:
+    return session.scalar(
+        select(Interview)
+        .where(Interview.application_id == application_id, Interview.status == status)
+        .order_by(Interview.created_at.desc())
+        .limit(1)
+    )
+
+
+def _in_reply(quote: str | None, body: str) -> bool:
+    def norm(text: str) -> str:
+        return re.sub(r"\s+", " ", text).strip().casefold()
+
+    return bool(quote and quote.strip()) and norm(quote) in norm(body)
+
+
+def pick_offered_slot(
+    ctx: AgentContext, message: Message, interview: Interview
+) -> tuple[dict[str, str], str] | None:
+    """Which offered time the candidate chose, as a number the model can only pick from the list.
+
+    Code then checks the number is in range and the quote is really in the candidate's words.
+    Anything unclear, or flagged as an attempt to steer the model, goes to a person instead.
+    """
+    prompt = load_prompt(PROMPT_ANCHOR, "slot_picker")
+    result = ctx.read_untrusted(
+        f"Times offered:\n{_numbered_slots(interview.slots)}\n\n"
+        f"Candidate's reply:\nSubject: {message.subject}\n\n{message.body}",
+        prompt,
+        SlotChoice,
+        "email",
+        str(message.id),
+        tier="fast",
+    )
+    choice = result.data.choice
+    quote = result.data.evidence.quote
+    if result.flagged or choice is None or not 1 <= choice <= len(interview.slots):
+        return None
+    if not _in_reply(quote, message.body):
+        return None
+    return interview.slots[choice - 1], quote.strip()
+
+
+def answer_about_times(
+    ctx: AgentContext,
+    message: Message,
+    classification: Classification,
+    application: Application,
+    identity: CandidateIdentity,
+    job: Job,
+) -> bool:
+    """Proposes the booking or the reschedule the candidate asked for. True if it did."""
+    session = ctx.session
+    name = identity.name or "the candidate"
+    target = {
+        "application_id": str(application.id),
+        "thread_id": str(message.thread_id),
+        "job_id": str(job.id),
+    }
+    offered = _latest_interview(session, application.id, "slots_proposed")
+    if offered is not None:
+        picked = pick_offered_slot(ctx, message, offered)
+        if picked is None:
+            return False  # no clear choice: the normal reply drafter answers, a person approves
+        chosen, quote = picked
+        decision = ctx.record_decision(
+            DecisionDraft(
+                kind="talent.interview_booking",
+                question="Should this interview be booked?",
+                subject={"application_id": str(application.id), "interview_id": str(offered.id)},
+                outcome={"starts_at": chosen["starts_at"]},
+                rationale="In their reply the candidate chose this time from those offered.",
+                evidence=[
+                    Evidence(ref="E1", source_type="email", source_id=str(message.id), quote=quote)
+                ],
+                not_considered=DRAFT_NOT_CONSIDERED,
+                limits=[TIME_LIMIT, "Checked again against the calendars when it is booked."],
+                versions={"model": ctx.model_used or "none"},
+            )
+        )
+        ctx.propose(
+            "talent.interview.book",
+            {"interview_id": str(offered.id), **chosen},
+            f"Book {name}'s interview at the time they chose",
+            decision.id,
+            f"book:{offered.id}:{chosen['starts_at']}",
+            target=target,
+        )
+        return True
+
+    booked = _latest_interview(session, application.id, "booked")
+    if classification.type != "reschedule" or booked is None:
+        return False
+    evidence = []
+    if _in_reply(classification.quote, message.body):
+        evidence.append(
+            Evidence(
+                ref="E1",
+                source_type="email",
+                source_id=str(message.id),
+                quote=classification.quote,
+            )
+        )
+    decision = ctx.record_decision(
+        DecisionDraft(
+            kind="talent.interview_cancel",
+            question="Should this interview be moved?",
+            subject={"application_id": str(application.id), "interview_id": str(booked.id)},
+            outcome={"action": "reschedule"},
+            rationale="The candidate asked to move their interview.",
+            evidence=evidence,
+            not_considered=DRAFT_NOT_CONSIDERED,
+            limits=[TIME_LIMIT, "New times are found and offered only after a person approves."],
+            versions={"model": ctx.model_used or "none"},
+        )
+    )
+    ctx.propose(
+        "talent.interview.cancel",
+        {
+            "interview_id": str(booked.id),
+            "reason": "The candidate asked to move it",
+            "reschedule": True,
+        },
+        f"Move {name}'s interview: they asked for another time",
+        decision.id,
+        f"cancel:{booked.id}",
+        target=target,
+    )
+    return True
 
 
 def build_reply_drafter() -> StateGraph:
@@ -597,7 +755,9 @@ def cancel_interview(session: Session, tenant_id: UUID, payload: dict[str, Any],
     reason = str(payload.get("reason") or "").strip()
     publish(session, tenant_id, InterviewCancelled(interview_id=interview.id, reason=reason))
     if was_booked:
-        _propose_cancellation(session, tenant_id, interview, application, job, reason)
+        _propose_cancellation(
+            session, tenant_id, interview, application, job, reason, bool(payload.get("reschedule"))
+        )
     if payload.get("reschedule"):
         replacement = request_interview(
             session, tenant_id, application.id, list(interview.participants)
@@ -613,6 +773,7 @@ def _propose_cancellation(
     application: Application,
     job: Job,
     reason: str,
+    reschedule: bool = False,
 ) -> None:
     identity = session.scalar(
         select(CandidateIdentity).where(CandidateIdentity.candidate_id == application.candidate_id)
@@ -639,11 +800,19 @@ def _propose_cancellation(
         "kernel.email.send",
         {
             "to": identity.email,
-            "subject": f"Interview cancelled: {job.title}",
+            "subject": (
+                f"Interview moved: {job.title}"
+                if reschedule
+                else f"Interview cancelled: {job.title}"
+            ),
             "body": (
-                f"Hello {first},\n\nWe have to cancel your interview for {job.title} on {when} "
-                "(Tunis time). We are sorry for the change and will be in touch about next "
-                "steps.\n\nThe recruitment team"
+                f"Hello {first},\n\nYour interview for {job.title} on {when} (Tunis time) is "
+                "cancelled so we can find a new time. New times will follow shortly.\n\n"
+                "The recruitment team"
+                if reschedule
+                else f"Hello {first},\n\nWe have to cancel your interview for {job.title} on "
+                f"{when} (Tunis time). We are sorry for the change and will be in touch about "
+                "next steps.\n\nThe recruitment team"
             ),
             "invite": invite_fields(
                 interview,
