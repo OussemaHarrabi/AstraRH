@@ -11,11 +11,10 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 
+from packs.finance.validation.common import BLOCKING, REVIEW, IssueSpec
+
 CDI, CDD, CIVP = "CDI", "CDD", "CIVP"
 ENGAGEMENT_TYPES = {CDI, CDD, CIVP}
-
-BLOCKING = "blocking"
-REVIEW = "review"
 
 # Placeholders, not the labour code. Anything else goes to a person for review.
 RECOGNISED_CDD_REASONS = {"REPLACEMENT", "SEASONAL", "TEMPORARY_INCREASE", "PROJECT"}
@@ -28,16 +27,6 @@ REQUIRED_DOCUMENTS = {
     CIVP: ("identity", "diploma", "aneti_approval", "contract"),
 }
 DOCUMENT_TYPES = {doc for docs in REQUIRED_DOCUMENTS.values() for doc in docs}
-
-
-@dataclass(frozen=True)
-class IssueSpec:
-    code: str
-    severity: str
-    field: str | None
-    message: str
-    next_action: str
-    owner_role: str
 
 
 @dataclass(frozen=True)

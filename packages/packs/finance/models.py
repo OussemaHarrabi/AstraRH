@@ -262,9 +262,26 @@ class PayrollInput(TenantMixin, Base):
     quantity: Mapped[Decimal | None] = mapped_column(Numeric(12, 3))
     amount: Mapped[Decimal | None] = mapped_column(MONEY)
     effective_date: Mapped[date] = mapped_column(Date, nullable=False)
+    reference: Mapped[str | None] = mapped_column(String(64))
+    line_number: Mapped[int | None] = mapped_column(Integer)
     source_event_id: Mapped[str] = mapped_column(String(128), nullable=False)
     status: Mapped[str] = mapped_column(String(12), nullable=False, default="accepted")
     reject_reason: Mapped[str | None] = mapped_column(Text)
+
+
+class PayrollInputRejection(TenantMixin, Base):
+    """A row that was not stored, and why. Kept so the sender can fix and resend it."""
+
+    __tablename__ = "payroll_input_rejection"
+    __table_args__ = (UniqueConstraint("batch_id", "line_number"), SCHEMA)
+
+    batch_id: Mapped[UUID] = mapped_column(
+        UUID_TYPE, ForeignKey("finance.payroll_input_batch.id"), nullable=False, index=True
+    )
+    line_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    code: Mapped[str] = mapped_column(String(48), nullable=False)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    raw: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
 
 
 class PayrollRun(TenantMixin, Base):

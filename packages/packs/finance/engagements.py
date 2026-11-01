@@ -17,7 +17,7 @@ from kernel.errors import Conflict, NotFound, ValidationFailed
 from kernel.events import publish
 from kernel.identity import Actor
 from kernel.people.models import Employee
-from packs.finance import proposals
+from packs.finance import issues, proposals
 from packs.finance.events import EngagementAmended, EngagementValidated
 from packs.finance.models import (
     DocumentRef,
@@ -35,7 +35,6 @@ DECISION_VIEW_ROLES = ["admin", "finance", "hr", "auditor"]
 BASE_SALARY = "BASE_SALARY"
 EDITABLE = {"draft", "pending_review", "approved"}
 LOCKED = {"active", "completed", "terminated"}
-RESOLVABLE = {"review", "warning", "info"}
 DOCUMENT_DECISIONS = {"verified", "rejected"}
 AMENDABLE_FIELDS = {"base_salary", "weekly_hours", "job_title", "work_location", "ends_on"}
 
@@ -193,69 +192,20 @@ def _view(session: Session, engagement: Engagement) -> rules.EngagementView:
     )
 
 
-def _sync_issues(
-    session: Session, tenant_id: UUID, engagement_id: UUID, specs: list[rules.IssueSpec]
-) -> None:
-    """Keep what a person already decided, recompute everything else."""
-    rows = session.scalars(
-        select(ValidationIssue)
-        .where(
-            ValidationIssue.entity_type == "engagement", ValidationIssue.entity_id == engagement_id
-        )
-        .order_by(ValidationIssue.created_at)
-    ).all()
-    latest = {(row.code, row.field): row for row in rows}
-    wanted = set()
-    for spec in specs:
-        key = (spec.code, spec.field)
-        wanted.add(key)
-        row = latest.get(key)
-        if row is None or row.status == "cleared":
-            session.add(
-                ValidationIssue(
-                    tenant_id=tenant_id,
-                    entity_type="engagement",
-                    entity_id=engagement_id,
-                    code=spec.code,
-                    severity=spec.severity,
-                    field=spec.field,
-                    message=spec.message,
-                    next_action=spec.next_action,
-                    owner_role=spec.owner_role,
-                )
-            )
-        elif row.status == "open":
-            row.severity, row.message = spec.severity, spec.message
-            row.next_action, row.owner_role = spec.next_action, spec.owner_role
-    for key, row in latest.items():
-        if key not in wanted and row.status == "open":
-            row.status = "cleared"
-            row.resolved_at = utcnow()
-    session.flush()
-
-
 def open_issues(session: Session, engagement_id: UUID) -> list[ValidationIssue]:
-    return list(
-        session.scalars(
-            select(ValidationIssue)
-            .where(
-                ValidationIssue.entity_type == "engagement",
-                ValidationIssue.entity_id == engagement_id,
-                ValidationIssue.status == "open",
-            )
-            .order_by(ValidationIssue.created_at)
-        )
-    )
+    return issues.open_for(session, "engagement", engagement_id)
 
 
 def validate_engagement(session: Session, tenant_id: UUID, engagement: Engagement) -> Engagement:
     """Idempotent. Updates the issues and, before activation, the status they imply."""
     if engagement.status in LOCKED:
         return engagement
-    _sync_issues(session, tenant_id, engagement.id, rules.validate(_view(session, engagement)))
-    issues = open_issues(session, engagement.id)
-    blocking = sum(1 for i in issues if i.severity == rules.BLOCKING)
-    review = sum(1 for i in issues if i.severity == rules.REVIEW)
+    issues.sync(
+        session, tenant_id, "engagement", engagement.id, rules.validate(_view(session, engagement))
+    )
+    pending = open_issues(session, engagement.id)
+    blocking = sum(1 for i in pending if i.severity == rules.BLOCKING)
+    review = sum(1 for i in pending if i.severity == rules.REVIEW)
     engagement.status = "draft" if blocking else "pending_review" if review else "approved"
     session.flush()
     publish(
@@ -266,26 +216,6 @@ def validate_engagement(session: Session, tenant_id: UUID, engagement: Engagemen
         ),
     )
     return engagement
-
-
-def resolve_issue(session: Session, actor: Actor, issue_id: UUID, reason: str) -> ValidationIssue:
-    """A person's decision on a review item, with a reason. A blocking item has to be fixed."""
-    issue = session.get(ValidationIssue, issue_id)
-    if issue is None or issue.entity_type != "engagement":
-        raise NotFound("Issue not found")
-    if issue.status != "open":
-        raise Conflict(f"This issue is already {issue.status}")
-    if issue.severity not in RESOLVABLE:
-        raise Conflict("A blocking issue cannot be waved through: fix its cause")
-    if len(reason.strip()) < 3:
-        raise ValidationFailed("A reason is required")
-    issue.status = "resolved"
-    issue.resolved_by = actor.user_id
-    issue.resolved_at = utcnow()
-    issue.resolution_reason = reason.strip()
-    session.flush()
-    validate_engagement(session, actor.tenant_id, get_engagement(session, issue.entity_id))
-    return issue
 
 
 def add_document(

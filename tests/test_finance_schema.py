@@ -445,7 +445,7 @@ def test_finance_foreign_keys_point_only_into_core_or_finance():
 
 def test_every_finance_table_has_a_tenant_and_row_level_security():
     names = {t.name for t in Base.metadata.tables.values() if t.schema == "finance"}
-    assert len(names) == 21
+    assert len(names) == 22
     with as_role("owner"), tenant_session(uuid4()) as session:
         enabled = {
             row[0]
@@ -702,3 +702,138 @@ def test_a_pay_item_cannot_be_moved_onto_an_active_engagement(tenant):
                 text("UPDATE finance.pay_item SET engagement_id = :a WHERE id = :i"),
                 {"a": active, "i": item_id},
             )
+
+
+def make_input(tenant_id: UUID, role: str = "worker") -> tuple[UUID, UUID, UUID]:
+    employee = make_employee(tenant_id)
+    with as_role(role), tenant_session(tenant_id) as session:
+        batch = m.PayrollInputBatch(
+            tenant_id=tenant_id,
+            source="csv",
+            period_start=MONTH,
+            period_end=date(2026, 11, 30),
+            file_sha256=uuid4().hex * 2,
+        )
+        session.add(batch)
+        session.flush()
+        row = m.PayrollInput(
+            tenant_id=tenant_id,
+            batch_id=batch.id,
+            employee_id=employee,
+            kind="hours",
+            quantity=Decimal("8"),
+            effective_date=MONTH,
+            source_event_id=f"row:{uuid4().hex}",
+            line_number=2,
+        )
+        session.add(row)
+        session.flush()
+        return batch.id, row.id, employee
+
+
+def run_sql(tenant_id: UUID, role: str, statement: str, **params) -> None:
+    with as_role(role), tenant_session(tenant_id) as session:
+        session.execute(text(statement), params)
+
+
+@pytest.mark.parametrize("role", ["api", "worker", "owner"])
+def test_the_content_of_an_input_never_changes_for_any_role(tenant, role):
+    _, row, _ = make_input(tenant)
+    for column, value in (
+        ("quantity", "9"),
+        ("kind", "'bonus'"),
+        ("effective_date", "'2026-11-02'"),
+    ):
+        with pytest.raises(DBAPIError, match="content of an input cannot be changed"):
+            run_sql(
+                tenant,
+                role,
+                f"UPDATE finance.payroll_input SET {column} = {value} WHERE id = :i",
+                i=row,
+            )
+
+
+def test_an_input_can_only_move_from_accepted_to_withdrawn(tenant):
+    _, row, _ = make_input(tenant)
+    run_sql(
+        tenant,
+        "api",
+        "UPDATE finance.payroll_input SET status = 'withdrawn', reject_reason = 'Mistake' "
+        "WHERE id = :i",
+        i=row,
+    )
+    for status in ("accepted", "rejected"):
+        with pytest.raises(DBAPIError, match="cannot go from withdrawn"):
+            run_sql(
+                tenant,
+                "owner",
+                f"UPDATE finance.payroll_input SET status = '{status}' WHERE id = :i",
+                i=row,
+            )
+
+
+@pytest.mark.parametrize("role", ["api", "worker", "owner"])
+def test_an_input_is_never_deleted(tenant, role):
+    _, row, _ = make_input(tenant)
+    with pytest.raises(DBAPIError, match="withdrawn, never deleted"):
+        run_sql(tenant, role, "DELETE FROM finance.payroll_input WHERE id = :i", i=row)
+
+
+def test_a_batch_keeps_its_period_and_content_but_its_counts_can_change(tenant):
+    batch, _, _ = make_input(tenant)
+    run_sql(
+        tenant,
+        "api",
+        "UPDATE finance.payroll_input_batch SET status = 'ready', accepted_rows = 3 WHERE id = :i",
+        i=batch,
+    )
+    for column, value in (
+        ("period_end", "'2026-12-31'"),
+        ("period_start", "'2026-10-01'"),
+        ("file_sha256", "'abc'"),
+        ("source", "'time'"),
+    ):
+        with pytest.raises(DBAPIError, match="cannot be changed"):
+            run_sql(
+                tenant,
+                "owner",
+                f"UPDATE finance.payroll_input_batch SET {column} = {value} WHERE id = :i",
+                i=batch,
+            )
+    with pytest.raises(DBAPIError, match="never deleted"):
+        run_sql(tenant, "owner", "DELETE FROM finance.payroll_input_batch WHERE id = :i", i=batch)
+
+
+def test_a_rejection_is_history(tenant):
+    batch, _, _ = make_input(tenant)
+    with as_role("api"), tenant_session(tenant) as session:
+        row = m.PayrollInputRejection(
+            tenant_id=tenant, batch_id=batch, line_number=5, code="KIND_UNKNOWN", message="No."
+        )
+        session.add(row)
+        session.flush()
+        rejection = row.id
+    for statement in (
+        "UPDATE finance.payroll_input_rejection SET message = 'edited' WHERE id = :i",
+        "DELETE FROM finance.payroll_input_rejection WHERE id = :i",
+    ):
+        with pytest.raises(DBAPIError, match="not allowed"):
+            run_sql(tenant, "owner", statement, i=rejection)
+
+
+def test_a_rejection_line_is_recorded_once_per_batch(tenant):
+    batch, _, _ = make_input(tenant)
+    with as_role("api"), tenant_session(tenant) as session:
+        session.add(
+            m.PayrollInputRejection(
+                tenant_id=tenant, batch_id=batch, line_number=5, code="A", message="First."
+            )
+        )
+        session.flush()
+        with pytest.raises(IntegrityError), session.begin_nested():
+            session.add(
+                m.PayrollInputRejection(
+                    tenant_id=tenant, batch_id=batch, line_number=5, code="B", message="Again."
+                )
+            )
+            session.flush()

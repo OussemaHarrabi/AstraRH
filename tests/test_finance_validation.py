@@ -163,7 +163,7 @@ def test_the_same_input_always_gives_the_same_issues():
 
 
 def test_validation_is_pure():
-    allowed = {"dataclasses", "datetime", "decimal"}
+    allowed = {"dataclasses", "datetime", "decimal", "packs.finance.validation.common"}
     imported = set()
     for node in ast.walk(ast.parse(MODULE.read_text(encoding="utf-8"))):
         if isinstance(node, ast.Import):

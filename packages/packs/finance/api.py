@@ -5,17 +5,21 @@ from decimal import Decimal
 from typing import Any, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, File, Form, Request, Response, UploadFile
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
 from kernel.authz import has_role, require_role
+from kernel.people.models import Employee
 from kernel.web import request_context
-from packs.finance import engagements, service
+from packs.finance import engagements, inputs, issues, service
 from packs.finance.models import (
     DocumentRef,
     Engagement,
     HireNotice,
+    PayrollInput,
+    PayrollInputBatch,
+    PayrollInputRejection,
     RuleSetRecord,
     ValidationIssue,
 )
@@ -28,6 +32,8 @@ ENGAGEMENT_READ = {"admin", "finance", "hr", "auditor"}
 ENGAGEMENT_WRITE = {"admin", "finance", "hr"}
 PAY_READ = {"admin", "finance", "auditor"}
 PAY_WRITE = {"admin", "finance"}
+INPUT_READ = {"admin", "finance", "auditor"}
+INPUT_WRITE = {"admin", "finance"}
 
 router = APIRouter()
 
@@ -354,8 +360,10 @@ def list_issues(engagement_id: UUID, request: Request) -> list[dict[str, Any]]:
 @router.post("/issues/{issue_id}/resolve", summary="Decide a review item, with a reason")
 def resolve_issue(issue_id: UUID, body: ReasonBody, request: Request) -> dict[str, Any]:
     with request_context(request) as ctx:
-        require_role(ctx.actor, ENGAGEMENT_WRITE)
-        return _issue_json(engagements.resolve_issue(ctx.session, ctx.actor, issue_id, body.reason))
+        found = ctx.session.get(ValidationIssue, issue_id)
+        about_pay = found is not None and found.entity_type == "payroll_input"
+        require_role(ctx.actor, INPUT_WRITE if about_pay else ENGAGEMENT_WRITE)
+        return _issue_json(issues.resolve_issue(ctx.session, ctx.actor, issue_id, body.reason))
 
 
 @router.get("/engagements/{engagement_id}/documents", summary="Documents and the checklist")
@@ -468,3 +476,186 @@ def convert_hire_notice(notice_id: UUID, body: ConvertBody, request: Request) ->
             ctx.session, ctx.actor.tenant_id, notice_id, body.employee_id, _new_engagement(body)
         )
         return _engagement_json(ctx.session, row, has_role(ctx.actor, PAY_READ))
+
+
+class InputRowBody(BaseModel):
+    model_config = {"extra": "forbid"}
+
+    employee: str = Field(max_length=64)
+    kind: str = Field(max_length=24)
+    effective_date: str = Field(max_length=10)
+    quantity: str | None = Field(default=None, max_length=20)
+    amount: str | None = Field(default=None, max_length=20)
+    reference: str | None = Field(default=None, max_length=64)
+
+
+class InputRowsBody(BaseModel):
+    source: Literal["manual", "time", "leave", "compensation"] = "manual"
+    period_start: date
+    period_end: date
+    rows: list[InputRowBody] = Field(min_length=1, max_length=inputs.MAX_ROWS)
+
+
+def _input_json(row: PayrollInput, employee_ref: str) -> dict[str, Any]:
+    return {
+        "id": str(row.id),
+        "line": row.line_number,
+        "employee": employee_ref,
+        "kind": row.kind,
+        "effective_date": row.effective_date.isoformat(),
+        "quantity": None if row.quantity is None else format(row.quantity, "f"),
+        "amount": None if row.amount is None else format(row.amount, "f"),
+        "reference": row.reference,
+        "status": row.status,
+        "note": row.reject_reason,
+    }
+
+
+@router.post(
+    "/input-batches",
+    status_code=201,
+    summary="Import a CSV of approved hours, absences, bonuses, allowances and reimbursements",
+)
+async def import_input_csv(
+    request: Request,
+    response: Response,
+    period_start: date = Form(),
+    period_end: date = Form(),
+    file: UploadFile = File(),
+) -> dict[str, Any]:
+    content = await file.read(inputs.MAX_BYTES + 1)
+    with request_context(request) as ctx:
+        require_role(ctx.actor, INPUT_WRITE)
+        batch, created = inputs.import_rows(
+            ctx.session,
+            ctx.actor.tenant_id,
+            ctx.actor.user_id,
+            "csv",
+            period_start,
+            period_end,
+            inputs.parse_csv(content),
+            inputs.content_hash_of_file(content, period_start, period_end),
+        )
+        if not created:
+            response.status_code = 200
+        return inputs.batch_summary(ctx.session, batch)
+
+
+@router.post(
+    "/input-batches/rows",
+    status_code=201,
+    summary="Send input rows as JSON. The same content returns the same batch.",
+)
+def import_input_rows(body: InputRowsBody, request: Request, response: Response) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, INPUT_WRITE)
+        rows = [
+            inputs.RawRow(
+                number,
+                {k: (v or "") for k, v in item.model_dump().items()},
+            )
+            for number, item in enumerate(body.rows, start=1)
+        ]
+        batch, created = inputs.import_rows(
+            ctx.session,
+            ctx.actor.tenant_id,
+            ctx.actor.user_id,
+            body.source,
+            body.period_start,
+            body.period_end,
+            rows,
+            inputs.content_hash_of_rows(rows, body.period_start, body.period_end),
+        )
+        if not created:
+            response.status_code = 200
+        return inputs.batch_summary(ctx.session, batch)
+
+
+@router.get("/input-batches", summary="Input batches, newest first")
+def list_input_batches(request: Request) -> list[dict[str, Any]]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, INPUT_READ)
+        rows = ctx.session.scalars(
+            select(PayrollInputBatch).order_by(PayrollInputBatch.created_at.desc())
+        )
+        return [inputs.batch_summary(ctx.session, row) for row in rows]
+
+
+@router.get("/input-batches/{batch_id}", summary="One input batch with its counts")
+def get_input_batch(batch_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, INPUT_READ)
+        return inputs.batch_summary(ctx.session, inputs.get_batch(ctx.session, batch_id))
+
+
+@router.get("/input-batches/{batch_id}/rows", summary="The inputs stored from a batch")
+def list_batch_rows(
+    batch_id: UUID, request: Request, status: str | None = None
+) -> list[dict[str, Any]]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, INPUT_READ)
+        inputs.get_batch(ctx.session, batch_id)
+        query = (
+            select(PayrollInput, Employee.external_id)
+            .join(Employee, Employee.id == PayrollInput.employee_id)
+            .where(PayrollInput.batch_id == batch_id)
+            .order_by(PayrollInput.line_number, PayrollInput.created_at)
+        )
+        if status:
+            query = query.where(PayrollInput.status == status)
+        return [_input_json(row, ref) for row, ref in ctx.session.execute(query)]
+
+
+@router.get("/input-batches/{batch_id}/rejections", summary="Rows that were not stored, and why")
+def list_batch_rejections(batch_id: UUID, request: Request) -> list[dict[str, Any]]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, INPUT_READ)
+        inputs.get_batch(ctx.session, batch_id)
+        rows = ctx.session.scalars(
+            select(PayrollInputRejection)
+            .where(PayrollInputRejection.batch_id == batch_id)
+            .order_by(PayrollInputRejection.line_number)
+        )
+        return [
+            {"line": r.line_number, "code": r.code, "message": r.message, "raw": r.raw}
+            for r in rows
+        ]
+
+
+@router.get("/input-batches/{batch_id}/issues", summary="Issues raised on a batch's inputs")
+def list_batch_issues(
+    batch_id: UUID, request: Request, status: str | None = None
+) -> list[dict[str, Any]]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, INPUT_READ)
+        inputs.get_batch(ctx.session, batch_id)
+        query = (
+            select(ValidationIssue, PayrollInput)
+            .join(PayrollInput, PayrollInput.id == ValidationIssue.entity_id)
+            .where(ValidationIssue.entity_type == inputs.ENTITY, PayrollInput.batch_id == batch_id)
+            .order_by(PayrollInput.line_number, ValidationIssue.created_at)
+        )
+        if status:
+            query = query.where(ValidationIssue.status == status)
+        return [
+            {**_issue_json(issue), "input_id": str(row.id), "line": row.line_number}
+            for issue, row in ctx.session.execute(query)
+        ]
+
+
+@router.post("/input-batches/{batch_id}/validate", summary="Check the batch again")
+def validate_input_batch(batch_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, INPUT_WRITE)
+        batch = inputs.get_batch(ctx.session, batch_id)
+        inputs.validate_batch(ctx.session, ctx.actor.tenant_id, batch)
+        return inputs.batch_summary(ctx.session, batch)
+
+
+@router.post("/payroll-inputs/{input_id}/withdraw", summary="Withdraw an input, with a reason")
+def withdraw_input(input_id: UUID, body: ReasonBody, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, INPUT_WRITE)
+        row = inputs.withdraw_input(ctx.session, ctx.actor, input_id, body.reason)
+        employee = ctx.session.get(Employee, row.employee_id)
+        return _input_json(row, employee.external_id)

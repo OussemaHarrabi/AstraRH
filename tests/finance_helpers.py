@@ -33,3 +33,33 @@ def make_employee(tenant_id: UUID, person_id: UUID | None = None) -> UUID:
         session.add(employee)
         session.flush()
         return employee.id
+
+
+def external_id_of(tenant_id: UUID, employee_id: UUID) -> str:
+    with as_role("owner"), tenant_session(tenant_id) as session:
+        return session.get(Employee, employee_id).external_id
+
+
+def seed_active_engagement(
+    tenant_id: UUID,
+    employee_id: UUID,
+    starts_on: date = date(2026, 1, 1),
+    ends_on: date | None = None,
+) -> UUID:
+    """Only the owner role may create an engagement that is already active."""
+    from packs.finance.models import Engagement
+
+    with as_role("owner"), tenant_session(tenant_id) as session:
+        row = Engagement(
+            tenant_id=tenant_id,
+            employee_id=employee_id,
+            type="CDI" if ends_on is None else "CDD",
+            status="active",
+            starts_on=starts_on,
+            ends_on=ends_on,
+            job_title="Engineer",
+            weekly_hours=40,
+        )
+        session.add(row)
+        session.flush()
+        return row.id

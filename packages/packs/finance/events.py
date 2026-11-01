@@ -64,6 +64,16 @@ class CivpCompleted(BaseModel):
     engagement_id: UUID
 
 
+@event_type("finance.payroll.inputs_validated.v1")
+class PayrollInputsValidated(BaseModel):
+    batch_id: UUID
+    accepted: int
+    rejected: int
+    blocking: int
+    review: int
+    status: str
+
+
 @event_type("finance.payroll.calculated.v1")
 class PayrollCalculated(BaseModel):
     run_id: UUID

@@ -38,6 +38,7 @@ publishes:
   - finance.civp.payment_due.v1
   - finance.civp.payment_reconciled.v1
   - finance.civp.completed.v1
+  - finance.payroll.inputs_validated.v1
   - finance.payroll.calculated.v1
   - finance.payroll.approved.v1
   - finance.payroll.rejected.v1
