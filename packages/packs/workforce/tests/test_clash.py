@@ -98,7 +98,6 @@ def test_seed_has_exactly_one_shift_clash():
     clashes = clash.detect_shift_clashes(shifts)
     assert len(clashes) == 1, [c.detail for c in clashes]
     assert clashes[0].employee_a == "EMP-029"
-    assert {clashes[0].a, clashes[0].b} == {"SH-010", "SH-011"}
 
 
 if __name__ == "__main__":

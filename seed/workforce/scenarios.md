@@ -10,7 +10,7 @@ The done-criteria for the `workforce` slice. The coding agent builds against the
 
 ## S2 — Leave clash is detected (operational conflict)
 
-- **Given** the seeded leave requests, with `LR-001` (EMP-010) and `LR-002` (EMP-011) overlapping in Engineering
+- **Given** the seeded leave requests, with `LR-001` (EMP-012) and `LR-002` (EMP-013) overlapping in Engineering
 - **When** the clash check runs
 - **Then** both requests are `flagged` with `clash_of` pointing at each other, and an agent draft suggests a fix for a manager — nothing is auto-changed.
 
@@ -23,7 +23,7 @@ The done-criteria for the `workforce` slice. The coding agent builds against the
 
 ## S4 — Shift clash is detected
 
-- **Given** the seeded Support shifts, with `SH-010` and `SH-011` double-booking `EMP-029` on 2026-11-06
+- **Given** the seeded Support shifts, with `SH-009` and `SH-013` double-booking `EMP-029` on 2026-11-06
 - **When** the clash check runs
 - **Then** the overlap is flagged with a suggested fix for the manager to approve.
 

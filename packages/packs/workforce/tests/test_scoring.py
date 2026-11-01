@@ -67,8 +67,8 @@ def test_seed_engineering_overloaded_in_week4():
     assert scoring.is_overloaded(result), result.score
 
 
-def test_seed_finance_not_overloaded_in_week4():
-    result = scoring.score_overload(_team_week("ORG-FIN", "2026-W43"))
+def test_seed_product_team_not_overloaded_in_week4():
+    result = scoring.score_overload(_team_week("ORG-PRD", "2026-W43"))
     assert not scoring.is_overloaded(result), result.score
 
 
