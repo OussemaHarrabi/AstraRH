@@ -45,6 +45,7 @@ from packs.talent.signals import (
     compute_signal,
     criterion_text,
     lexical_document,
+    rerank_closest,
     weighted_dense_match,
 )
 
@@ -123,7 +124,9 @@ def collect_signals(ctx: AgentContext, state: dict) -> dict:
         c["id"]: best_similarities(session, ranking.job_id, vector)
         for c, vector in zip(criteria, vectors, strict=True)
     }
-    ranking.embedding_model = str(ml_client.model_info()["model"])
+    info = ml_client.model_info()
+    ranking.embedding_model = str(info["model"])
+    reranked = rerank_closest(criteria, similarities)
 
     public_criteria = [
         {
@@ -177,6 +180,10 @@ def collect_signals(ctx: AgentContext, state: dict) -> dict:
                             )
                         ),
                         "lexical": str(lexical.get(cv.id, 0)),
+                        "rerank": None
+                        if reranked is None
+                        else str(weighted_dense_match(public_criteria, reranked.get(cv.id, {}))),
+                        "reranker": None if reranked is None else info.get("reranker"),
                     },
                 },
                 evidence=evidence,

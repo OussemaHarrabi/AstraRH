@@ -10,7 +10,8 @@ The answer to the jury's question: "You ranked these candidates. Based on what?"
 score (out of 100) = 70 points of evidence + 30 points of job match
 
 Layer 1, job match (30)   hybrid search across the whole CV
-                          50% vector similarity (meaning) + 50% BM25 (exact terms)
+                          40% vector similarity (meaning) + 30% BM25 (exact terms)
+                          + 30% reranker (reads criterion and passage together)
 
 Layer 2, evidence (70)    each approved criterion:  weight x how much the CV proved
 ```
@@ -33,6 +34,7 @@ Layer 2, evidence (70)    each approved criterion:  weight x how much the CV pro
 | Check the AI's quotes | Code | A quote not found in the CV is deleted, and the skill it supported goes with it |
 | Vector similarity | Local multilingual model + pgvector | Meaning, in French, English and Arabic, on the CV's identity-free text |
 | BM25 | Code | Exact terms. Keyword-list lines are excluded |
+| Rerank | Local cross-encoder (bge-reranker-v2-m3, int8), in the sandbox | Reads each criterion with the CV's closest passage, so "used Kubernetes in production" beats "read about Kubernetes" |
 | **Compute the score and rank** | **Formula. No AI** | Reproducible and auditable, and can't be talked into anything |
 | Write the justification | AI, from numbers only | It never sees CV text, and any wrong number or uncited sentence is rejected |
 | Move candidates forward | **A person approves** | The golden rule |
@@ -41,6 +43,9 @@ Layer 2, evidence (70)    each approved criterion:  weight x how much the CV pro
 
 - **Vector similarity:** each criterion is embedded, and pgvector finds the CV's closest passage by cosine similarity. The result is the criterion-weighted average of those similarities. The search is exact rather than approximate, so it's repeatable.
 - **BM25:** the classic ranking function for exact terms, computed over this job's CVs with the job offer and criteria as the query. It is scaled so the best CV in the run is 1. Word repetition saturates, and lines that are only keyword lists don't count.
+
+- **Reranker:** a cross-encoder (`BAAI/bge-reranker-v2-m3`, int8, multilingual, Apache-2.0) scores each criterion against the CV's closest passage from 0 to 1. Unlike the vector model it reads both texts together, so it separates "built X" from "heard of X". The result is criterion-weighted like the vector score. It runs locally in the parsing sandbox; no CV text leaves the machine.
+- **If the reranker is unavailable,** the ranking still runs on 50% vector + 50% BM25, and the stored inputs show `rerank: null`, so the decision says exactly which rule it used.
 
 BM25 is relative to the CVs in the run, so adding CVs can shift scores slightly. That's why every decision stores the values it used: replay always reproduces the original.
 
@@ -60,7 +65,7 @@ For each criterion, the candidate earns a value from 0 to 1, from their **strong
 
 **Years are only believed if verified.** Either the number is in a quote that really exists in the CV, or our code computes it from dated roles that name the skill, counting overlapping roles once. The arithmetic is ours, not the model's.
 
-These values encode one rule, **proof beats suggestion**: any direct proof (0.60) beats the best similar wording (0.35). They are product judgement, not learned from data. They are versioned (`talent.rubric@2`), and each decision records its version.
+These values encode one rule, **proof beats suggestion**: any direct proof (0.60) beats the best similar wording (0.35). They are product judgement, not learned from data. They are versioned (`talent.rubric@3` since the reranker; rankings made under `@2` still replay under `@2`), and each decision records its version.
 
 All of this is in [`scoring.py`](../packages/packs/talent/scoring.py). A test confirms that file can't import a database table or a model client.
 

@@ -25,6 +25,7 @@ from kernel.trust.models import AuditEvent, Proposal
 from packs.talent import api, service
 from packs.talent.agents import cv_reader, ranking, rubric_builder
 from packs.talent.agents.rubric_builder import normalized_weights
+from packs.talent.evals.screening import clean_twin_pdf
 from packs.talent.models import (
     Application,
     CandidateIdentity,
@@ -226,7 +227,7 @@ def test_scanned_pdf_is_read_with_ocr(tenant, job_id):
     cv = add_and_read(tenant, job_id, FakeReader(), file_of("scanned"))
     with tenant_session(tenant) as session:
         stored = session.get(CvDocument, cv.id)
-    assert stored.parse_method == "ocr"
+    assert stored.parse_method == "docling_ocr"
     assert "Python" in stored.blind_text
 
 
@@ -319,18 +320,18 @@ def test_hidden_text_gives_no_advantage_over_the_same_cv_without_it(tenant, job_
     reader = FakeReader()
     attack = file_of("attack_white_text")
     add_and_read(tenant, job_id, reader, attack)
-    visible = ml_client.parse(attack, (CV_DIR / attack).read_bytes()).text
-    add_and_read(tenant, job_id, reader, "clean_twin.txt", visible.encode("utf-8"))
+    visible = ml_client.parse(attack, (CV_DIR / attack).read_bytes()).lines
+    add_and_read(tenant, job_id, reader, "clean_twin.pdf", clean_twin_pdf(visible))
     ranking_row = rank(tenant, job_id, reader)
     scores = scores_by_file(tenant, ranking_row.id)
-    assert scores[attack].score == scores["clean_twin.txt"].score
-    assert criterion_values(scores[attack]) == criterion_values(scores["clean_twin.txt"])
+    assert scores[attack].score == scores["clean_twin.pdf"].score
+    assert criterion_values(scores[attack]) == criterion_values(scores["clean_twin.pdf"])
 
 
 def test_swapping_the_name_does_not_move_the_score(tenant, job_id):
     reader = FakeReader()
     hero = file_of("hero")
-    text = ml_client.parse(hero, (CV_DIR / hero).read_bytes()).text
+    text = ml_client.parse(hero, (CV_DIR / hero).read_bytes()).lines
     add_and_read(tenant, job_id, reader, "a.txt", text.encode("utf-8"))
     swapped = (
         text.replace("Yasmine", "Mohamed")
