@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from kernel.events import EventOutbox, subscribe
-from packs.finance import engagements, runs
+from packs.finance import engagements, payments, runs
 
 
 @subscribe("talent.candidate.hired.v1", "finance.record_hire")
@@ -35,3 +35,21 @@ def reopen_rejected_run(session: Session, event: EventOutbox) -> None:
     """The approver said no, so the run goes back to draft."""
     if event.payload["action_type"] == runs.APPROVE_ACTION:
         runs.mark_rejected(session, event.tenant_id, UUID(event.payload["proposal_id"]))
+
+
+@subscribe("trust.action.executed.v1", "finance.record_payment_release")
+def record_payment_release(session: Session, event: EventOutbox) -> None:
+    """The executor sent a release. Only its result reaches finance, as this event."""
+    if event.payload["action_type"] == payments.RELEASE_ACTION:
+        payments.record_release(
+            session,
+            event.tenant_id,
+            UUID(event.payload["proposal_id"]),
+            UUID(event.payload["execution_id"]),
+        )
+
+
+@subscribe("bank.payment.status_reported.v1", "finance.apply_payment_status")
+def apply_payment_status(session: Session, event: EventOutbox) -> None:
+    """What the bank said about one payment, published by the executor."""
+    payments.apply_status(session, event.tenant_id, event.payload)

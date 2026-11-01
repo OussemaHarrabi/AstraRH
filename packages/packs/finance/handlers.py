@@ -10,7 +10,7 @@ from kernel.db import utcnow
 from kernel.errors import KernelError
 from kernel.events import publish
 from kernel.trust import AdapterRejected, Approval, Proposal
-from packs.finance import engagements, issues, runs, service
+from packs.finance import engagements, issues, payments, runs, service
 from packs.finance.events import EngagementActivated, PayrollApproved
 from packs.finance.models import Engagement, PayrollRun, Payslip, RuleSetRecord
 
@@ -119,6 +119,10 @@ def approve_run(session: Session, tenant_id: UUID, payload: dict[str, Any], key:
         raise AdapterRejected("The person who prepared the run cannot approve it")
     if not runs.verify_run(session, run.id)["verified"]:
         raise AdapterRejected("A payslip does not replay to the figures that were recorded")
+    try:
+        payments.create_lines(session, tenant_id, run)
+    except payments.MissingDestination as exc:
+        raise AdapterRejected(f"No payment destination for: {', '.join(exc.employees)}") from exc
     run.status = "approved"
     run.approved_by = approver
     run.approved_at = utcnow()
@@ -128,3 +132,11 @@ def approve_run(session: Session, tenant_id: UUID, payload: dict[str, Any], key:
     )
     publish(session, tenant_id, PayrollApproved(run_id=run.id, payslips=count))
     return f"run:{run.id}:approved"
+
+
+def close_run(session: Session, tenant_id: UUID, payload: dict[str, Any], key: str) -> str:
+    try:
+        payments.close(session, tenant_id, UUID(payload["run_id"]))
+    except KernelError as exc:
+        raise AdapterRejected(exc.message) from exc
+    return f"run:{payload['run_id']}:closed"

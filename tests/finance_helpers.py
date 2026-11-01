@@ -83,15 +83,34 @@ def seed_active_engagement(
         return row.id
 
 
+def set_destination(tenant_id: UUID, employee_id: UUID, token: str) -> None:
+    from packs.finance.models import PaymentDestination
+
+    with as_role("owner"), tenant_session(tenant_id) as session:
+        session.add(
+            PaymentDestination(
+                tenant_id=tenant_id, employee_id=employee_id, token=token, set_by=uuid4()
+            )
+        )
+
+
 def paid_employee(
     tenant_id: UUID,
     base_salary: str = "2000.000",
     head_of_family: bool = True,
     children: tuple[str, ...] = ("child", "child"),
     starts_on: date = date(2026, 1, 1),
+    destination: str | None = "auto",
 ) -> tuple[UUID, str, UUID]:
-    """An employee with an active CDI and a base salary: (employee id, external id, engagement)."""
+    """An employee with an active CDI, a base salary and a payment destination.
+
+    Returns (employee id, external id, engagement). Pass a token such as ACC-1234-FAIL to choose
+    what the sandbox bank does, or None for an employee without a destination."""
     employee = make_employee(tenant_id)
+    if destination == "auto":
+        destination = f"ACC-{uuid4().hex[:12].upper()}"
+    if destination is not None:
+        set_destination(tenant_id, employee, destination)
     engagement = seed_active_engagement(
         tenant_id,
         employee,

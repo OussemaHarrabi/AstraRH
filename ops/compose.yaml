@@ -147,11 +147,28 @@ services:
       DATABASE_URL: postgresql://astra_executor:${ASTRA_EXECUTOR_PASSWORD}@postgres:5432/astra
       SMTP_HOST: mailpit
       SMTP_PORT: "1025"
-    networks: [data, mail, telemetry]
+      BANK_URL: http://bank:9000
+    networks: [data, mail, bank, telemetry]
     depends_on:
       migrate: { condition: service_completed_successfully }
+      bank: { condition: service_healthy }
     healthcheck: *heartbeat-check
     mem_limit: 256m
+
+  # A deterministic stand-in for a payment provider. Only the executor can reach it.
+  bank:
+    <<: *python-hardening
+    build:
+      context: .
+      dockerfile: ops/docker/python.Dockerfile
+    command: ["uvicorn", "apps.bank.main:app", "--host", "0.0.0.0", "--port", "9000"]
+    networks: [bank]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:9000/healthz', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    mem_limit: 128m
 
   ml:
     <<: *python-hardening
@@ -275,6 +292,7 @@ networks:
   files: { internal: true }
   ml: { internal: true }
   mail: { internal: true }
+  bank: { internal: true }
   telemetry: { internal: true }
   telemetry_ui: {}
   llm_egress: {}

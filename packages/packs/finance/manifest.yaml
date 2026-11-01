@@ -37,6 +37,21 @@ actions:
     view_roles: [admin, finance, auditor]
     description: Approve a calculated payroll run. Needs a second person and password confirmation.
 
+  - id: finance.payment.release
+    risk: R3
+    channel: external
+    adapter: payment.release
+    approver_roles: [admin, finance]
+    view_roles: [admin, finance, auditor]
+    description: Pay the approved payslips through the bank. Needs a second person and password confirmation.
+  - id: finance.payroll.close
+    risk: R2
+    channel: internal
+    handler: packs.finance.handlers:close_run
+    approver_roles: [admin, finance]
+    view_roles: [admin, finance, auditor]
+    description: Close a fully paid payroll run so it can never change.
+
 publishes:
   - finance.engagement.validated.v1
   - finance.engagement.activated.v1
@@ -59,3 +74,4 @@ consumes:
   - talent.candidate.hired.v1
   - trust.action.executed.v1
   - trust.proposal.rejected.v1
+  - bank.payment.status_reported.v1

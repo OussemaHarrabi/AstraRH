@@ -445,7 +445,7 @@ def test_finance_foreign_keys_point_only_into_core_or_finance():
 
 def test_every_finance_table_has_a_tenant_and_row_level_security():
     names = {t.name for t in Base.metadata.tables.values() if t.schema == "finance"}
-    assert len(names) == 23
+    assert len(names) == 24
     with as_role("owner"), tenant_session(uuid4()) as session:
         enabled = {
             row[0]

@@ -20,7 +20,7 @@ from kernel.events import publish
 from kernel.identity import Actor
 from kernel.people.models import Employee
 from packs.finance import inputs as inputs_module
-from packs.finance import issues, proposals, service
+from packs.finance import issues, payments, proposals, service
 from packs.finance.events import PayrollCalculated, PayrollCalculationRequested, PayrollRejected
 from packs.finance.models import (
     Engagement,
@@ -346,6 +346,18 @@ def calculate(session: Session, tenant_id: UUID, run_id: UUID) -> PayrollRun | N
                 f"{who} has {_text(absence_days)} days of absence. A deduction for "
                 "unpaid absence is not calculated yet.",
                 "Confirm that no deduction applies",
+            )
+
+    destinations = payments.destinations_of(session, list(plans))
+    for employee_id in plans:
+        if employee_id not in destinations:
+            _specs_for_employee(
+                specs,
+                "NO_PAYMENT_DESTINATION",
+                BLOCKING,
+                str(employee_id),
+                f"{externals.get(employee_id, employee_id)} has no payment destination.",
+                "Record the employee's payment destination",
             )
 
     results: list[list[str]] = []

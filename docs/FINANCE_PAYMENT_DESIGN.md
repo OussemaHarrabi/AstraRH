@@ -162,11 +162,11 @@ Fallback if K4 is declined: a stateless simulator inside the adapter that derive
 | Request | Status on `main` | Note |
 |---|---|---|
 | K1 hire event | **Fixed on `finance-v2`, for the kernel owner to review.** Originally open and larger than assumed: | No `talent.candidate.hired.v1` anywhere. Worse, **talent never moves a candidate to a `hired` stage**, and `talent.application.stage_changed.v1` carries only IDs (no employee, salary or start date). So even the fallback cannot fire today. Finance therefore records a hire notice for HR to complete (decision D23) |
-| K2 look up `unknown` executions | Open | `trust` and the executor are unchanged |
-| K3 executor poll hook | Open | Unchanged |
-| K4 sandbox bank and adapter | Open | Unchanged |
+| K2 look up `unknown` executions | Open | `trust` is unchanged. An `unknown` release is refused for retry and waits for a person (`FINANCE_PAYMENTS.md` section 7) |
+| K3 executor poll hook | **Implemented on `finance-v2`, for the kernel owner's review** | `poll_bank` in `apps/executor/main.py` and `poll(cursor)` in `kernel/adapters/__init__.py`. It compares the paid amount with the approved payload and publishes only a boolean |
+| K4 sandbox bank and adapter | **Implemented on `finance-v2`, for the kernel owner's review** | `apps/bank/`, `kernel/adapters/payments.py` registered as `payment.release`, a `bank` service and an internal `bank` network in `ops/compose*.yaml`, `BANK_URL` for the executor only. `smoke` passes its network and credential checks with it |
 | K5 `finance` queue | Open | `WORKER_QUEUES` is still `["default", "agents"]` |
-| K6 events for failed or unknown executions | Open | Unchanged. The sweep job is the default |
+| K6 events for failed or unknown executions | Open | Unchanged. Finance reads the state of the latest release from the proposal and its execution (`release_state`), with no sweep job yet |
 | K7 pack event consumers | **Worked around on `finance-v2`**: `apps/worker/main.py` imports the finance consumers, as for talent. The manifest `consumers:` section is still the cleaner fix | Packs are wired by importing their module in `apps/worker/main.py` (`talent` does it, and the kernel does it through `install_kernel_consumers`). Finance can do the same with one import line there, which is a kernel-owner file. The manifest `consumers:` section is still the cleaner fix |
 | K8 macOS init script | **Fixed on `finance-v2`** | `main` still has `01-init.sh`. Needs review and merge by the kernel owner |
 | K14 an unordered query in `tests/test_inbox_api.py` | **Fixed on `finance-v2`** | `test_a_person_corrects_the_sorting_and_the_model_answer_is_kept` selected events with no ORDER BY and asserted their order, so it failed whenever table space was reused. Added `.order_by(EventOutbox.id)`. Other tests may have the same pattern |

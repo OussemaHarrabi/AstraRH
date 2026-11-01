@@ -111,6 +111,15 @@ services:
         INSTALL_DEV: "1"
     volumes: *python-mounts
 
+  bank:
+    image: astrarh-python:dev
+    build:
+      context: .
+      dockerfile: ops/docker/python.Dockerfile
+      args:
+        INSTALL_DEV: "1"
+    volumes: *python-mounts
+
   ml:
     image: astrarh-ml:dev
     build:

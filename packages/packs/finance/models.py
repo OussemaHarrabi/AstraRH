@@ -1,9 +1,10 @@
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from uuid import UUID
 
 from sqlalchemy import (
     Boolean,
+    CheckConstraint,
     Date,
     DateTime,
     ForeignKey,
@@ -229,6 +230,26 @@ class EmployerProfile(TenantMixin, Base):
     sector: Mapped[str | None] = mapped_column(String(64))
     regime_id: Mapped[str] = mapped_column(String(64), nullable=False)
     identifiers: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+
+
+class PaymentDestination(TenantMixin, Base):
+    """Where an employee's net pay goes, as an opaque account token. Never an account number."""
+
+    __tablename__ = "payment_destination"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "employee_id"),
+        CheckConstraint("token ~ '^ACC-[A-Z0-9-]{4,40}$'", name="token_format"),
+        SCHEMA,
+    )
+
+    employee_id: Mapped[UUID] = mapped_column(
+        UUID_TYPE, ForeignKey("core.employee.id"), nullable=False
+    )
+    token: Mapped[str] = mapped_column(String(64), nullable=False)
+    set_by: Mapped[UUID] = mapped_column(UUID_TYPE, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
 
 
 class PayrollInputBatch(TenantMixin, Base):

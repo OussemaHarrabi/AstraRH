@@ -3858,6 +3858,230 @@
         }
       }
     },
+    "/packs/finance/employees/{employee_id}/payment-destination": {
+      "put": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Record where an employee's net pay goes, as an opaque account token",
+        "operationId": "put_payment_destination_packs_finance_employees__employee_id__payment_destination_put",
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Employee Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DestinationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Put Payment Destination Packs Finance Employees  Employee Id  Payment Destination Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/payment-destinations": {
+      "get": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Who has a payment destination. Tokens are masked.",
+        "operationId": "list_payment_destinations_packs_finance_payment_destinations_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response List Payment Destinations Packs Finance Payment Destinations Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/payroll-runs/{run_id}/payments": {
+      "get": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Payments of a run and where each one stands",
+        "operationId": "get_run_payments_packs_finance_payroll_runs__run_id__payments_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Run Payments Packs Finance Payroll Runs  Run Id  Payments Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/payroll-runs/{run_id}/payments/release": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Propose paying what is due. A different person must approve it.",
+        "operationId": "release_run_payments_packs_finance_payroll_runs__run_id__payments_release_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Release Run Payments Packs Finance Payroll Runs  Run Id  Payments Release Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/payroll-runs/{run_id}/close": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Propose closing a fully paid run. Once closed it never changes.",
+        "operationId": "close_payroll_run_packs_finance_payroll_runs__run_id__close_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Close Payroll Run Packs Finance Payroll Runs  Run Id  Close Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/packs/talent/jobs": {
       "get": {
         "tags": [
@@ -4085,7 +4309,7 @@
         "tags": [
           "talent"
         ],
-        "summary": "Upload CVs (PDF, DOCX or TXT)",
+        "summary": "Upload CVs (PDF, DOCX, HTML, Markdown or TXT)",
         "operationId": "upload_cvs_packs_talent_jobs__job_id__cvs_post",
         "parameters": [
           {
@@ -5191,6 +5415,21 @@
         },
         "type": "object",
         "title": "CorrectionBody"
+      },
+      "DestinationBody": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 8,
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "title": "DestinationBody"
       },
       "DocumentReviewBody": {
         "properties": {

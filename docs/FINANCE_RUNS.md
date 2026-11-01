@@ -2,7 +2,7 @@
 
 Reference for how a payroll run is created, calculated, checked, submitted and approved. Part of the [finance documentation](FINANCE_INDEX.md). The use cases are D1 to D8 in [FINANCE_USE_CASES.md](FINANCE_USE_CASES.md). The formula and rate values are in [FINANCE_RULES.md](FINANCE_RULES.md), the inputs in [FINANCE_INPUTS.md](FINANCE_INPUTS.md).
 
-**A run produces approved payslips. It does not pay anyone yet.** Payment, reconciliation and closing a run come with the payment step (section 11).
+**A run produces approved payslips.** Paying them, reconciling the bank's answer and closing the run are in [FINANCE_PAYMENTS.md](FINANCE_PAYMENTS.md).
 
 Values and treatments marked **[verify]** are configuration standing in for a real rule and are not checked against Tunisian law.
 
@@ -27,7 +27,7 @@ draft ──calculate──▶ calculated ──submit──▶ approval_pending
   └── recalculate ◀──────┘        recall / reject ─┘ (back to draft, calculate again)
 ```
 
-The three states after `approved` belong to the payment step. **Status and outcome are separate: calculated, approved and paid are three different facts.** The database enforces the path and who may take each step (section 10).
+The three states after `approved` belong to the payment step ([FINANCE_PAYMENTS.md](FINANCE_PAYMENTS.md)). **Status and outcome are separate: calculated, approved and paid are three different facts.** The database enforces the path and who may take each step (section 10).
 
 ## 3. Creating a run
 
@@ -159,7 +159,7 @@ Migration `finance_0006`, tested in `tests/test_finance_schema.py` and `tests/te
 | Unpaid absence deduction, overtime, advances | Later slices. An absence needs a person's decision |
 | Adjustments for changes effective in a closed period (D7) | Not started |
 | Run comparison (D11) and off-cycle runs (D10) | Not started |
-| Payment lines, release, reconciliation, closing a run (D9) | The payment step |
+| Payment lines, release, reconciliation, closing a run (D9) | Built, see [FINANCE_PAYMENTS.md](FINANCE_PAYMENTS.md). Approval now also needs a payment destination for every employee paid |
 | Calculation as a durable job on its own queue | Kernel request K5. It runs from an event in the worker, which retries a failure |
 | Employees seeing their own payslips (H1) | Later |
 | Previous-run anomaly needs an approved run to compare with | The first run has nothing to compare |

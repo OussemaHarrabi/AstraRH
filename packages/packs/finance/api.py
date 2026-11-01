@@ -14,11 +14,12 @@ from kernel.authz import has_role, require_role
 from kernel.errors import NotFound
 from kernel.people.models import Employee
 from kernel.web import request_context
-from packs.finance import engagements, inputs, issues, runs, service
+from packs.finance import engagements, inputs, issues, payments, runs, service
 from packs.finance.models import (
     DocumentRef,
     Engagement,
     HireNotice,
+    PaymentDestination,
     PayrollInput,
     PayrollInputBatch,
     PayrollInputRejection,
@@ -842,3 +843,71 @@ def recall_payroll_run(run_id: UUID, request: Request) -> dict[str, Any]:
     with request_context(request) as ctx:
         require_role(ctx.actor, RUN_WRITE)
         return runs.run_json(ctx.session, runs.recall_submission(ctx.session, ctx.actor, run_id))
+
+
+class DestinationBody(BaseModel):
+    token: str = Field(min_length=8, max_length=64)
+
+
+@router.put(
+    "/employees/{employee_id}/payment-destination",
+    summary="Record where an employee's net pay goes, as an opaque account token",
+)
+def put_payment_destination(
+    employee_id: UUID, body: DestinationBody, request: Request
+) -> dict[str, str]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, PAY_WRITE)
+        row = payments.set_destination(
+            ctx.session, ctx.actor.tenant_id, ctx.actor, employee_id, body.token
+        )
+        employee = ctx.session.get(Employee, employee_id)
+        return {"employee": employee.external_id, "destination": payments.mask(row.token)}
+
+
+@router.get("/payment-destinations", summary="Who has a payment destination. Tokens are masked.")
+def list_payment_destinations(request: Request) -> list[dict[str, str]]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, INPUT_READ)
+        rows = ctx.session.execute(
+            select(PaymentDestination, Employee.external_id)
+            .join(Employee, Employee.id == PaymentDestination.employee_id)
+            .order_by(Employee.external_id)
+        )
+        return [
+            {"employee": external, "destination": payments.mask(row.token)}
+            for row, external in rows
+        ]
+
+
+@router.get(
+    "/payroll-runs/{run_id}/payments", summary="Payments of a run and where each one stands"
+)
+def get_run_payments(run_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, RUN_DETAIL_READ)
+        return payments.payments_json(ctx.session, runs.get_run(ctx.session, run_id))
+
+
+@router.post(
+    "/payroll-runs/{run_id}/payments/release",
+    status_code=202,
+    summary="Propose paying what is due. A different person must approve it.",
+)
+def release_run_payments(run_id: UUID, request: Request) -> dict[str, str]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, RUN_WRITE)
+        proposal = payments.request_release(ctx.session, ctx.actor.tenant_id, ctx.actor, run_id)
+        return {"proposal_id": str(proposal.id), "status": proposal.status}
+
+
+@router.post(
+    "/payroll-runs/{run_id}/close",
+    status_code=202,
+    summary="Propose closing a fully paid run. Once closed it never changes.",
+)
+def close_payroll_run(run_id: UUID, request: Request) -> dict[str, str]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, RUN_WRITE)
+        proposal = payments.request_close(ctx.session, ctx.actor.tenant_id, ctx.actor, run_id)
+        return {"proposal_id": str(proposal.id), "status": proposal.status}
