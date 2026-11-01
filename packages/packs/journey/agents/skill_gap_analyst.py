@@ -66,7 +66,7 @@ def run(ctx: AgentContext, event: EventOutbox | None) -> None:
                 kind=SOURCE_MAP.get(item.source, "inferred"),
                 weight=Decimal("1"),
                 summary=item.evidence,
-                ref=str(item.id),
+                ref=f"ev-{str(item.id)[:8]}",
             )
             for item in signals
         ]
@@ -177,3 +177,4 @@ def run(ctx: AgentContext, event: EventOutbox | None) -> None:
         proposed += 1
         if proposed >= 3:
             break
+

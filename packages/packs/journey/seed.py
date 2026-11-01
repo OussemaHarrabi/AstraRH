@@ -67,7 +67,9 @@ def _dt(value: str | None) -> datetime | None:
 
 
 def _date(value: str | None) -> date | None:
-    return date.fromisoformat(value) if value else None
+    if not value:
+        return None
+    return date.fromisoformat(str(value)[:10])
 
 
 def _uuid(value: str | None) -> UUID | None:
@@ -281,7 +283,7 @@ def _decision_record(
     ]
     evidence = [
         explain.Evidence(
-            ref=str(item.get("ref") or f"{seed_gap['gap_id']}-{index}"),
+            ref=str(item.get("ref") or f"ev-{str(gap.id)[:8]}-{index}")[:16],
             factor_key=None,
             source_type=str(item.get("kind", "inferred")),
             source_id=str(item.get("ref") or seed_gap["gap_id"]),
@@ -331,9 +333,9 @@ def _plan_proposal(
         rationale="Draft built from the role template and role profile; a human decides.",
         evidence=[
             explain.Evidence(
-                ref=f"plan:{plan.id}",
+                ref=f"plan-{str(plan.id)[:8]}",
                 factor_key=None,
-                source_type="onboarding_template",
+                source_type="template",
                 source_id=str(plan.template_id),
                 quote="Role template and role-profile requirements",
             )
@@ -705,3 +707,5 @@ def seed(session: Session, tenant_id: UUID, world: dict) -> None:
         session.add(gap)
         session.flush()
         gap.decision_record_id = _decision_record(session, tenant_id, gap, seed_gap, skill.name)
+
+

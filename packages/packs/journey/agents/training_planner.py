@@ -101,7 +101,7 @@ def run(ctx: AgentContext, event: EventOutbox | None) -> None:
             ),
             evidence=[
                 DecisionEvidence(
-                    ref=f"gap:{gap.id}",
+                    ref=f"gap-{str(gap.id)[:8]}",
                     factor_key=None,
                     source_type="skill_gap",
                     source_id=str(gap.id),
@@ -141,3 +141,4 @@ def run(ctx: AgentContext, event: EventOutbox | None) -> None:
         f"journey-training:{gap.id}",
         target={"type": "employee", "id": str(employee.id)},
     )
+

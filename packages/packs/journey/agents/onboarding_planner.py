@@ -125,7 +125,7 @@ def run(ctx: AgentContext, event: EventOutbox | None) -> None:
 
     evidence = [
         Evidence(
-            ref=f"position:{employee.position_id}",
+            ref=f"pos-{str(employee.position_id)[:8]}",
             factor_key=None,
             source_type="role_profile",
             source_id=str(employee.position_id),
@@ -137,7 +137,7 @@ def run(ctx: AgentContext, event: EventOutbox | None) -> None:
         if skill_id:
             evidence.append(
                 Evidence(
-                    ref=f"hired_gap:{skill_id}",
+                    ref=f"gap-{str(skill_id)[:8]}",
                     factor_key=None,
                     source_type="hiring_gap",
                     source_id=str(skill_id),
@@ -177,3 +177,4 @@ def run(ctx: AgentContext, event: EventOutbox | None) -> None:
         f"journey-plan:{employee.id}:{start.isoformat()}",
         target={"type": "employee", "id": str(employee.id)},
     )
+
