@@ -2,7 +2,7 @@
 
 **Branch:** `integration/final`  
 **Remote:** `origin/integration/final`  
-**Latest commit at this report:** `8c5d8a3`  
+**Branch head at final verification:** `4a27afe` (plus this report update)  
 **Scope:** merge the teammate branches, fix integration seams, freeze and document the API contract. UI work intentionally excluded.
 
 ## 1. Starting point
@@ -170,9 +170,9 @@ Most successful responses are still open JSON objects because the backend serial
 | Initial post-merge full suite | 234 failed, 626 passed — all failures were missing finance tables before migration |
 | Full suite after migration | 861 passed, 4 failed — all four were obsolete strict XPASS markers for K9; markers removed |
 | Final contract generation | passed; 111 paths / 122 operations |
-| Full suite after the final changes | **not confirmed green**; the run exceeded the tool window at roughly 74% with no observed failures |
+| Full suite after the final changes | **867 passed, 2 skipped, 0 failed** in 18m 43s |
 
-The final full-suite run was still in progress when time ran out. Do not treat the branch as fully green until it completes. Targeted suites are green.
+The final full suite is green. The two skips are the live-stack and live-model tests that require separate opt-in.
 
 ## 7. Commits pushed
 
@@ -187,6 +187,7 @@ The final full-suite run was still in progress when time ran out. Do not treat t
 | `4654212` | Connect employee creation and fix journey agent runtime |
 | `d2d3568` | Clarify contract source |
 | `8c5d8a3` | Add the detailed API contract document |
+| `4a27afe` | Add this integration report |
 
 All are pushed to `origin/integration/final`.
 
@@ -204,12 +205,11 @@ All are pushed to `origin/integration/final`.
 
 ### Still open
 
-1. **Run the full suite to completion** after the final changes.
-2. **Workforce** is not mergeable yet: add API, handlers, agents and RLS, then re-run architecture tests.
-3. **UI**: not touched by request. Journey has a route but no page; finance has no `ui` block. Do not expose dead routes.
-4. **Response DTOs**: add named Pydantic response models for UI-used endpoints, then regenerate OpenAPI and TypeScript.
-5. **Role contract**: manager read/write gates were fixed for journey; review finance and future packs for target-key consistency.
-6. **Untracked** `packages/kernel/limits.py` is not part of this branch. Decide whether to finish and commit it or discard it.
+1. **Workforce** is not mergeable yet: add API, handlers, agents and RLS, then re-run architecture tests.
+2. **UI**: not touched by request. Journey has a route but no page; finance has no `ui` block. Do not expose dead routes.
+3. **Response DTOs**: add named Pydantic response models for UI-used endpoints, then regenerate OpenAPI and TypeScript.
+4. **Role contract**: manager read/write gates were fixed for journey; review finance and future packs for target-key consistency.
+5. **Untracked** `packages/kernel/limits.py` is not part of this branch. Decide whether to finish and commit it or discard it.
 
 ## 9. Operating commands
 
