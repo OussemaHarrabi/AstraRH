@@ -4,6 +4,7 @@ owner: khaled
 status: preview
 description: Team capacity, leave and shifts with operational clash detection, plus confidential conflict cases. The agent prepares, a human decides.
 models: packs.workforce.models
+api: packs.workforce.api:router
 
 ui:
   route: /workforce

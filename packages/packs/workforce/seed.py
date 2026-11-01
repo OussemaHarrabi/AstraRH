@@ -78,6 +78,20 @@ def seed(session: Session, tenant_id: UUID, world: dict) -> None:
             )
         )
 
+    # flag the seeded same-team leave overlaps so the clash shows from the start
+    session.flush()
+    from packs.workforce import service as _service
+
+    for overlap in _service.detect_leave_clashes(session):
+        pair = {overlap.a: overlap.b, overlap.b: overlap.a}
+        for req in session.scalars(
+            select(LeaveRequest).where(LeaveRequest.external_id.in_(list(pair)))
+        ):
+            others = set(req.clash_of or [])
+            others.add(pair[req.external_id])
+            req.clash_of = sorted(others)
+            req.status = "flagged"
+
     for row in _rows("shifts.csv"):
         session.add(
             Shift(
