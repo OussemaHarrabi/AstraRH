@@ -86,6 +86,11 @@ def resolve_issue(session: Session, actor: Actor, issue_id: UUID, reason: str) -
         raise Conflict(f"This issue is already {issue.status}")
     if issue.severity not in RESOLVABLE:
         raise Conflict("A blocking issue cannot be waved through: fix its cause")
+    if issue.entity_type == "payroll_run":
+        from packs.finance import runs
+
+        if runs.get_run(session, issue.entity_id).status in runs.FROZEN:
+            raise Conflict("The run is submitted. Recall it before changing its issues")
     if len(reason.strip()) < 3:
         raise ValidationFailed("A reason is required")
     issue.status = "resolved"

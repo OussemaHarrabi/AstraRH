@@ -175,7 +175,9 @@ def test_a_person_corrects_the_sorting_and_the_model_answer_is_kept(tenant, slug
         assert thread["messages"][0]["sorting"]["type"] == "other"
     with as_role("api"), tenant_session(tenant) as session:
         events = session.scalars(
-            select(EventOutbox).where(EventOutbox.type == "comms.classification.corrected.v1")
+            select(EventOutbox)
+            .where(EventOutbox.type == "comms.classification.corrected.v1")
+            .order_by(EventOutbox.id)
         ).all()
         assert [e.payload["after"]["type"] for e in events] == ["offer_or_salary", "other"]
 

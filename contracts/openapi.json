@@ -3362,6 +3362,502 @@
         }
       }
     },
+    "/packs/finance/payroll-runs": {
+      "get": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Payroll runs with their totals. HR sees totals only.",
+        "operationId": "list_payroll_runs_packs_finance_payroll_runs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response List Payroll Runs Packs Finance Payroll Runs Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Create a payroll run for a period. The same request id returns the same run.",
+        "operationId": "create_payroll_run_packs_finance_payroll_runs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Create Payroll Run Packs Finance Payroll Runs Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/payroll-runs/{run_id}": {
+      "get": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "One payroll run with its totals and open issues",
+        "operationId": "get_payroll_run_packs_finance_payroll_runs__run_id__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Payroll Run Packs Finance Payroll Runs  Run Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/payroll-runs/{run_id}/calculate": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Ask the worker to calculate every payslip. Poll the run for the result.",
+        "operationId": "calculate_payroll_run_packs_finance_payroll_runs__run_id__calculate_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Calculate Payroll Run Packs Finance Payroll Runs  Run Id  Calculate Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/payroll-runs/{run_id}/payslips": {
+      "get": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "The payslips of a run",
+        "operationId": "list_run_payslips_packs_finance_payroll_runs__run_id__payslips_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response List Run Payslips Packs Finance Payroll Runs  Run Id  Payslips Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/payslips/{payslip_id}": {
+      "get": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "One payslip with every line and the rule it used",
+        "operationId": "get_payslip_packs_finance_payslips__payslip_id__get",
+        "parameters": [
+          {
+            "name": "payslip_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Payslip Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Payslip Packs Finance Payslips  Payslip Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/payslips/{payslip_id}/verify": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Replay a payslip from its stored inputs",
+        "operationId": "verify_payslip_packs_finance_payslips__payslip_id__verify_post",
+        "parameters": [
+          {
+            "name": "payslip_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Payslip Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Verify Payslip Packs Finance Payslips  Payslip Id  Verify Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/payroll-runs/{run_id}/issues": {
+      "get": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Exceptions and anomalies on a run",
+        "operationId": "list_run_issues_packs_finance_payroll_runs__run_id__issues_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response List Run Issues Packs Finance Payroll Runs  Run Id  Issues Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/payroll-runs/{run_id}/verify": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Replay every payslip and check the run's hash",
+        "operationId": "verify_payroll_run_packs_finance_payroll_runs__run_id__verify_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Verify Payroll Run Packs Finance Payroll Runs  Run Id  Verify Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/payroll-runs/{run_id}/submit": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Submit a calculated run for approval. A different person must approve it.",
+        "operationId": "submit_payroll_run_packs_finance_payroll_runs__run_id__submit_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Submit Payroll Run Packs Finance Payroll Runs  Run Id  Submit Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/packs/finance/payroll-runs/{run_id}/recall": {
+      "post": {
+        "tags": [
+          "finance"
+        ],
+        "summary": "Take a submitted run back before approval",
+        "operationId": "recall_payroll_run_packs_finance_payroll_runs__run_id__recall_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Recall Payroll Run Packs Finance Payroll Runs  Run Id  Recall Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/packs/talent/jobs": {
       "get": {
         "tags": [
@@ -5291,6 +5787,60 @@
           "definition"
         ],
         "title": "RuleSetBody"
+      },
+      "RunBody": {
+        "properties": {
+          "period_start": {
+            "type": "string",
+            "format": "date",
+            "title": "Period Start"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date",
+            "title": "Period End"
+          },
+          "pay_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Pay Date"
+          },
+          "regime_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Regime Id",
+            "default": "TN_PRIVATE_NON_AGRI"
+          },
+          "input_batch_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Input Batch Ids"
+          },
+          "external_request_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "period_start",
+          "period_end",
+          "pay_date"
+        ],
+        "title": "RunBody"
       },
       "TicketAnswerBody": {
         "properties": {

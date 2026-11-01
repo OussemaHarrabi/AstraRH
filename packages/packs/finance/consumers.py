@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from kernel.events import EventOutbox, subscribe
-from packs.finance import engagements
+from packs.finance import engagements, runs
 
 
 @subscribe("talent.candidate.hired.v1", "finance.record_hire")
@@ -22,3 +22,16 @@ def record_hire(session: Session, event: EventOutbox) -> None:
         UUID(payload["person_id"]),
         str(event.id),
     )
+
+
+@subscribe("finance.payroll.calculation_requested.v1", "finance.calculate_run")
+def calculate_run(session: Session, event: EventOutbox) -> None:
+    """Only the worker may write payslips, so calculation starts from this event."""
+    runs.calculate(session, event.tenant_id, UUID(event.payload["run_id"]))
+
+
+@subscribe("trust.proposal.rejected.v1", "finance.reopen_rejected_run")
+def reopen_rejected_run(session: Session, event: EventOutbox) -> None:
+    """The approver said no, so the run goes back to draft."""
+    if event.payload["action_type"] == runs.APPROVE_ACTION:
+        runs.mark_rejected(session, event.tenant_id, UUID(event.payload["proposal_id"]))

@@ -340,3 +340,84 @@ def test_rates_must_be_finite_numbers_written_as_strings(definition, value):
     broken["css"]["rate"] = value
     with pytest.raises(rules.RuleSetInvalid):
         rules.parse(broken)
+
+
+def run_with(
+    rule_set, gross, components=(), reimbursements="0", head=True, kids=("child", "child")
+):
+    data = calc.PayslipInput(
+        Decimal(gross),
+        head,
+        tuple(kids),
+        tuple((code, label, Decimal(amount)) for code, label, amount in components),
+        Decimal(reimbursements),
+    )
+    return calc.payslip(data, rule_set)
+
+
+def test_components_and_reimbursements_match_the_hand_checked_payslip(rule_set):
+    """2,500 gross as 2,000 base and 500 bonus, 100 reimbursed, head of family, two children.
+    CNSS 242.000, tax base 24,596, income tax 4,628.8 a year = 385.733, levy 10.248."""
+    slip = run_with(
+        rule_set,
+        "2500",
+        [("BASE_SALARY", "Base salary", "2000"), ("BONUS", "Bonus", "500")],
+        "100",
+    )
+    assert slip.employee_deductions == Decimal("242.000")
+    assert slip.income_tax == Decimal("385.733")
+    assert slip.solidarity == Decimal("10.248")
+    assert slip.net_pay == Decimal("1962.019")
+    assert slip.reimbursements == Decimal("100")
+    assert line(slip, "CNSS_EMPLOYER") == Decimal("426.750")
+    assert slip.employer_cost == Decimal("3026.750")
+
+
+def test_reimbursements_are_not_taxed_and_do_not_change_the_tax_lines(rule_set):
+    without = run_with(rule_set, "2500")
+    with_reimbursement = run_with(rule_set, "2500", reimbursements="100")
+    assert with_reimbursement.income_tax == without.income_tax
+    assert with_reimbursement.solidarity == without.solidarity
+    assert with_reimbursement.employee_deductions == without.employee_deductions
+    assert with_reimbursement.net_pay == without.net_pay + Decimal("100")
+    assert with_reimbursement.employer_cost == without.employer_cost + Decimal("100")
+
+
+def test_components_are_shown_as_lines_and_do_not_change_the_figures(rule_set):
+    plain = run_with(rule_set, "2500")
+    split = run_with(
+        rule_set,
+        "2500",
+        [("BASE_SALARY", "Base salary", "2000"), ("ALLOWANCE", "Allowance", "500")],
+    )
+    assert split.net_pay == plain.net_pay
+    shown = [(i.code, i.kind, i.amount) for i in split.lines if i.kind == calc.COMPONENT]
+    assert shown == [
+        ("BASE_SALARY", "component", Decimal("2000")),
+        ("ALLOWANCE", "component", Decimal("500")),
+    ]
+    assert [i.code for i in split.lines][:3] == ["GROSS", "BASE_SALARY", "ALLOWANCE"]
+
+
+def test_lines_still_add_up_to_net_pay_with_reimbursements(rule_set):
+    slip = run_with(rule_set, "2750.125", reimbursements="12.345")
+    earned = sum(i.amount for i in slip.lines if i.kind in {calc.EARNING, calc.REIMBURSEMENT})
+    taken = sum(i.amount for i in slip.lines if i.kind in {calc.DEDUCTION, calc.TAX})
+    assert earned - taken == slip.net_pay
+
+
+@pytest.mark.parametrize(
+    ("components", "reimbursements", "message"),
+    [
+        ([("BASE_SALARY", "Base", "2000")], "0", "do not add up"),
+        ([("BASE_SALARY", "Base", "2600"), ("BONUS", "Bonus", "-100")], "0", "above zero"),
+        ([("BASE_SALARY", "Base", "0"), ("BONUS", "Bonus", "2500")], "0", "above zero"),
+        ([], "-1", "negative"),
+        ([], "1.0001", "decimal places"),
+    ],
+)
+def test_inconsistent_components_or_reimbursements_are_refused(
+    rule_set, components, reimbursements, message
+):
+    with pytest.raises(calc.PayslipInvalid, match=message):
+        run_with(rule_set, "2500", components, reimbursements)

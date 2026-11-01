@@ -445,7 +445,7 @@ def test_finance_foreign_keys_point_only_into_core_or_finance():
 
 def test_every_finance_table_has_a_tenant_and_row_level_security():
     names = {t.name for t in Base.metadata.tables.values() if t.schema == "finance"}
-    assert len(names) == 22
+    assert len(names) == 23
     with as_role("owner"), tenant_session(uuid4()) as session:
         enabled = {
             row[0]
@@ -533,7 +533,7 @@ def test_payslips_and_lines_cannot_be_moved_out_of_or_into_a_submitted_run(tenan
 
 def test_a_run_follows_the_allowed_path_and_only_the_worker_approves(tenant):
     employee, engagement, run, slip = submitted(tenant)
-    with pytest.raises(DBAPIError, match="Only an approved action"):
+    with pytest.raises(DBAPIError, match="Only the worker can move a run to approved"):
         with as_role("api"), tenant_session(tenant) as session:
             session.execute(
                 text("UPDATE finance.payroll_run SET status = 'approved' WHERE id = :i"), {"i": run}
@@ -836,4 +836,65 @@ def test_a_rejection_line_is_recorded_once_per_batch(tenant):
                     tenant_id=tenant, batch_id=batch, line_number=5, code="B", message="Again."
                 )
             )
+            session.flush()
+
+
+def make_linked_input(tenant_id: UUID, run_status: str = "draft"):
+    """An input linked to a run, walked to the given status through the real path."""
+    batch, row, employee = make_input(tenant_id)
+    run = make_run(tenant_id)
+    with as_role("worker"), tenant_session(tenant_id) as session:
+        session.add(m.PayrollRunInput(tenant_id=tenant_id, run_id=run, input_id=row))
+    path = ["calculated", "approval_pending", "approved", "payment_pending", "paid", "closed"]
+    if run_status != "draft":
+        slip_engagement = make_engagement(tenant_id, employee)
+        make_payslip(tenant_id, run, employee, slip_engagement)
+        for status in path[: path.index(run_status) + 1]:
+            run_sql(
+                tenant_id,
+                "owner",
+                "UPDATE finance.payroll_run SET status = :s WHERE id = :i",
+                s=status,
+                i=run,
+            )
+    return batch, row, run
+
+
+def test_the_inputs_of_a_run_can_change_while_it_is_a_draft_or_calculated(tenant):
+    _, row, run = make_linked_input(tenant)
+    other_batch, other_row, _ = make_input(tenant)
+    with as_role("worker"), tenant_session(tenant) as session:
+        session.add(m.PayrollRunInput(tenant_id=tenant, run_id=run, input_id=other_row))
+    run_sql(tenant, "worker", "DELETE FROM finance.payroll_run_input WHERE run_id = :r", r=run)
+
+
+@pytest.mark.parametrize("status", ["approval_pending", "approved", "paid", "closed"])
+def test_the_inputs_of_a_submitted_run_are_frozen_for_every_role(tenant, status):
+    _, row, run = make_linked_input(tenant, status)
+    _, other_row, _ = make_input(tenant)
+    with pytest.raises(DBAPIError, match="inputs of a .* run cannot be changed"):
+        with as_role("owner"), tenant_session(tenant) as session:
+            session.add(m.PayrollRunInput(tenant_id=tenant, run_id=run, input_id=other_row))
+            session.flush()
+    with pytest.raises(DBAPIError, match="inputs of a .* run cannot be changed"):
+        run_sql(tenant, "owner", "DELETE FROM finance.payroll_run_input WHERE run_id = :r", r=run)
+
+
+def test_an_input_used_by_a_submitted_run_cannot_be_withdrawn_by_any_role(tenant):
+    _, row, _ = make_linked_input(tenant, "approval_pending")
+    for role in ("api", "worker", "owner"):
+        with pytest.raises(DBAPIError, match="used by a submitted payroll run"):
+            run_sql(
+                tenant,
+                role,
+                "UPDATE finance.payroll_input SET status = 'withdrawn' WHERE id = :i",
+                i=row,
+            )
+
+
+def test_the_api_cannot_record_which_inputs_a_run_used(tenant):
+    _, row, run = make_linked_input(tenant)
+    with pytest.raises(DBAPIError, match="permission denied"):
+        with as_role("api"), tenant_session(tenant) as session:
+            session.add(m.PayrollRunInput(tenant_id=tenant, run_id=run, input_id=row))
             session.flush()

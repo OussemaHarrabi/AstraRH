@@ -74,6 +74,11 @@ class PayrollInputsValidated(BaseModel):
     status: str
 
 
+@event_type("finance.payroll.calculation_requested.v1")
+class PayrollCalculationRequested(BaseModel):
+    run_id: UUID
+
+
 @event_type("finance.payroll.calculated.v1")
 class PayrollCalculated(BaseModel):
     run_id: UUID

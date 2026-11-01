@@ -169,6 +169,7 @@ Fallback if K4 is declined: a stateless simulator inside the adapter that derive
 | K6 events for failed or unknown executions | Open | Unchanged. The sweep job is the default |
 | K7 pack event consumers | **Worked around on `finance-v2`**: `apps/worker/main.py` imports the finance consumers, as for talent. The manifest `consumers:` section is still the cleaner fix | Packs are wired by importing their module in `apps/worker/main.py` (`talent` does it, and the kernel does it through `install_kernel_consumers`). Finance can do the same with one import line there, which is a kernel-owner file. The manifest `consumers:` section is still the cleaner fix |
 | K8 macOS init script | **Fixed on `finance-v2`** | `main` still has `01-init.sh`. Needs review and merge by the kernel owner |
+| K14 an unordered query in `tests/test_inbox_api.py` | **Fixed on `finance-v2`** | `test_a_person_corrects_the_sorting_and_the_model_answer_is_kept` selected events with no ORDER BY and asserted their order, so it failed whenever table space was reused. Added `.order_by(EventOutbox.id)`. Other tests may have the same pattern |
 | K13 talent API fails to load in the API image | **Fixed on `finance-v2`** | `communications.py` imported `langgraph` at module level. See `FINANCE_ENGAGEMENTS.md` section 7. Recommend keeping the new test |
 | K9 API cannot insert proposals | Open | Verified again: `has_table_privilege('astra_api','trust.proposal','INSERT')` is false |
 | K10 to K12 | Open | Small confirmations |

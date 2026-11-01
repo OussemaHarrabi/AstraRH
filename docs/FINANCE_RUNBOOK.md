@@ -47,7 +47,7 @@ or, if the database holds nothing you need, `python3 astra.py down --wipe` then 
 | `python3 astra.py up` | All services healthy after the workaround |
 | `python3 astra.py smoke` | All pass except **"worker holds an LLM key"**, which fails only because the keys are empty. This is expected while AI is paused |
 | `python3 astra.py check` | First run, 2026-10-31: **288 passed, 2 skipped** (the platform's 253 plus 35 finance calculation tests). After the finance work and the rebase onto `main` `63529ca`, 2026-11-01: **420 passed, 2 skipped, 1 expected failure** (the K9 test) |
-| Migrations | Database at `kernel_0006`, `talent_0004`, `finance_0003` (2026-11-01), then `finance_0004` after the engagement work (**518 passed**), then up to `finance_0005` after payroll inputs, when `check` gave **678 passed, 2 skipped, 4 expected failures** |
+| Migrations | Database at `kernel_0006`, `talent_0004`, `finance_0003` (2026-11-01), then `finance_0004` after the engagement work (**518 passed**), then `finance_0005` after payroll inputs (**678 passed**), then up to `finance_0006` after payroll runs, when `check` gave **748 passed, 2 skipped, 5 expected failures** |
 
 ## 5. Running only the finance calculation tests
 

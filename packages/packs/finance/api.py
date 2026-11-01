@@ -9,10 +9,12 @@ from fastapi import APIRouter, File, Form, Request, Response, UploadFile
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
+from kernel import explain
 from kernel.authz import has_role, require_role
+from kernel.errors import NotFound
 from kernel.people.models import Employee
 from kernel.web import request_context
-from packs.finance import engagements, inputs, issues, service
+from packs.finance import engagements, inputs, issues, runs, service
 from packs.finance.models import (
     DocumentRef,
     Engagement,
@@ -20,6 +22,9 @@ from packs.finance.models import (
     PayrollInput,
     PayrollInputBatch,
     PayrollInputRejection,
+    PayrollRun,
+    Payslip,
+    PayslipLine,
     RuleSetRecord,
     ValidationIssue,
 )
@@ -34,6 +39,9 @@ PAY_READ = {"admin", "finance", "auditor"}
 PAY_WRITE = {"admin", "finance"}
 INPUT_READ = {"admin", "finance", "auditor"}
 INPUT_WRITE = {"admin", "finance"}
+RUN_SUMMARY_READ = {"admin", "finance", "hr", "auditor"}
+RUN_DETAIL_READ = {"admin", "finance", "auditor"}
+RUN_WRITE = {"admin", "finance"}
 
 router = APIRouter()
 
@@ -361,7 +369,7 @@ def list_issues(engagement_id: UUID, request: Request) -> list[dict[str, Any]]:
 def resolve_issue(issue_id: UUID, body: ReasonBody, request: Request) -> dict[str, Any]:
     with request_context(request) as ctx:
         found = ctx.session.get(ValidationIssue, issue_id)
-        about_pay = found is not None and found.entity_type == "payroll_input"
+        about_pay = found is not None and found.entity_type in {"payroll_input", "payroll_run"}
         require_role(ctx.actor, INPUT_WRITE if about_pay else ENGAGEMENT_WRITE)
         return _issue_json(issues.resolve_issue(ctx.session, ctx.actor, issue_id, body.reason))
 
@@ -659,3 +667,178 @@ def withdraw_input(input_id: UUID, body: ReasonBody, request: Request) -> dict[s
         row = inputs.withdraw_input(ctx.session, ctx.actor, input_id, body.reason)
         employee = ctx.session.get(Employee, row.employee_id)
         return _input_json(row, employee.external_id)
+
+
+class RunBody(BaseModel):
+    period_start: date
+    period_end: date
+    pay_date: date
+    regime_id: str = Field(default=runs.DEFAULT_REGIME, min_length=1, max_length=64)
+    input_batch_ids: list[UUID] = Field(default_factory=list, max_length=20)
+    external_request_id: str | None = Field(default=None, max_length=128)
+
+
+def _payslip_json(row: Payslip, employee_ref: str) -> dict[str, Any]:
+    return {
+        "id": str(row.id),
+        "run_id": str(row.run_id),
+        "employee": employee_ref,
+        "gross": format(row.gross, "f"),
+        "employee_deductions": format(row.employee_deductions, "f"),
+        "income_tax": format(row.income_tax, "f"),
+        "solidarity": format(row.solidarity, "f"),
+        "net_pay": format(row.net_pay, "f"),
+        "employer_cost": format(row.employer_cost, "f"),
+        "status": row.status,
+        "decision_record_id": str(row.decision_record_id) if row.decision_record_id else None,
+    }
+
+
+@router.post(
+    "/payroll-runs",
+    status_code=201,
+    summary="Create a payroll run for a period. The same request id returns the same run.",
+)
+def create_payroll_run(body: RunBody, request: Request, response: Response) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, RUN_WRITE)
+        run, created = runs.create_run(
+            ctx.session,
+            ctx.actor.tenant_id,
+            ctx.actor,
+            body.period_start,
+            body.period_end,
+            body.pay_date,
+            body.regime_id,
+            body.input_batch_ids,
+            body.external_request_id,
+        )
+        if not created:
+            response.status_code = 200
+        return runs.run_json(ctx.session, run)
+
+
+@router.get("/payroll-runs", summary="Payroll runs with their totals. HR sees totals only.")
+def list_payroll_runs(request: Request) -> list[dict[str, Any]]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, RUN_SUMMARY_READ)
+        rows = ctx.session.scalars(select(PayrollRun).order_by(PayrollRun.period_start.desc()))
+        return [runs.run_json(ctx.session, row) for row in rows]
+
+
+@router.get("/payroll-runs/{run_id}", summary="One payroll run with its totals and open issues")
+def get_payroll_run(run_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, RUN_SUMMARY_READ)
+        return runs.run_json(ctx.session, runs.get_run(ctx.session, run_id))
+
+
+@router.post(
+    "/payroll-runs/{run_id}/calculate",
+    status_code=202,
+    summary="Ask the worker to calculate every payslip. Poll the run for the result.",
+)
+def calculate_payroll_run(run_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, RUN_WRITE)
+        run = runs.request_calculation(ctx.session, ctx.actor.tenant_id, run_id)
+        return {"status": run.status, "calculation_state": run.calculation_state}
+
+
+@router.get("/payroll-runs/{run_id}/payslips", summary="The payslips of a run")
+def list_run_payslips(run_id: UUID, request: Request) -> list[dict[str, Any]]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, RUN_DETAIL_READ)
+        runs.get_run(ctx.session, run_id)
+        rows = ctx.session.execute(
+            select(Payslip, Employee.external_id)
+            .join(Employee, Employee.id == Payslip.employee_id)
+            .where(Payslip.run_id == run_id)
+            .order_by(Employee.external_id)
+        )
+        return [_payslip_json(row, ref) for row, ref in rows]
+
+
+@router.get("/payslips/{payslip_id}", summary="One payslip with every line and the rule it used")
+def get_payslip(payslip_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, RUN_DETAIL_READ)
+        row = ctx.session.get(Payslip, payslip_id)
+        if row is None:
+            raise NotFound("Payslip not found")
+        employee = ctx.session.get(Employee, row.employee_id)
+        lines = ctx.session.scalars(
+            select(PayslipLine)
+            .where(PayslipLine.payslip_id == row.id)
+            .order_by(PayslipLine.position)
+        )
+        return {
+            **_payslip_json(row, employee.external_id),
+            "lines": [
+                {
+                    "code": line.code,
+                    "label": line.label,
+                    "kind": line.kind,
+                    "base": format(line.base, "f"),
+                    "rate": None if line.rate is None else format(line.rate, "f"),
+                    "amount": format(line.amount, "f"),
+                    "rule_ref": line.rule_ref,
+                }
+                for line in lines
+            ],
+        }
+
+
+@router.post("/payslips/{payslip_id}/verify", summary="Replay a payslip from its stored inputs")
+def verify_payslip(payslip_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, RUN_DETAIL_READ)
+        row = ctx.session.get(Payslip, payslip_id)
+        if row is None:
+            raise NotFound("Payslip not found")
+        return explain.verify(ctx.session, row.decision_record_id)
+
+
+@router.get("/payroll-runs/{run_id}/issues", summary="Exceptions and anomalies on a run")
+def list_run_issues(
+    run_id: UUID, request: Request, status: str | None = None
+) -> list[dict[str, Any]]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, RUN_DETAIL_READ)
+        runs.get_run(ctx.session, run_id)
+        query = (
+            select(ValidationIssue)
+            .where(ValidationIssue.entity_type == runs.ENTITY, ValidationIssue.entity_id == run_id)
+            .order_by(ValidationIssue.created_at)
+        )
+        if status:
+            query = query.where(ValidationIssue.status == status)
+        return [_issue_json(row) for row in ctx.session.scalars(query)]
+
+
+@router.post(
+    "/payroll-runs/{run_id}/verify", summary="Replay every payslip and check the run's hash"
+)
+def verify_payroll_run(run_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, RUN_DETAIL_READ)
+        return runs.verify_run(ctx.session, run_id)
+
+
+@router.post(
+    "/payroll-runs/{run_id}/submit",
+    status_code=202,
+    summary="Submit a calculated run for approval. A different person must approve it.",
+)
+def submit_payroll_run(run_id: UUID, request: Request) -> dict[str, str]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, RUN_WRITE)
+        proposal = runs.submit_for_approval(ctx.session, ctx.actor.tenant_id, ctx.actor, run_id)
+        return {"proposal_id": str(proposal.id), "status": proposal.status}
+
+
+@router.post("/payroll-runs/{run_id}/recall", summary="Take a submitted run back before approval")
+def recall_payroll_run(run_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, RUN_WRITE)
+        return runs.run_json(ctx.session, runs.recall_submission(ctx.session, ctx.actor, run_id))

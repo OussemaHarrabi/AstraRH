@@ -29,6 +29,14 @@ actions:
     view_roles: [admin, finance, hr, auditor]
     description: Change pay, hours, title, place or a fixed-term end date from a date, keeping the history.
 
+  - id: finance.payroll.approve
+    risk: R3
+    channel: internal
+    handler: packs.finance.handlers:approve_run
+    approver_roles: [admin, finance]
+    view_roles: [admin, finance, auditor]
+    description: Approve a calculated payroll run. Needs a second person and password confirmation.
+
 publishes:
   - finance.engagement.validated.v1
   - finance.engagement.activated.v1
@@ -39,6 +47,7 @@ publishes:
   - finance.civp.payment_reconciled.v1
   - finance.civp.completed.v1
   - finance.payroll.inputs_validated.v1
+  - finance.payroll.calculation_requested.v1
   - finance.payroll.calculated.v1
   - finance.payroll.approved.v1
   - finance.payroll.rejected.v1
@@ -49,3 +58,4 @@ publishes:
 consumes:
   - talent.candidate.hired.v1
   - trust.action.executed.v1
+  - trust.proposal.rejected.v1

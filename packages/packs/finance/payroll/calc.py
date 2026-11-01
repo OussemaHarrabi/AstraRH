@@ -10,8 +10,13 @@ Order, with every value taken from the rule set:
     income tax         = progressive brackets on net taxable, divided by 12
     solidarity levy    = rate x net taxable, divided by 12, none within the exempt amount.
                          On the whole amount once above it, so there is a step at the threshold
-    net pay            = gross - employee CNSS - income tax - solidarity levy
-    employer cost      = gross + employer CNSS + other employer charges
+    net pay            = gross - employee CNSS - income tax - solidarity levy (+ reimbursements)
+    employer cost      = gross + employer CNSS + other employer charges + reimbursements
+
+Gross may be given as components (base salary, bonus, allowance), which must add up to it. They are
+all taxed and contribute to CNSS as one amount [verify the treatment of allowances]. Reimbursements
+are paid on top, are not taxed and add to net pay [verify]:
+    net pay            = gross - employee CNSS - income tax - solidarity levy + reimbursements
 
 Each displayed line is rounded once, half up, to the rule set's decimal places, and net pay is the
 sum of those rounded lines, so the lines always add up exactly. Gross may not have more decimal
@@ -27,6 +32,8 @@ MONTHS = Decimal(12)
 ZERO = Decimal(0)
 
 EARNING = "earning"
+COMPONENT = "component"
+REIMBURSEMENT = "reimbursement"
 DEDUCTION = "deduction"
 TAX = "tax"
 EMPLOYER_COST = "employer_cost"
@@ -46,6 +53,8 @@ class PayslipInput:
     gross: Decimal
     head_of_family: bool = False
     children: tuple[str, ...] = ()
+    components: tuple[tuple[str, str, Decimal], ...] = ()
+    reimbursements: Decimal = Decimal(0)
 
 
 @dataclass(frozen=True)
@@ -70,6 +79,7 @@ class Payslip:
     employer_cost: Decimal
     rule_set_id: str
     rule_set_hash: str
+    reimbursements: Decimal = Decimal(0)
     working: dict[str, Decimal] = field(default_factory=dict)
 
 
@@ -114,6 +124,13 @@ def payslip(data: PayslipInput, rules: RuleSet) -> Payslip:
     places = rules.places
     if _round(data.gross, places) != data.gross:
         raise PayslipInvalid(f"Gross pay has more than {places} decimal places")
+    if data.reimbursements < 0 or _round(data.reimbursements, places) != data.reimbursements:
+        raise PayslipInvalid("Reimbursements must not be negative or exceed the decimal places")
+    if data.components:
+        if any(amount <= 0 for _, _, amount in data.components):
+            raise PayslipInvalid("Every pay component must be above zero")
+        if sum((amount for _, _, amount in data.components), ZERO) != data.gross:
+            raise PayslipInvalid("The pay components do not add up to the gross pay")
     ref = rules.id
 
     cnss_base = data.gross
@@ -134,11 +151,15 @@ def payslip(data: PayslipInput, rules: RuleSet) -> Payslip:
     if net_taxable > rules.css_exempt_up_to:
         css = _round(net_taxable * rules.css_rate / MONTHS, places)
 
-    net_pay = data.gross - cnss_employee - income_tax - css
+    net_pay = data.gross - cnss_employee - income_tax - css + data.reimbursements
     monthly_net_taxable = _round(net_taxable / MONTHS, places)
 
     lines = [
         Line("GROSS", "Gross salary", EARNING, data.gross, None, data.gross, f"{ref}#gross"),
+        *[
+            Line(code, label, COMPONENT, amount, None, amount, f"{ref}#component.{code}")
+            for code, label, amount in data.components
+        ],
         Line(
             "CNSS_EMPLOYEE",
             "Employee social security (CNSS)",
@@ -168,6 +189,19 @@ def payslip(data: PayslipInput, rules: RuleSet) -> Payslip:
         ),
     ]
 
+    if data.reimbursements > 0:
+        lines.append(
+            Line(
+                "REIMBURSEMENT",
+                "Expense reimbursements (not taxed)",
+                REIMBURSEMENT,
+                data.reimbursements,
+                None,
+                data.reimbursements,
+                f"{ref}#reimbursement",
+            )
+        )
+
     employer_cnss = _round(cnss_base * rules.cnss_employer_rate, places)
     employer_lines = [
         Line(
@@ -192,7 +226,9 @@ def payslip(data: PayslipInput, rules: RuleSet) -> Payslip:
                 f"{ref}#employer_charges.{charge.code}",
             )
         )
-    employer_cost = data.gross + sum((line.amount for line in employer_lines), ZERO)
+    employer_cost = (
+        data.gross + data.reimbursements + sum((line.amount for line in employer_lines), ZERO)
+    )
 
     return Payslip(
         gross=data.gross,
@@ -204,6 +240,7 @@ def payslip(data: PayslipInput, rules: RuleSet) -> Payslip:
         employer_cost=employer_cost,
         rule_set_id=rules.id,
         rule_set_hash=rules.definition_hash,
+        reimbursements=data.reimbursements,
         working={
             "monthly_taxable": monthly_taxable,
             "annual_taxable": annual_taxable,

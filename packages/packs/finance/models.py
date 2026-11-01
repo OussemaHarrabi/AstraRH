@@ -305,6 +305,24 @@ class PayrollRun(TenantMixin, Base):
     prepared_by: Mapped[UUID | None] = mapped_column(UUID_TYPE)
     last_edited_by: Mapped[UUID | None] = mapped_column(UUID_TYPE)
     approval_proposal_id: Mapped[UUID | None] = mapped_column(UUID_TYPE)
+    calculation_state: Mapped[str] = mapped_column(String(12), nullable=False, default="idle")
+    calculation_error: Mapped[str | None] = mapped_column(Text)
+    approved_by: Mapped[UUID | None] = mapped_column(UUID_TYPE)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class PayrollRunInput(TenantMixin, Base):
+    """Which inputs a run used, so they cannot be withdrawn once it is submitted."""
+
+    __tablename__ = "payroll_run_input"
+    __table_args__ = (UniqueConstraint("run_id", "input_id"), SCHEMA)
+
+    run_id: Mapped[UUID] = mapped_column(
+        UUID_TYPE, ForeignKey("finance.payroll_run.id"), nullable=False, index=True
+    )
+    input_id: Mapped[UUID] = mapped_column(
+        UUID_TYPE, ForeignKey("finance.payroll_input.id"), nullable=False, index=True
+    )
 
 
 class Payslip(TenantMixin, Base):

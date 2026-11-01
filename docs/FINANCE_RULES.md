@@ -95,6 +95,8 @@ The first row also matches a published worked example from a payroll guide. A se
 
 Other tests cover: lines summing to net pay, net rising with gross, identical output for identical input, the expense cap, only four children counting, student and disabled amounts, the exempt levy, net taxable never below zero, bracket edges, the CNSS ceiling, employer charges changing only employer cost, refusals, hash changes, malformed rule sets, and exactly-one rule-set selection. A final test checks that `calc.py` imports nothing but `dataclasses`, `decimal` and the rules module, and contains no float.
 
+**Pay components and reimbursements (added with payroll runs).** The formula can take the gross as components (base salary, bonus, allowance), which must add up to it. Each is shown as its own line and all are taxed and contribute to CNSS together as one amount **[verify the treatment of allowances]**. Reimbursements are paid on top of net pay, are not taxed and are not part of CNSS **[verify]**. Hand-checked: 2,500 gross as 2,000 base and 500 bonus with 100 reimbursed, head of family and two children, gives CNSS 242.000, income tax 385.733, solidarity levy 10.248, **net 1,962.019** and employer cost 3,026.750.
+
 ## 6. Examples and the rule set lifecycle
 
 **Examples.** A rule set carries its own hand-checked examples in an `examples` list: `name`, `input` (`gross`, `head_of_family`, `children`) and `expect` (any of `employee_deductions`, `income_tax`, `solidarity`, `net_pay`, `employer_cost`). The demo rule set holds the four cases in section 5. `payroll/examples.py` runs them against the formula and reports each mismatch with the expected and actual value. A rule set with no example, or with a failing one, **cannot be activated**.

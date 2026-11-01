@@ -23,6 +23,8 @@ from packs.finance.models import (
     PayrollInput,
     PayrollInputBatch,
     PayrollInputRejection,
+    PayrollRun,
+    PayrollRunInput,
     ValidationIssue,
 )
 from packs.finance.validation import inputs as rules
@@ -33,6 +35,7 @@ MAX_PERIOD_DAYS = 62
 COLUMNS = ("employee", "kind", "effective_date", "quantity", "amount", "reference")
 RAW_LIMIT = 120
 ENTITY = "payroll_input"
+SUBMITTED = {"approval_pending", "approved", "payment_pending", "paid", "closed"}
 
 
 @dataclass(frozen=True)
@@ -282,7 +285,7 @@ def validate_batch(
     for row in own:
         issues.sync(session, tenant_id, ENTITY, row.id, found.get(row.id, []))
 
-    counts = _issue_counts(session, batch.id)
+    counts = issue_counts(session, batch.id)
     batch.accepted_rows = len(own)
     if not own:
         batch.status = "empty"
@@ -306,7 +309,7 @@ def validate_batch(
     return batch
 
 
-def _issue_counts(session: Session, batch_id: UUID) -> dict[str, int]:
+def issue_counts(session: Session, batch_id: UUID) -> dict[str, int]:
     rows = session.execute(
         select(ValidationIssue.severity, func.count())
         .join(PayrollInput, PayrollInput.id == ValidationIssue.entity_id)
@@ -322,7 +325,7 @@ def _issue_counts(session: Session, batch_id: UUID) -> dict[str, int]:
 
 
 def batch_summary(session: Session, batch: PayrollInputBatch) -> dict:
-    counts = _issue_counts(session, batch.id)
+    counts = issue_counts(session, batch.id)
     return {
         "id": str(batch.id),
         "source": batch.source,
@@ -356,6 +359,23 @@ def withdraw_input(session: Session, actor: Actor, input_id: UUID, reason: str) 
         raise Conflict(f"This input is already {row.status}")
     if len(reason.strip()) < 3:
         raise ValidationFailed("A reason is required")
+    runs = list(
+        session.scalars(
+            select(PayrollRun)
+            .join(PayrollRunInput, PayrollRunInput.run_id == PayrollRun.id)
+            .where(PayrollRunInput.input_id == row.id)
+            .with_for_update(of=PayrollRun)
+        )
+    )
+    if any(run.status in SUBMITTED for run in runs):
+        raise Conflict(
+            "A payroll run that is waiting for approval or already approved uses this input. "
+            "Recall the run first"
+        )
+    for run in runs:
+        if run.status == "calculated":
+            run.status = "draft"
+            run.calculation_state = "idle"
     row.status = "withdrawn"
     row.reject_reason = reason.strip()
     session.flush()
