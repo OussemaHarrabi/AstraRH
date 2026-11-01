@@ -182,3 +182,13 @@ def test_checkin_schedule_is_four_working_day_milestones():
         add_working_days(MONDAY, days, holidays=()) for days in (7, 30, 60, 90)
     ]
     assert all(moment.hour == 9 and moment.minute == 0 for _, moment in rows)
+
+def test_dossier_treats_a_verified_milestone_as_complete():
+    result = dossier(
+        [{"title": "Verified milestone", "status": "verified", "evidence": {"ref": "task-1"}}],
+        [],
+        [],
+    )
+    assert result["tasks_completed"] == 1
+    assert result["tasks_with_evidence"] == 1
+    assert result["missing"] == []
