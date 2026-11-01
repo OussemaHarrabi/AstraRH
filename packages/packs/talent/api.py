@@ -13,11 +13,14 @@ from sqlalchemy.orm import Session
 from kernel import explain, trust
 from kernel.ai.models import SecurityEvent
 from kernel.authz import require_role
+from kernel.comms.models import Attachment
 from kernel.errors import Conflict, KernelError, NotFound, ValidationFailed
 from kernel.explain import DecisionDraft
 from kernel.explain.models import DecisionRecord
+from kernel.trust.models import Proposal
 from kernel.web import request_context
 from packs.talent import communications, scoring, service
+from packs.talent.handlers import HIREABLE_STAGES
 from packs.talent.models import (
     Application,
     CandidateIdentity,
@@ -31,6 +34,7 @@ from packs.talent.models import (
     Score,
 )
 
+OPEN_PROPOSAL_STATUSES = {"pending_approval", "approved", "executing", "unknown", "blocked"}
 READ_ROLES = {"admin", "hr", "recruiter", "auditor"}
 WRITE_ROLES = {"admin", "hr", "recruiter"}
 MAX_FILES_PER_UPLOAD = 200
@@ -63,7 +67,16 @@ class BookBody(BaseModel):
     ends_at: str
 
 
+class CancelBody(BaseModel):
+    reason: str = Field(min_length=1, max_length=500)
+    reschedule: bool = False
+
+
 class RejectBody(BaseModel):
+    reason: str = Field(min_length=3)
+
+
+class HireBody(BaseModel):
     reason: str = Field(min_length=3)
 
 
@@ -165,7 +178,9 @@ def activate_rubric(job_id: UUID, rubric_id: UUID, request: Request) -> dict[str
         return _rubric_json(rubric)
 
 
-@router.post("/jobs/{job_id}/cvs", status_code=202, summary="Upload CVs (PDF, DOCX or TXT)")
+@router.post(
+    "/jobs/{job_id}/cvs", status_code=202, summary="Upload CVs (PDF, DOCX, HTML, Markdown or TXT)"
+)
 async def upload_cvs(
     job_id: UUID, request: Request, files: list[UploadFile] = File()
 ) -> dict[str, Any]:
@@ -183,6 +198,26 @@ async def upload_cvs(
         except (ValidationFailed, Conflict) as exc:
             rejected.append({"filename": filename, "reason": exc.message})
     return {"accepted": accepted, "rejected": rejected}
+
+
+class AttachmentBody(BaseModel):
+    attachment_id: UUID
+
+
+@router.post(
+    "/jobs/{job_id}/cvs/from-email",
+    status_code=202,
+    summary="Use a CV that arrived by email for this job",
+)
+def cv_from_email(job_id: UUID, body: AttachmentBody, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, WRITE_ROLES)
+        _job_or_404(ctx.session, job_id)
+        attachment = ctx.session.get(Attachment, body.attachment_id)
+        if attachment is None:
+            raise NotFound("Attachment not found")
+        cv = service.add_cv_from_attachment(ctx.session, ctx.actor.tenant_id, job_id, attachment)
+        return {"cv_id": str(cv.id), "application_id": str(cv.application_id)}
 
 
 @router.get("/jobs/{job_id}/cvs", summary="CV processing status")
@@ -434,6 +469,9 @@ def _interview_json(interview: Interview) -> dict[str, Any]:
         "slots": interview.slots,
         "participants": interview.participants,
         "starts_at": interview.starts_at.isoformat() if interview.starts_at else None,
+        "ends_at": interview.ends_at.isoformat() if interview.ends_at else None,
+        "booking_id": str(interview.booking_id) if interview.booking_id else None,
+        "created_at": interview.created_at.isoformat(),
     }
 
 
@@ -511,6 +549,61 @@ def propose_booking(interview_id: UUID, body: BookBody, request: Request) -> dic
         return {"proposal_id": str(proposal.id), "status": proposal.status}
 
 
+@router.get("/interviews/{interview_id}", summary="One interview, with its offered times")
+def get_interview(interview_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, READ_ROLES)
+        interview = ctx.session.get(Interview, interview_id)
+        if interview is None:
+            raise NotFound("Interview not found")
+        return _interview_json(interview)
+
+
+@router.post(
+    "/interviews/{interview_id}/cancel",
+    status_code=202,
+    summary="Propose cancelling, or rescheduling, an interview. A person approves it.",
+)
+def propose_cancel(interview_id: UUID, body: CancelBody, request: Request) -> dict[str, str]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, WRITE_ROLES)
+        session = ctx.session
+        interview = session.get(Interview, interview_id)
+        if interview is None:
+            raise NotFound("Interview not found")
+        if interview.status not in communications.CANCELLABLE:
+            raise Conflict(f"An interview that is {interview.status} can't be cancelled")
+        verb = "reschedule" if body.reschedule else "cancel"
+        decision = explain.record(
+            session,
+            ctx.actor.tenant_id,
+            DecisionDraft(
+                kind="talent.interview_cancel",
+                question=f"Should this interview be {verb}d?",
+                subject={"interview_id": str(interview_id)},
+                outcome={"action": verb},
+                rationale=body.reason,
+                limits=["If it was booked, the candidate gets a cancellation to approve too."],
+            ),
+        )
+        proposal = trust.propose(
+            session,
+            ctx.actor.tenant_id,
+            "talent.interview.cancel",
+            {
+                "interview_id": str(interview_id),
+                "reason": body.reason,
+                "reschedule": body.reschedule,
+            },
+            f"{verb.capitalize()} the interview",
+            decision.id,
+            f"cancel:{interview_id}",
+            requested_by=ctx.actor.user_id,
+            target={"application_id": str(interview.application_id)},
+        )
+        return {"proposal_id": str(proposal.id), "status": proposal.status}
+
+
 @router.post("/followups/check", summary="Check now for candidates who went quiet")
 def check_followups(request: Request) -> dict[str, int]:
     with request_context(request) as ctx:
@@ -518,3 +611,61 @@ def check_followups(request: Request) -> dict[str, int]:
         return {
             "prepared": communications.sweep_followups(ctx.session, ctx.actor.tenant_id),
         }
+
+
+@router.post(
+    "/applications/{application_id}/hire",
+    status_code=202,
+    summary="Propose hiring a shortlisted or interviewed candidate. A different HR person decides.",
+)
+def propose_hire(application_id: UUID, body: HireBody, request: Request) -> dict[str, str]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, WRITE_ROLES)
+        session = ctx.session
+        application = _application_or_404(session, application_id)
+        if application.stage not in HIREABLE_STAGES:
+            raise Conflict(f"A candidate at the {application.stage} stage cannot be hired")
+        prefix = f"hire:{application_id}:"
+        earlier = session.scalars(
+            select(Proposal).where(Proposal.idempotency_key.startswith(prefix, autoescape=True))
+        ).all()
+        if any(p.status in OPEN_PROPOSAL_STATUSES for p in earlier):
+            raise Conflict("This candidate already has a hiring request waiting for a decision")
+        score = session.scalar(
+            select(Score)
+            .where(Score.application_id == application_id)
+            .order_by(Score.created_at.desc())
+            .limit(1)
+        )
+        ranking = (
+            f" Latest ranking: rank {score.rank}, score {score.score}."
+            if score is not None and score.rank is not None
+            else " This candidate has not been ranked."
+        )
+        decision = explain.record(
+            session,
+            ctx.actor.tenant_id,
+            DecisionDraft(
+                kind="talent.application.hire",
+                question="Should this candidate be hired?",
+                outcome={"stage": application.stage},
+                rationale=f"Stage: {application.stage}. Requested reason: {body.reason}.{ranking}",
+                limits=[
+                    "Hiring is a human decision. The ranking looks at job-related criteria only "
+                    "and is one input among others."
+                ],
+                view_roles=["admin", "hr", "recruiter", "auditor"],
+            ),
+        )
+        proposal = trust.propose(
+            session,
+            ctx.actor.tenant_id,
+            "talent.application.hire",
+            {"application_id": str(application_id), "reason": body.reason},
+            "Hire this candidate",
+            decision.id,
+            f"{prefix}{len(earlier) + 1}",
+            target={"job_id": str(application.job_id)},
+            requested_by=ctx.actor.user_id,
+        )
+        return {"proposal_id": str(proposal.id), "status": proposal.status}

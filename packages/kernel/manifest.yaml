@@ -17,9 +17,30 @@ actions:
   - id: kernel.email.digest
     risk: R0
     description: Build the daily inbox digest.
+  - id: kernel.email.handle
+    risk: R1
+    description: Mark a conversation as dealt with, or reopen it.
+  - id: kernel.email.correct
+    risk: R1
+    description: Correct how the assistant sorted an email.
+  - id: kernel.calendar.change
+    risk: R1
+    description: Add, remove or import someone's busy time.
   - id: kernel.question.answer
     risk: R0
     description: Answer an employee's question from company documents, with citations.
+  - id: kernel.question.feedback
+    risk: R0
+    description: Record whether an answer helped, and pass it to HR if it didn't.
+  - id: kernel.ticket.answer
+    risk: R1
+    description: A person in HR answers a question the assistant passed on.
+  - id: kernel.ticket.close
+    risk: R1
+    description: A person in HR closes a passed-on question that needs no answer.
+  - id: kernel.document.publish
+    risk: R1
+    description: A person in HR publishes a policy document or a new version of one.
   - id: kernel.email.send
     risk: R2
     channel: external
@@ -39,6 +60,9 @@ agents:
     events: [knowledge.question.asked.v1]
     entry: kernel.knowledge.agents:build
     description: Answers from company documents with citations, or passes the question to HR.
+
+publishes:
+  - core.employee.created.v1
 
 graph:
   - event: ai.agent_run.completed.v1

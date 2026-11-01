@@ -247,6 +247,33 @@ def weighted_dense_match(
     return total.quantize(MATCH_PLACES, rounding=ROUND_HALF_UP)
 
 
+def rerank_closest(
+    criteria: list[dict[str, Any]], closest: dict[str, dict[Any, dict[str, Any]]]
+) -> dict[Any, dict[str, str]] | None:
+    """Cross-encoder score of each criterion against each CV's closest passage.
+
+    Returns {cv_id: {criterion_id: score}}, or None if the reranker is unavailable, in which
+    case the ranking is made without it and says so.
+    """
+    from kernel import ml_client
+    from kernel.errors import ProviderUnavailable
+
+    out: dict[Any, dict[str, str]] = {}
+    try:
+        for criterion in criteria:
+            rows = list(closest.get(criterion["id"], {}).items())
+            if not rows:
+                continue
+            scores = ml_client.rerank(criterion_text(criterion), [row["text"] for _, row in rows])
+            for (cv_id, _), value in zip(rows, scores, strict=True):
+                out.setdefault(cv_id, {})[criterion["id"]] = str(
+                    Decimal(str(value)).quantize(SIMILARITY_PLACES, rounding=ROUND_HALF_UP)
+                )
+    except ProviderUnavailable:
+        return None
+    return out
+
+
 def criterion_text(criterion: dict[str, Any]) -> str:
     return f"{criterion['label']}: {criterion.get('description', '')}".strip()
 

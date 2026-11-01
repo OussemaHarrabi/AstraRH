@@ -15,7 +15,15 @@ from kernel.errors import SecurityCheckUnavailable, ValidationFailed
 
 BUCKET = "astrarh"
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024
-ALLOWED_TYPES = {".pdf": "application/pdf", ".docx": "application/docx", ".txt": "text/plain"}
+ALLOWED_TYPES = {
+    ".pdf": "application/pdf",
+    ".docx": "application/docx",
+    ".txt": "text/plain",
+    ".md": "text/markdown",
+    ".html": "text/html",
+    ".htm": "text/html",
+}
+TEXT_SUFFIXES = {".txt", ".md", ".html", ".htm"}
 
 _client: BaseClient | None = None
 
@@ -54,12 +62,12 @@ def check_upload(filename: str, data: bytes) -> str:
         raise ValidationFailed(f"{filename}: larger than {MAX_UPLOAD_BYTES // 1024 // 1024} MB")
     suffix = os.path.splitext(filename.lower())[1]
     if suffix not in ALLOWED_TYPES:
-        raise ValidationFailed(f"{filename}: only PDF, DOCX and TXT are accepted")
+        raise ValidationFailed(f"{filename}: only PDF, DOCX, HTML, Markdown and TXT are accepted")
     if suffix == ".pdf" and not data.startswith(b"%PDF-"):
         raise ValidationFailed(f"{filename}: this is not a real PDF")
     if suffix == ".docx" and not data.startswith(b"PK"):
         raise ValidationFailed(f"{filename}: this is not a real DOCX")
-    if suffix == ".txt":
+    if suffix in TEXT_SUFFIXES:
         if b"\x00" in data:
             raise ValidationFailed(f"{filename}: this is not a text file")
         try:

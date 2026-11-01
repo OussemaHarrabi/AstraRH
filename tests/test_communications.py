@@ -3,6 +3,7 @@ Only the LLM is faked. `astra.py evals` measures these with the real one."""
 
 import json
 from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
@@ -16,12 +17,13 @@ from kernel.ai.gateway import Gateway
 from kernel.ai.graphs import run_agent_graph
 from kernel.ai.providers import LlmResponse
 from kernel.comms import agents as comms_agents
-from kernel.comms.models import Classification, Message
+from kernel.comms.models import Classification, Message, Thread
 from kernel.db import tenant_session, utcnow
+from kernel.explain.models import DecisionEvidence
 from kernel.knowledge.agents import Cited, PolicyAnswer, check_answer
 from kernel.knowledge.agents import build as build_policy
 from kernel.knowledge.models import Question, Ticket
-from kernel.schedule.models import Booking, BookingSeat, BusyBlock
+from kernel.schedule.models import Booking, BookingSeat, BusyBlock, Hold
 from kernel.trust.models import AuditEvent, Proposal
 from packs.talent import communications as talent_comms
 from packs.talent.communications import due_followups, sweep_followups
@@ -41,7 +43,7 @@ OTHER = "bo@mail.example.test"
 class Fake:
     """Returns a fixed answer per schema, and records every prompt."""
 
-    def __init__(self, triage=None, draft=None, policy=None):
+    def __init__(self, triage=None, draft=None, policy=None, slot=None):
         self.triage = triage or {
             "type": "availability",
             "urgency": "normal",
@@ -55,6 +57,7 @@ class Fake:
             "body": "Hello {name}, thank you. The recruitment team",
         }
         self.policy = policy
+        self.slot = slot or {"choice": None, "evidence": {"quote": ""}}
         self.prompts: list[str] = []
 
     def complete(self, model, system, user, schema, max_tokens):
@@ -64,6 +67,8 @@ class Fake:
             body = self.triage
         elif "can_answer" in properties:
             body = self.policy
+        elif "choice" in properties:
+            body = self.slot
         else:
             body = self.draft
         return LlmResponse(json.dumps(body), 10, 10, "fake", model)
@@ -320,6 +325,11 @@ def test_sent_reply_is_recorded_in_the_thread(tenant):
             select(Message.direction).where(Message.thread_id == message.thread_id)
         ).all()
     assert sorted(directions) == ["in", "out"]
+    with tenant_session(tenant) as session:
+        assert session.get(Thread, message.thread_id).status == "handled"
+    receive(tenant, CANDIDATE, "Re: Availability", "Actually Tuesday is better.")
+    with tenant_session(tenant) as session:
+        assert session.get(Thread, message.thread_id).status == "open"
 
 
 # ----- Follow-ups -----
@@ -461,6 +471,62 @@ def test_scheduler_proposes_real_times_and_a_person_approves(tenant):
     assert proposal.payload["to"] == CANDIDATE
 
 
+def offer_slots(tenant, name, email, participants):
+    application_id = add_candidate(tenant, name, email)
+    with tenant_session(tenant) as session:
+        interview = talent_comms.request_interview(session, tenant, application_id, participants)
+    run = run_agent_graph(
+        "scheduler",
+        "talent",
+        talent_comms.build_scheduler(),
+        tenant,
+        event={"interview_id": str(interview.id)},
+        event_id=uuid4(),
+    )
+    assert run.status == "succeeded", run.error
+    with tenant_session(tenant) as session:
+        return session.get(Interview, interview.id)
+
+
+def test_offered_slots_are_held_from_other_candidates(tenant):
+    first = offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
+    second = offer_slots(tenant, "Sami Ben", "sami@mail.test", ["nadia@x.test"])
+    taken = {s["starts_at"] for s in first.slots}
+    assert taken.isdisjoint(s["starts_at"] for s in second.slots)
+    with tenant_session(tenant) as session:
+        holds = session.scalars(select(Hold).where(Hold.owner == f"talent.interview:{first.id}"))
+        assert len(holds.all()) == 3
+
+
+def test_booking_releases_the_other_held_slots(tenant):
+    interview = offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
+    chosen = interview.slots[0]
+    with tenant_session(tenant) as session:
+        talent_comms.book_interview(
+            session, tenant, {"interview_id": str(interview.id), **chosen}, "key"
+        )
+    with tenant_session(tenant) as session:
+        assert session.scalars(select(Hold)).all() == []
+    later = offer_slots(tenant, "Sami Ben", "sami@mail.test", ["nadia@x.test"])
+    assert chosen["starts_at"] not in {s["starts_at"] for s in later.slots}
+    assert interview.slots[1]["starts_at"] in {s["starts_at"] for s in later.slots}
+
+
+def test_rejecting_the_offer_frees_the_held_slots(tenant):
+    from kernel.events import relay_once
+
+    interview = offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
+    approver = make_user(tenant, roles=("hr",))
+    with tenant_session(tenant) as session:
+        proposal = session.scalar(select(Proposal))
+    with as_role("api"), tenant_session(tenant) as session:
+        trust.reject(session, approver.actor, proposal.id, "Wrong week")
+    relay_once(tenant)
+    with tenant_session(tenant) as session:
+        assert session.get(Interview, interview.id).status == "slots_declined"
+        assert session.scalars(select(Hold)).all() == []
+
+
 def test_booking_a_slot_that_stopped_being_free_is_refused(tenant):
     start = tunis(10, 10)
     with tenant_session(tenant) as session:
@@ -539,6 +605,133 @@ def test_approved_booking_books_and_prepares_a_confirmation(tenant):
         )
     assert confirmation.status == "pending_approval"
     assert "confirmed" in confirmation.payload["body"]
+    invite = confirmation.payload["invite"]
+    assert invite["method"] == "REQUEST"
+    assert invite["attendees"] == [CANDIDATE, "nadia@x.test"]
+    assert invite["starts_at"] == start.isoformat()
+
+
+# ----- Calendar invites and cancelling -----
+
+INVITE = {
+    "uid": "interview-1@astrarh.example.test",
+    "title": "Interview: Backend Engineer, Tunis; on site",
+    "starts_at": "2026-11-10T09:00:00+00:00",
+    "ends_at": "2026-11-10T09:45:00+00:00",
+    "attendees": [CANDIDATE],
+    "method": "REQUEST",
+    "sequence": 0,
+}
+
+
+def test_invite_is_valid_icalendar():
+    from kernel.schedule import ics
+
+    text = ics.render(INVITE, "no-reply@cds.example.test", now=datetime(2026, 11, 1, tzinfo=UTC))
+    assert text.endswith("\r\n") and "\n" not in text.replace("\r\n", "")
+    lines = text.split("\r\n")
+    assert "METHOD:REQUEST" in lines and "DTSTART:20261110T090000Z" in lines
+    assert "SUMMARY:Interview: Backend Engineer\\, Tunis\\; on site" in lines
+    assert all(len(line.encode()) <= 75 for line in lines)
+    cancel = ics.render({**INVITE, "method": "CANCEL", "sequence": 1}, "x@cds.example.test")
+    assert "STATUS:CANCELLED" in cancel and "SEQUENCE:1" in cancel
+
+
+@pytest.mark.parametrize(
+    "bad",
+    [
+        {"attendees": ["ana@mail.example.test\r\nATTENDEE:mailto:evil@x.test"]},
+        {"uid": "x\r\nMETHOD:PUBLISH"},
+        {"method": "PUBLISH"},
+        {"ends_at": "2026-11-10T08:00:00+00:00"},
+    ],
+)
+def test_an_invite_cannot_smuggle_lines_or_be_inconsistent(bad):
+    from kernel.schedule import ics
+
+    with pytest.raises(ValueError):
+        ics.render({**INVITE, **bad}, "no-reply@cds.example.test")
+
+
+def test_mail_attaches_the_invite_only_for_its_attendees():
+    from kernel.adapters import mail
+
+    payload = {"to": CANDIDATE, "subject": "Interview", "body": "See you", "invite": INVITE}
+    message = mail.build(payload, "key")
+    attachment = next(message.iter_attachments())
+    assert attachment.get_content_type() == "text/calendar"
+    assert attachment.get_param("method") == "REQUEST"
+    assert "UID:interview-1@astrarh.example.test" in attachment.get_content()
+    with pytest.raises(trust.AdapterRejected, match="list the person"):
+        mail.build({**payload, "to": OTHER}, "key")
+    with pytest.raises(trust.AdapterRejected, match="invite is invalid"):
+        mail.build({**payload, "invite": {**INVITE, "method": "PUBLISH"}}, "key")
+
+
+def booked(tenant):
+    interview = offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
+    with tenant_session(tenant) as session:
+        talent_comms.book_interview(
+            session, tenant, {"interview_id": str(interview.id), **interview.slots[0]}, "key"
+        )
+        return session.get(Interview, interview.id)
+
+
+def test_cancelling_frees_the_calendar_and_prepares_a_cancel_invite(tenant):
+    interview = booked(tenant)
+    with tenant_session(tenant) as session:
+        reference = talent_comms.cancel_interview(
+            session, tenant, {"interview_id": str(interview.id), "reason": "Panel ill"}, "key"
+        )
+    assert reference.endswith(":cancelled")
+    with tenant_session(tenant) as session:
+        assert session.get(Interview, interview.id).status == "cancelled"
+        booking = session.get(Booking, interview.booking_id)
+        assert booking.status == "cancelled" and booking.cancelled_at is not None
+        assert session.scalars(select(BookingSeat)).all() == []
+        notice = session.scalar(
+            select(Proposal).where(Proposal.idempotency_key == f"interview_cancel:{interview.id}")
+        )
+    assert notice.payload["invite"]["method"] == "CANCEL"
+    assert notice.payload["invite"]["uid"] == talent_comms.invite_uid(interview.id)
+    assert notice.payload["invite"]["sequence"] == 1
+    with tenant_session(tenant) as session:
+        again = talent_comms.cancel_interview(
+            session, tenant, {"interview_id": str(interview.id), "reason": "x"}, "key"
+        )
+    assert again.endswith("already_cancelled")
+
+
+def test_rescheduling_opens_a_new_request_and_frees_the_old_time(tenant):
+    interview = booked(tenant)
+    with tenant_session(tenant) as session:
+        reference = talent_comms.cancel_interview(
+            session,
+            tenant,
+            {"interview_id": str(interview.id), "reason": "Clash", "reschedule": True},
+            "key",
+        )
+    assert ":rescheduled:" in reference
+    with tenant_session(tenant) as session:
+        interviews = session.scalars(
+            select(Interview).where(Interview.application_id == interview.application_id)
+        ).all()
+    assert sorted(i.status for i in interviews) == ["cancelled", "requested"]
+
+
+def test_an_unbooked_interview_cancels_without_telling_the_candidate(tenant):
+    interview = offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
+    with tenant_session(tenant) as session:
+        talent_comms.cancel_interview(
+            session, tenant, {"interview_id": str(interview.id), "reason": "Role closed"}, "key"
+        )
+        assert session.scalars(select(Hold)).all() == []
+        assert (
+            session.scalar(
+                select(Proposal).where(Proposal.idempotency_key.like("interview_cancel:%"))
+            )
+            is None
+        )
 
 
 # ----- Employee questions -----
@@ -680,9 +873,115 @@ def test_check_answer_rules():
     # The model often puts the citation after the full stop; it still belongs to that sentence.
     after = PolicyAnswer(can_answer=True, answer="Up to 5 days. [C1]", citations=quote)
     assert check_answer(after, {"C1": hit}) is None
-    two = PolicyAnswer(can_answer=True, answer="Up to 5 days. [C1] Use them early.", citations=quote)
+    two = PolicyAnswer(
+        can_answer=True, answer="Up to 5 days. [C1] Use them early.", citations=quote
+    )
     assert check_answer(two, {"C1": hit}) == "a sentence has no citation"
     missing = PolicyAnswer(can_answer=True, answer="Up to 5 days. [C9]", citations=quote)
     assert check_answer(missing, {"C1": hit}) == "a citation points at no passage"
     with pytest.raises(ValidationError):
         Cited(ref="C1")
+
+
+# ----- A candidate's answer about times -----
+
+
+def answer(tenant, body, kind="availability", slot=None):
+    declare_action("talent.interview.book", channel="internal")
+    declare_action("talent.interview.cancel", channel="internal")
+    message = receive(tenant, CANDIDATE, "Re: Interview for Backend Engineer", body)
+    triage(
+        tenant, message, Fake(triage={**Fake().triage, "type": kind, "evidence": {"quote": body}})
+    )
+    fake = Fake(slot=slot)
+    proposals = draft(tenant, message, fake)
+    return message, fake, proposals
+
+
+def by_action(proposals, action):
+    return [p for p in proposals if p.action_type == action]
+
+
+def test_a_clear_choice_of_an_offered_time_becomes_a_booking_to_approve(tenant):
+    interview = offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
+    body = "Thank you! The second time works best for me."
+    message, fake, proposals = answer(
+        tenant, body, slot={"choice": 2, "evidence": {"quote": "The second time works best"}}
+    )
+    [booking] = by_action(proposals, "talent.interview.book")
+    assert booking.status == "pending_approval"
+    assert booking.payload == {"interview_id": str(interview.id), **interview.slots[1]}
+    assert booking.target["thread_id"] == str(message.thread_id)
+    assert "2. " in fake.prompts[-1] and "Ana Ali" not in fake.prompts[-1]
+    # No reply draft as well: the confirmation follows the booking, once a person approves it.
+    assert [p.idempotency_key for p in by_action(proposals, "kernel.email.send")] == [
+        f"interview_slots:{interview.id}"
+    ]
+    with tenant_session(tenant) as session:
+        quotes = session.scalars(
+            select(DecisionEvidence.quote).where(
+                DecisionEvidence.record_id == booking.decision_record_id
+            )
+        ).all()
+    assert quotes == ["The second time works best"]
+
+
+@pytest.mark.parametrize(
+    "slot",
+    [
+        {"choice": None, "evidence": {"quote": ""}},  # no clear choice
+        {"choice": 7, "evidence": {"quote": "works for me"}},  # not an offered time
+        {"choice": 1, "evidence": {"quote": "Monday at 9 is perfect"}},  # quote not in the reply
+    ],
+)
+def test_an_unclear_answer_gets_a_normal_reply_draft_not_a_booking(tenant, slot):
+    offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
+    _, _, proposals = answer(tenant, "Hmm, any of them works for me I think.", slot=slot)
+    assert by_action(proposals, "talent.interview.book") == []
+    assert any(p.idempotency_key.startswith("reply:") for p in proposals)
+
+
+def test_a_request_to_move_a_booked_interview_becomes_a_reschedule_to_approve(tenant):
+    interview = booked(tenant)
+    message, _, proposals = answer(tenant, "Something came up, could we move it?", "reschedule")
+    [move] = by_action(proposals, "talent.interview.cancel")
+    assert move.payload == {
+        "interview_id": str(interview.id),
+        "reason": "The candidate asked to move it",
+        "reschedule": True,
+    }
+    assert move.idempotency_key == f"cancel:{interview.id}"
+    assert move.target["thread_id"] == str(message.thread_id)
+
+
+def test_a_moved_interview_is_announced_as_moved_not_cancelled(tenant):
+    interview = booked(tenant)
+    with tenant_session(tenant) as session:
+        talent_comms.cancel_interview(
+            session,
+            tenant,
+            {"interview_id": str(interview.id), "reason": "Asked", "reschedule": True},
+            "key",
+        )
+        notice = session.scalar(
+            select(Proposal).where(Proposal.idempotency_key == f"interview_cancel:{interview.id}")
+        )
+    assert notice.payload["subject"].startswith("Interview moved")
+    assert "New times will follow" in notice.payload["body"]
+
+
+def test_an_approved_booking_from_a_conversation_marks_it_handled(tenant):
+    offer_slots(tenant, "Ana Ali", CANDIDATE, ["nadia@x.test"])
+    message, _, proposals = answer(
+        tenant, "The first one is great.", slot={"choice": 1, "evidence": {"quote": "first one"}}
+    )
+    [booking] = by_action(proposals, "talent.interview.book")
+    event = SimpleNamespace(
+        tenant_id=tenant,
+        payload={"proposal_id": str(booking.id), "action_type": "talent.interview.book"},
+    )
+    with tenant_session(tenant) as session:
+        comms.record_outbound(session, event)
+        thread = session.get(Thread, message.thread_id)
+        assert thread.status == "handled"
+        assert thread.handled_note.startswith("Done: Book")

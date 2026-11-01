@@ -27,6 +27,17 @@ def require_role(actor: Actor, roles: Iterable[str], target: dict[str, Any] | No
         raise PermissionDenied("You do not have access to this.")
 
 
+def require_role_any_scope(actor: Actor, roles: Iterable[str]) -> None:
+    """For list/detail endpoints that filter rows themselves.
+
+    A scoped manager is allowed through the role gate; the query must still restrict the
+    rows to people they manage. Use require_role with a target for approvals and writes.
+    """
+    allowed = set(roles)
+    if not any(grant.role in allowed for grant in actor.grants):
+        raise PermissionDenied("You do not have access to this.")
+
+
 def can_approve(
     actor: Actor,
     view_roles: Iterable[str],

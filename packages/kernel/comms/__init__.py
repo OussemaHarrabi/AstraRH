@@ -51,6 +51,14 @@ class MessageReceived(BaseModel):
     thread_id: UUID
 
 
+@event_type("comms.classification.corrected.v1")
+class ClassificationCorrected(BaseModel):
+    message_id: UUID
+    corrected_by: UUID
+    before: dict[str, Any]
+    after: dict[str, Any]
+
+
 @event_type("comms.message.classified.v1")
 class MessageClassified(BaseModel):
     message_id: UUID
@@ -125,8 +133,51 @@ def ingest(
     session.add(message)
     session.flush()
     if direction == "in":
+        reopen(thread)
         publish(session, tenant_id, MessageReceived(message_id=message.id, thread_id=thread.id))
     return message
+
+
+def mark_handled(thread: Thread, user_id: UUID | None, note: str | None = None) -> None:
+    thread.status = "handled"
+    thread.handled_by = user_id
+    thread.handled_at = utcnow()
+    thread.handled_note = note
+
+
+def reopen(thread: Thread) -> None:
+    thread.status = "open"
+    thread.handled_by = None
+    thread.handled_at = None
+    thread.handled_note = None
+
+
+SORTING_FIELDS = ("type", "urgency", "needs_human", "human_reason")
+
+
+def correct(
+    session: Session,
+    classification: Classification,
+    user_id: UUID,
+    changes: dict[str, Any],
+) -> Classification:
+    """A person's sorting replaces the model's. The first model answer is kept for evals."""
+    before = {field: getattr(classification, field) for field in SORTING_FIELDS}
+    if classification.model_values is None:
+        classification.model_values = before
+    for field, value in changes.items():
+        setattr(classification, field, value)
+    classification.corrected_by = user_id
+    classification.corrected_at = utcnow()
+    after = {field: getattr(classification, field) for field in SORTING_FIELDS}
+    publish(
+        session,
+        classification.tenant_id,
+        ClassificationCorrected(
+            message_id=classification.message_id, corrected_by=user_id, before=before, after=after
+        ),
+    )
+    return classification
 
 
 def build_digest(session: Session, tenant_id: UUID, day: date | None = None) -> Digest:
@@ -167,6 +218,13 @@ def digest_view(session: Session, digest: Digest) -> dict[str, Any]:
         .join(DigestItem, DigestItem.message_id == Message.id)
         .where(DigestItem.digest_id == digest.id)
     ).all()
+    statuses = dict(
+        session.execute(
+            select(Thread.id, Thread.status).where(
+                Thread.id.in_({message.thread_id for _, message in rows})
+            )
+        ).all()
+    )
     items = sorted(
         rows,
         key=lambda pair: (
@@ -188,6 +246,8 @@ def digest_view(session: Session, digest: Digest) -> dict[str, Any]:
                 "needs_human": classification.needs_human,
                 "human_reason": classification.human_reason,
                 "flagged": classification.flagged,
+                "corrected": classification.corrected_at is not None,
+                "thread_status": statuses.get(message.thread_id, "open"),
                 "sent_at": message.sent_at.isoformat(),
             }
         )
@@ -197,11 +257,15 @@ def digest_view(session: Session, digest: Digest) -> dict[str, Any]:
 @subscribe("trust.action.executed.v1", "comms.record_outbound")
 def record_outbound(session: Session, event: EventOutbox) -> None:
     """An approved email that went out belongs in its thread, which also stops its follow-ups."""
-    if event.payload["action_type"] != "kernel.email.send":
-        return
     proposal = session.get(Proposal, UUID(event.payload["proposal_id"]))
+    if event.payload["action_type"] != "kernel.email.send":
+        thread_id = proposal.target.get("thread_id")
+        thread = session.get(Thread, UUID(thread_id)) if thread_id else None
+        if thread is not None and thread.status != "handled":
+            mark_handled(thread, None, f"Done: {proposal.summary}")
+        return
     payload = proposal.payload
-    ingest(
+    sent = ingest(
         session,
         event.tenant_id,
         f"sent:{proposal.id}",
@@ -212,3 +276,6 @@ def record_outbound(session: Session, event: EventOutbox) -> None:
         payload["body"],
         thread_id=UUID(proposal.target["thread_id"]) if proposal.target.get("thread_id") else None,
     )
+    if sent is not None and proposal.target.get("thread_id"):
+        # A reply a person approved answers the conversation. Reminders and invites don't.
+        mark_handled(session.get(Thread, sent.thread_id), None, "Approved reply sent")

@@ -4,25 +4,43 @@ Same idea as CV ranking: vector similarity for meaning, plus full-text search fo
 combined by reciprocal rank fusion. A person can't retrieve text they couldn't read.
 """
 
+import logging
 import re
 from dataclasses import dataclass
+from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy import text
+from sqlalchemy import select, text, update
 from sqlalchemy.orm import Session
 
 from kernel import ml_client
-from kernel.events import event_type
+from kernel.db import utcnow
+from kernel.errors import ProviderUnavailable
+from kernel.events import EventOutbox, event_type, subscribe
 from kernel.knowledge.models import Chunk, Document, Question, Ticket
 
-__all__ = ["Chunk", "Document", "Question", "Ticket", "chunk_markdown", "ingest_document", "search"]
+__all__ = [
+    "Chunk",
+    "Document",
+    "Question",
+    "Ticket",
+    "chunk_markdown",
+    "index_document",
+    "ingest_document",
+    "search",
+]
+
+log = logging.getLogger("kernel.knowledge")
 
 RRF_K = 60
 TOP_K = 5
 CANDIDATES = 20
+# The cross-encoder reorders the best fused candidates. It reads question and passage
+# together, so it tells "annual leave" from "sick leave" better than either search.
+RERANK_CANDIDATES = 10
 SECTION = re.compile(r"^#{1,3}\s+(.+)$", re.MULTILINE)
 
 
@@ -37,6 +55,18 @@ class QuestionEscalated(BaseModel):
     ticket_id: UUID
 
 
+@event_type("knowledge.ticket.resolved.v1")
+class TicketResolved(BaseModel):
+    ticket_id: UUID
+    question_id: UUID
+    outcome: str  # answered | closed
+
+
+@event_type("knowledge.document.submitted.v1")
+class DocumentSubmitted(BaseModel):
+    document_id: UUID
+
+
 @dataclass(frozen=True)
 class Hit:
     chunk_id: UUID
@@ -46,6 +76,7 @@ class Hit:
     text: str
     similarity: Decimal
     score: Decimal
+    relevance: Decimal | None = None  # reranker score; None if it was unavailable
 
     def as_json(self, ref: str) -> dict[str, Any]:
         return {
@@ -55,6 +86,7 @@ class Hit:
             "version": self.document_version,
             "section": self.section,
             "text": self.text,
+            "relevance": str(self.relevance) if self.relevance is not None else None,
         }
 
 
@@ -80,18 +112,32 @@ def ingest_document(
     markdown: str,
     audience_roles: list[str] | None = None,
     version: str = "1",
+    effective_date: date | None = None,
 ) -> Document:
-    audience = audience_roles or []
+    """Index a document now. Uploads through the API go through `index_document` in the worker."""
     document = Document(
         tenant_id=tenant_id,
         external_id=external_id,
         title=title,
         version=version,
-        audience_roles=audience,
+        effective_date=effective_date,
+        audience_roles=audience_roles or [],
+        status="processing",
+        source=markdown,
     )
     session.add(document)
     session.flush()
-    sections = chunk_markdown(markdown)
+    _index(session, document)
+    return document
+
+
+def _index(session: Session, document: Document) -> None:
+    """Chunk and embed, then make this the only active version of its external_id."""
+    tenant_id, title, audience = document.tenant_id, document.title, document.audience_roles
+    sections = chunk_markdown(document.source or "")
+    if not sections:
+        document.status = "failed"
+        return
     vectors = ml_client.embed([f"{title}. {name}. {body}" for name, body in sections])
     for position, ((name, body), vector) in enumerate(zip(sections, vectors, strict=True)):
         session.add(
@@ -105,15 +151,37 @@ def ingest_document(
                 embedding=vector,
             )
         )
+    older = select(Document.id).where(
+        Document.external_id == document.external_id,
+        Document.id != document.id,
+        Document.status == "active",
+    )
+    older_ids = list(session.scalars(older))
+    if older_ids:
+        session.execute(
+            update(Document)
+            .where(Document.id.in_(older_ids))
+            .values(status="superseded", superseded_at=utcnow())
+        )
+        session.execute(update(Chunk).where(Chunk.document_id.in_(older_ids)).values(active=False))
+    document.status = "active"
     session.flush()
-    return document
+
+
+@subscribe("knowledge.document.submitted.v1", "knowledge.index_document")
+def index_document(session: Session, event: EventOutbox) -> None:
+    """Embedding needs the ml service, which only the worker reaches, so uploads index here."""
+    document = session.get(Document, UUID(event.payload["document_id"]), with_for_update=True)
+    if document is None or document.status != "processing":
+        return
+    _index(session, document)
 
 
 def search(session: Session, question: str, roles: list[str], top_k: int = TOP_K) -> list[Hit]:
     """Permissions are inside the WHERE of both searches, so forbidden text can't even rank."""
     vector = ml_client.embed([question])[0]
     literal = "[" + ",".join(f"{x:.6f}" for x in vector) + "]"
-    allowed = "(c.audience_roles = '{}' OR c.audience_roles && CAST(:roles AS text[]))"
+    allowed = "c.active AND (c.audience_roles = '{}' OR c.audience_roles && CAST(:roles AS text[]))"
     params = {"literal": literal, "roles": roles, "question": question, "limit": CANDIDATES}
     dense = session.execute(
         text(
@@ -142,17 +210,22 @@ def search(session: Session, question: str, roles: list[str], top_k: int = TOP_K
         row.id: Decimal(str(row.similarity)).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
         for row in dense
     }
-    top = sorted(fused, key=lambda chunk_id: (-fused[chunk_id], str(chunk_id)))[:top_k]
-    if not top:
+    candidates = sorted(fused, key=lambda chunk_id: (-fused[chunk_id], str(chunk_id)))
+    candidates = candidates[: max(top_k, RERANK_CANDIDATES)]
+    if not candidates:
         return []
     rows = session.execute(
         text(
             "SELECT c.id, c.section, c.text, d.title, d.version FROM knowledge.chunk c "
             "JOIN knowledge.document d ON d.id = c.document_id WHERE c.id = ANY(:ids)"
         ),
-        {"ids": top},
+        {"ids": candidates},
     ).all()
     by_id = {row.id: row for row in rows}
+    relevance = _rerank(question, [(c, by_id[c]) for c in candidates])
+    if relevance:
+        candidates.sort(key=lambda c: (-relevance[c], -fused[c], str(c)))
+    top = candidates[:top_k]
     return [
         Hit(
             chunk_id=chunk_id,
@@ -162,9 +235,25 @@ def search(session: Session, question: str, roles: list[str], top_k: int = TOP_K
             text=by_id[chunk_id].text,
             similarity=similarity.get(chunk_id, Decimal(0)),
             score=fused[chunk_id],
+            relevance=relevance.get(chunk_id),
         )
         for chunk_id in top
     ]
+
+
+def _rerank(question: str, rows: list[tuple[UUID, Any]]) -> dict[UUID, Decimal]:
+    """Reranker scores by chunk. If the reranker is down, the fused order is kept and logged."""
+    try:
+        scores = ml_client.rerank(
+            question, [f"{row.title}. {row.section}. {row.text}" for _, row in rows]
+        )
+    except ProviderUnavailable:
+        log.warning("reranker unavailable, keeping the hybrid search order")
+        return {}
+    return {
+        chunk_id: Decimal(str(value)).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+        for (chunk_id, _), value in zip(rows, scores, strict=True)
+    }
 
 
 def _or_query(question: str) -> str:

@@ -6,18 +6,18 @@
   "every_good_candidate_above_every_no_fit": true,
   "hard_set_size": 12,
   "hard_set_ndcg_at_5": 1.0,
-  "hard_set_ndcg_at_12": 0.9994,
+  "hard_set_ndcg_at_12": 1.0,
   "hard_set_order": [
     {
       "rank_in_set": 1,
       "true_relevance": 3,
-      "score": "0.8574",
+      "score": "0.7858",
       "meets_must_haves": true
     },
     {
       "rank_in_set": 2,
       "true_relevance": 3,
-      "score": "0.8473",
+      "score": "0.7539",
       "meets_must_haves": true
     },
     {
@@ -29,86 +29,86 @@
     {
       "rank_in_set": 4,
       "true_relevance": 2,
-      "score": "0.5909",
+      "score": "0.5135",
       "meets_must_haves": true
     },
     {
       "rank_in_set": 5,
       "true_relevance": 2,
-      "score": "0.5867",
+      "score": "0.4732",
       "meets_must_haves": true
     },
     {
       "rank_in_set": 6,
       "true_relevance": 2,
-      "score": "0.4349",
+      "score": "0.4424",
       "meets_must_haves": true
     },
     {
       "rank_in_set": 7,
       "true_relevance": 1,
-      "score": "0.3701",
+      "score": "0.3669",
       "meets_must_haves": true
     },
     {
       "rank_in_set": 8,
       "true_relevance": 1,
-      "score": "0.4788",
+      "score": "0.3730",
       "meets_must_haves": false
     },
     {
       "rank_in_set": 9,
-      "true_relevance": 0,
-      "score": "0.2109",
+      "true_relevance": 1,
+      "score": "0.2978",
       "meets_must_haves": false
     },
     {
       "rank_in_set": 10,
-      "true_relevance": 1,
-      "score": "0.2047",
+      "true_relevance": 0,
+      "score": "0.1556",
       "meets_must_haves": false
     },
     {
       "rank_in_set": 11,
       "true_relevance": 0,
-      "score": "0.1620",
+      "score": "0.1007",
       "meets_must_haves": false
     },
     {
       "rank_in_set": 12,
       "true_relevance": 0,
-      "score": "0.0886",
+      "score": "0.0825",
       "meets_must_haves": false
     }
   ],
   "top_5": [
     {
       "rank": 1,
-      "score": "0.85742000",
+      "score": "0.78581000",
       "true_relevance": 3,
       "kind": "hard"
     },
     {
       "rank": 2,
-      "score": "0.84730000",
+      "score": "0.75388000",
       "true_relevance": 3,
       "kind": "hard"
     },
     {
       "rank": 3,
-      "score": "0.77510000",
+      "score": "0.74346000",
       "true_relevance": 3,
-      "kind": "hero"
+      "kind": "hard"
     },
     {
       "rank": 4,
-      "score": "0.76186300",
+      "score": "0.72155200",
       "true_relevance": 3,
       "kind": "regular"
     },
     {
       "rank": 5,
-      "score": "0.75856600",
+      "score": "0.72109700",
       "true_relevance": 3,
       "kind": "regular"
     }
@@ -119,44 +119,44 @@
   "name_swap_score_unchanged": true,
   "attacks": {
     "attack_keyword_stuffing": {
-      "rank": 27,
+      "rank": 28,
       "of": 42,
-      "score": "0.26154100",
+      "score": "0.24769950",
       "flagged": false
     },
     "attack_visible_instruction": {
-      "rank": 33,
+      "rank": 34,
       "of": 42,
-      "score": "0.07383000",
+      "score": "0.07362000",
       "flagged": true
     },
     "attack_white_text": {
       "rank": 35,
       "of": 42,
-      "score": "0.06795000",
+      "score": "0.06501000",
       "flagged": true
     },
     "attack_french_instruction": {
-      "rank": 42,
+      "rank": 41,
       "of": 42,
-      "score": "0.03039000",
+      "score": "0.02784000",
       "flagged": true
     }
   },
-  "quotes_verified_in_source": "170/170",
+  "quotes_verified_in_source": "177/177",
   "invented_quotes_removed": 0,
   "fresh_reread_rank_correlation": 1.0,
   "fresh_reread_top5_overlap": "5/5",
   "fresh_reread_max_score_change": "0.0000",
-  "llm_calls": 71,
-  "llm_cache_hits": 33,
-  "llm_input_tokens": 95211,
-  "llm_output_tokens": 15713,
-  "llm_cost_usd_one_full_run": "0.017381",
+  "llm_calls": 74,
+  "llm_cache_hits": 31,
+  "llm_input_tokens": 99201,
+  "llm_output_tokens": 15869,
+  "llm_cost_usd_one_full_run": "0.017856",
   "models": [
     "claude-haiku-5-5"
   ],
-  "seconds_to_read_all_cvs": 35.2,
-  "scorer": "talent.rubric@2",
-  "total_seconds": 133.5
+  "seconds_to_read_all_cvs": 65.7,
+  "scorer": "talent.rubric@3",
+  "total_seconds": 311.2
 }

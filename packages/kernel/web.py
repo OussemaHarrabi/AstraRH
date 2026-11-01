@@ -5,12 +5,13 @@ import secrets
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
+from datetime import date
 from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, FastAPI, Query, Request, Response
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -18,7 +19,14 @@ from kernel import explain, graph, registry, trust
 from kernel.ai.models import AgentRun, AgentStep
 from kernel.authz import has_role, require_role
 from kernel.db import tenant_session
-from kernel.errors import KernelError, NotAuthenticated, NotFound, PermissionDenied
+from kernel.errors import (
+    Conflict,
+    KernelError,
+    NotAuthenticated,
+    NotFound,
+    PermissionDenied,
+)
+from kernel.events import publish
 from kernel.identity import (
     SESSION_HOURS,
     STEP_UP_MINUTES,
@@ -32,7 +40,8 @@ from kernel.identity import (
     verify_password,
 )
 from kernel.identity.models import UserAccount
-from kernel.people.models import Employee, KpiDefinition, OrgUnit, Position, Skill
+from kernel.people import EmployeeCreated
+from kernel.people.models import Employee, KpiDefinition, OrgUnit, Person, Position, Skill
 from kernel.trust.models import ActionType, AuditEvent, Proposal
 
 SESSION_COOKIE = "astra_session"
@@ -386,6 +395,89 @@ def get_run(run_id: UUID, request: Request) -> dict[str, Any]:
 people_router = APIRouter(prefix="/people", tags=["people"])
 
 
+class EmployeeBody(BaseModel):
+    person_id: UUID
+    display_name: str = Field(min_length=1, max_length=200)
+    email: str = Field(min_length=3, max_length=320)
+    org_unit_id: UUID
+    position_id: UUID
+    manager_id: UUID | None = None
+    start_date: date
+    external_id: str | None = Field(default=None, pattern=r"^[A-Za-z0-9._-]{1,64}$")
+
+
+def _employee_json(employee: Employee) -> dict[str, Any]:
+    return {
+        "id": str(employee.id),
+        "external_id": employee.external_id,
+        "person_id": str(employee.person_id),
+        "display_name": employee.display_name,
+        "email": employee.email,
+        "org_unit_id": str(employee.org_unit_id),
+        "position_id": str(employee.position_id),
+        "manager_id": str(employee.manager_id) if employee.manager_id else None,
+        "start_date": employee.start_date.isoformat(),
+        "status": employee.status,
+    }
+
+
+@people_router.post("/employees", status_code=201)
+def create_employee(body: EmployeeBody, request: Request) -> dict[str, Any]:
+    """Turn a hired person into an employee. HR/admin only; emits core.employee.created.v1."""
+    with request_context(request) as ctx:
+        require_role(ctx.actor, {"admin", "hr"})
+        session = ctx.session
+        person = session.get(Person, body.person_id)
+        if person is None:
+            raise NotFound("Person not found")
+        if session.scalar(select(Employee.id).where(Employee.person_id == body.person_id)):
+            raise Conflict("This person already has an employee record")
+        for model, value, label in (
+            (OrgUnit, body.org_unit_id, "Org unit"),
+            (Position, body.position_id, "Position"),
+        ):
+            if session.get(model, value) is None:
+                raise NotFound(f"{label} not found")
+        if body.manager_id is not None and session.get(Employee, body.manager_id) is None:
+            raise NotFound("Manager not found")
+        external_id = body.external_id or f"EMP-{person.id.hex[:8].upper()}"
+        if session.scalar(select(Employee.id).where(Employee.external_id == external_id)):
+            raise Conflict("That employee external id is already in use")
+        employee = Employee(
+            tenant_id=ctx.actor.tenant_id,
+            external_id=external_id,
+            person_id=body.person_id,
+            display_name=body.display_name,
+            email=body.email,
+            org_unit_id=body.org_unit_id,
+            position_id=body.position_id,
+            manager_id=body.manager_id,
+            start_date=body.start_date,
+        )
+        session.add(employee)
+        person.lifecycle = "employee"
+        session.flush()
+        publish(
+            session,
+            ctx.actor.tenant_id,
+            EmployeeCreated(
+                employee_id=employee.id,
+                person_id=employee.person_id,
+                external_id=employee.external_id,
+                start_date=employee.start_date,
+            ),
+        )
+        trust.audit.append(
+            session,
+            ctx.actor.tenant_id,
+            "human",
+            ctx.actor.user_id,
+            "people.employee.create",
+            data={"employee_id": str(employee.id), "person_id": str(employee.person_id)},
+        )
+        return _employee_json(employee)
+
+
 @people_router.get("/employees")
 def list_employees(request: Request) -> list[dict[str, Any]]:
     with request_context(request) as ctx:
@@ -450,6 +542,7 @@ def list_packs(request: Request) -> list[dict[str, Any]]:
 def install(app: FastAPI) -> None:
     from kernel.comms.api import router as comms_router
     from kernel.knowledge.api import router as knowledge_router
+    from kernel.schedule.api import router as calendar_router
 
     @app.exception_handler(KernelError)
     def handle_kernel_error(_: Request, exc: KernelError) -> JSONResponse:
@@ -467,5 +560,6 @@ def install(app: FastAPI) -> None:
         registry_router,
         comms_router,
         knowledge_router,
+        calendar_router,
     ):
         app.include_router(router)

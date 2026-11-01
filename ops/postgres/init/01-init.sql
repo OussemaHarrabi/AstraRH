@@ -1,13 +1,17 @@
-#!/bin/bash
-# Runs once, on an empty database volume. Creates per-process roles and schemas.
-# No application role is a superuser or has BYPASSRLS, so row-level security applies to all of them.
-set -euo pipefail
+-- Runs once, on an empty database volume. Creates per-process roles and schemas.
+-- No application role is a superuser or has BYPASSRLS, so row-level security applies to all of them.
+--
+-- A .sql file, not a .sh script: the Postgres entrypoint reads .sql files with psql, so this works
+-- the same on macOS, Windows and Linux. A mounted .sh must be executable, and Docker Desktop for Mac
+-- reports it as executable but cannot run it ("bad interpreter: Permission denied").
+-- \getenv (psql 15+) reads each password from the container environment. If one is missing, the
+-- variable stays unset, the statement below fails, and initialisation stops (fail closed).
 
-psql -v ON_ERROR_STOP=1 --username postgres --dbname astra \
-  -v owner_pw="$ASTRA_OWNER_PASSWORD" \
-  -v api_pw="$ASTRA_API_PASSWORD" \
-  -v worker_pw="$ASTRA_WORKER_PASSWORD" \
-  -v executor_pw="$ASTRA_EXECUTOR_PASSWORD" <<'SQL'
+\getenv owner_pw ASTRA_OWNER_PASSWORD
+\getenv api_pw ASTRA_API_PASSWORD
+\getenv worker_pw ASTRA_WORKER_PASSWORD
+\getenv executor_pw ASTRA_EXECUTOR_PASSWORD
+
 CREATE ROLE astra_owner    LOGIN PASSWORD :'owner_pw'    NOSUPERUSER NOBYPASSRLS NOCREATEROLE NOCREATEDB;
 CREATE ROLE astra_api      LOGIN PASSWORD :'api_pw'      NOSUPERUSER NOBYPASSRLS NOCREATEROLE NOCREATEDB;
 CREATE ROLE astra_worker   LOGIN PASSWORD :'worker_pw'   NOSUPERUSER NOBYPASSRLS NOCREATEROLE NOCREATEDB;
@@ -37,4 +41,3 @@ END $$;
 GRANT USAGE ON SCHEMA trust TO astra_executor;
 ALTER DEFAULT PRIVILEGES FOR ROLE astra_owner IN SCHEMA trust GRANT SELECT, INSERT, UPDATE ON TABLES TO astra_executor;
 ALTER DEFAULT PRIVILEGES FOR ROLE astra_owner IN SCHEMA trust GRANT USAGE, SELECT ON SEQUENCES TO astra_executor;
-SQL

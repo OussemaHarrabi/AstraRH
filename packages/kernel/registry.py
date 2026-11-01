@@ -163,6 +163,8 @@ def sync_catalogue() -> None:
 def install_kernel_consumers() -> None:
     """Importing registers the consumers."""
     import_module("kernel.comms")
+    import_module("kernel.comms.inbound")
+    import_module("kernel.knowledge")
 
 
 def install_graph_projections() -> None:

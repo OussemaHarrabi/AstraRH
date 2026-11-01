@@ -8,7 +8,7 @@ from uuid import uuid4
 
 import pytest
 from conftest import as_role, declare_action
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 
 from kernel import ai, trust
@@ -305,6 +305,20 @@ def test_strict_schema_closes_every_object():
     assert schema["required"] == ["inner", "items"]
     assert schema["$defs"]["Inner"]["additionalProperties"] is False
     assert schema["$defs"]["Inner"]["required"] == ["a"]
+
+
+def test_strict_schema_drops_bounds_the_api_rejects_but_pydantic_keeps_them():
+    class Pick(BaseModel):
+        choice: int | None = Field(default=None, ge=1, le=10)
+        note: str = Field(max_length=40)
+        minimum: str  # a field that happens to share a keyword's name
+
+    schema = strict_json_schema(Pick.model_json_schema())
+    assert "minimum" in schema["properties"]
+    assert "minimum" not in json.dumps(schema["properties"]["choice"])
+    assert "maxLength" not in json.dumps(schema)
+    with pytest.raises(ValueError):
+        Pick.model_validate({"choice": 11, "note": "x", "minimum": "y"})
 
 
 # ----- Quarantined reader -----

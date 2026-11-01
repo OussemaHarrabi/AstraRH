@@ -7,6 +7,7 @@ x-python-mounts: &python-mounts
   - ./pyproject.toml:/app/pyproject.toml:ro
   - ./ops/compose.yaml:/app/ops/compose.yaml:ro
   - ./data:/app/data:ro
+  - ./seed:/app/seed:ro
 
 services:
   migrate:
@@ -21,6 +22,7 @@ services:
       - ./packages:/app/packages
       - ./apps:/app/apps:ro
       - ./data:/app/data:ro
+      - ./seed:/app/seed:ro
 
   # Runs as the API role by default. Tests switch roles to prove the database rules.
   tests:

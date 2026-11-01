@@ -147,6 +147,7 @@ services:
       DATABASE_URL: postgresql://astra_executor:${ASTRA_EXECUTOR_PASSWORD}@postgres:5432/astra
       SMTP_HOST: mailpit
       SMTP_PORT: "1025"
+      INBOUND_MAILBOXES: cds=hr@cds.example.test
     networks: [data, mail, telemetry]
     depends_on:
       migrate: { condition: service_completed_successfully }
@@ -165,13 +166,22 @@ services:
     environment:
       <<: *otel-env
       OTEL_SERVICE_NAME: astra-ml
+      # No internet here: models come only from the image.
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      DOCLING_THREADS: "4"
+      # The filesystem is read-only: any cache goes to the tmpfs.
+      HOME: /tmp
+      HF_HOME: /tmp/hf
+      XDG_CACHE_HOME: /tmp/cache
+      TORCH_HOME: /tmp/torch
     networks: [ml, telemetry]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8001/healthz', timeout=3)"]
       interval: 10s
       timeout: 5s
       retries: 12
-    mem_limit: 1536m
+    mem_limit: 4g
 
   postgres:
     image: pgvector/pgvector:pg17@sha256:7d0a41464797aeb9862dfdc0bbf1526b82cfd324cdd8036df19e3545f4a9ccb8

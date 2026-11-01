@@ -45,11 +45,24 @@ def _guess_name(text: str) -> str | None:
     return None
 
 
-def blind(text: str) -> Blinded:
-    name = _guess_name(text)
-    email_match = EMAIL.search(text)
-    phone_match = PHONE.search(text)
+def _flexible(value: str) -> re.Pattern:
+    """The same words, allowing any spacing or Markdown marks between them."""
+    words = [re.escape(w) for w in re.findall(r"[^\s*_#|>]+", value)]
+    return re.compile(r"[\s*_#|>]*".join(words), re.IGNORECASE)
+
+
+def blind(text: str, lines: str | None = None) -> Blinded:
+    """`text` is what gets read and scored. `lines` is the same CV line by line, when the parser
+    joined lines into paragraphs: names and protected lines are found there, removed from `text`."""
+    source = lines or text
+    name = _guess_name(source)
+    email_match = EMAIL.search(source) or EMAIL.search(text)
+    phone_match = PHONE.search(source) or PHONE.search(text)
+    protected = [m.group().strip() for m in PROTECTED_LINE.finditer(source) if m.group().strip()]
     working, removed = PROTECTED_LINE.subn("", text)
+    for value in protected:
+        working = _flexible(value).sub("", working)
+    removed = max(removed, len(protected))
     # Mask contact details first: an email address often contains the person's name.
     working = pii.mask(working).text
     if name:

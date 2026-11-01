@@ -1,5 +1,6 @@
 """Talent operations shared by the HTTP API, the demo loader and the tests."""
 
+import re
 from decimal import Decimal
 from typing import Any
 from uuid import UUID
@@ -8,6 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from kernel import files
+from kernel.comms.models import Attachment, Message
 from kernel.errors import Conflict, NotFound, ValidationFailed
 from kernel.events import publish
 from kernel.ids import uuid7
@@ -16,6 +18,7 @@ from packs.talent.events import CvUploaded, JobCreated, RankingRequested
 from packs.talent.models import (
     Application,
     Candidate,
+    CandidateIdentity,
     CvDocument,
     Job,
     RankingRun,
@@ -153,3 +156,40 @@ def request_ranking(
     session.flush()
     publish(session, tenant_id, RankingRequested(ranking_id=ranking.id, job_id=job_id))
     return ranking
+
+
+def job_for_subject(session: Session, subject: str) -> Job | None:
+    """The one open job the subject names, by reference (J03) or else by full title. Never a
+    guess: two matches mean a person files it."""
+    lowered = subject.casefold()
+    jobs = session.scalars(select(Job).where(Job.status == "open")).all()
+    by_reference = [
+        job
+        for job in jobs
+        if re.search(rf"(?<![\w-]){re.escape(job.external_id.casefold())}(?![\w-])", lowered)
+    ]
+    if by_reference:
+        return by_reference[0] if len(by_reference) == 1 else None
+    by_title = [job for job in jobs if job.title.casefold() in lowered]
+    return by_title[0] if len(by_title) == 1 else None
+
+
+def add_cv_from_attachment(
+    session: Session, tenant_id: UUID, job_id: UUID, attachment: Attachment
+) -> CvDocument:
+    """Same path as an upload. The sender's address is kept in case the CV has none."""
+    if attachment.status != "stored" or not attachment.file_key:
+        raise Conflict(f"{attachment.filename}: this attachment can't be used")
+    message = session.get(Message, attachment.message_id)
+    data = files.get(tenant_id, attachment.file_key)
+    cv = add_cv(session, tenant_id, job_id, attachment.filename, data)
+    application = session.get(Application, cv.application_id)
+    session.add(
+        CandidateIdentity(
+            tenant_id=tenant_id, candidate_id=application.candidate_id, email=message.sender
+        )
+    )
+    attachment.status = "used"
+    attachment.used_for = {"kind": "talent.application", "id": str(application.id)}
+    session.flush()
+    return cv

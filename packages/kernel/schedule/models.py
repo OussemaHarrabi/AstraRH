@@ -21,6 +21,10 @@ class BusyBlock(TenantMixin, Base):
     starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     label: Mapped[str] = mapped_column(Text, nullable=False, default="Busy")
+    # manual: typed in by a person. ics: imported from a calendar file, replaced on re-import.
+    source: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="manual", server_default="manual"
+    )
 
 
 class Booking(TenantMixin, Base):
@@ -31,6 +35,23 @@ class Booking(TenantMixin, Base):
     starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     ref: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    status: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="confirmed", server_default="confirmed"
+    )
+    cancelled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Hold(TenantMixin, Base):
+    """A slot offered to someone, kept off other offers until it is booked, released or expires."""
+
+    __tablename__ = "hold"
+    __table_args__ = {"schema": "calendar"}
+
+    owner: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    participant: Mapped[str] = mapped_column(String(320), nullable=False, index=True)
+    starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 class BookingSeat(TenantMixin, Base):

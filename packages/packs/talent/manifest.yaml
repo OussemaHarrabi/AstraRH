@@ -9,7 +9,7 @@ api: packs.talent.api:router
 ui:
   route: /jobs
   nav_label: Recruitment
-  roles: [admin, hr, recruiter, manager, auditor]
+  roles: [admin, hr, recruiter, auditor]
 
 actions:
   - id: talent.cv.read
@@ -32,6 +32,13 @@ actions:
     approver_roles: [admin, hr, recruiter]
     view_roles: [admin, hr, recruiter, auditor]
     description: Book an interview slot, after checking it is still free.
+  - id: talent.interview.cancel
+    risk: R2
+    channel: internal
+    handler: packs.talent.communications:cancel_interview
+    approver_roles: [admin, hr, recruiter]
+    view_roles: [admin, hr, recruiter, auditor]
+    description: Cancel an interview, free the calendars, and optionally offer new times.
   - id: talent.application.reject
     risk: R3
     channel: internal
@@ -39,6 +46,13 @@ actions:
     approver_roles: [admin, hr]
     view_roles: [admin, hr, recruiter, auditor]
     description: Reject a candidate. Needs a second person and password confirmation.
+  - id: talent.application.hire
+    risk: R3
+    channel: internal
+    handler: packs.talent.handlers:hire_candidate
+    approver_roles: [admin, hr]
+    view_roles: [admin, hr, recruiter, auditor]
+    description: Hire a shortlisted or interviewed candidate. Needs a second person and password confirmation.
 
 agents:
   - id: rubric_builder
@@ -79,3 +93,4 @@ publishes:
   - talent.ranking.requested.v1
   - talent.ranking.completed.v1
   - talent.application.stage_changed.v1
+  - talent.candidate.hired.v1

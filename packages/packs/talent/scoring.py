@@ -2,12 +2,15 @@
 
 Two layers:
     Layer 1, hybrid search: how close the whole CV is to the job, combining vector
-             similarity (meaning) and BM25 (exact terms). Worth 30 of 100 points.
+             similarity (meaning), BM25 (exact terms) and a cross-encoder reranker that
+             reads each criterion with the CV's closest passage. Worth 30 of 100 points.
     Layer 2, evidence: proof for each approved criterion. Worth 70 of 100 points.
 
     score = 0.70 x sum(weight x value) + 0.30 x job_match
     value = the strongest evidence signal for that criterion, from 0 to 1
-    job_match = 0.50 x vector similarity + 0.50 x BM25
+    job_match = 0.40 x vector similarity + 0.30 x BM25 + 0.30 x reranker
+                (0.50 x vector + 0.50 x BM25 if the reranker was unavailable, or for
+                 rankings made with version 2, which had no reranker)
 
 Direct evidence      0.60 + 0.40 x min(1, stated years / required years)
                      Found in the CV's visible text. Years are stated in a verified quote,
@@ -33,7 +36,7 @@ from typing import Any
 from kernel.explain import Factor, ScoreResult, register_scorer
 
 SCORER = "talent.rubric"
-SCORER_VERSION = "2"
+SCORER_VERSION = "3"
 
 DIRECT_BASE = Decimal("0.60")
 LISTED_VALUE = Decimal("0.30")
@@ -49,6 +52,9 @@ EVIDENCE_SHARE = Decimal("0.70")
 MATCH_SHARE = Decimal("0.30")
 MATCH_DENSE_SHARE = Decimal("0.50")
 MATCH_LEXICAL_SHARE = Decimal("0.50")
+RERANKED_DENSE_SHARE = Decimal("0.40")
+RERANKED_LEXICAL_SHARE = Decimal("0.30")
+RERANKED_RERANK_SHARE = Decimal("0.30")
 MATCH_KEY = "job_match"
 MATCH_LABEL = "Overall match with the job"
 
@@ -85,10 +91,20 @@ def criterion_value(criterion: dict[str, Any], signal: dict[str, Any]) -> Decima
     return _round(max(candidates))
 
 
+def _unit(value: Any) -> Decimal:
+    return max(Decimal(0), min(Decimal(1), Decimal(str(value))))
+
+
 def job_match_value(match: dict[str, Any]) -> Decimal:
-    dense = max(Decimal(0), min(Decimal(1), Decimal(str(match.get("dense", 0)))))
-    lexical = max(Decimal(0), min(Decimal(1), Decimal(str(match.get("lexical", 0)))))
-    return _round(MATCH_DENSE_SHARE * dense + MATCH_LEXICAL_SHARE * lexical)
+    dense = _unit(match.get("dense", 0))
+    lexical = _unit(match.get("lexical", 0))
+    if match.get("rerank") is None:
+        return _round(MATCH_DENSE_SHARE * dense + MATCH_LEXICAL_SHARE * lexical)
+    return _round(
+        RERANKED_DENSE_SHARE * dense
+        + RERANKED_LEXICAL_SHARE * lexical
+        + RERANKED_RERANK_SHARE * _unit(match["rerank"])
+    )
 
 
 def meets_must_have(criterion: dict[str, Any], signal: dict[str, Any]) -> bool:
@@ -102,6 +118,7 @@ def meets_must_have(criterion: dict[str, Any], signal: dict[str, Any]) -> bool:
     return related is not None and Decimal(str(related)) >= MUST_HAVE_RELATED_STRENGTH
 
 
+@register_scorer(SCORER, "2")  # older rankings replay with the rule they were made with
 @register_scorer(SCORER, SCORER_VERSION)
 def score(inputs: dict[str, Any]) -> ScoreResult:
     factors = []
