@@ -105,7 +105,7 @@ def parse_and_blind(ctx: AgentContext, state: dict) -> dict:
         identity = CandidateIdentity(tenant_id=ctx.tenant_id, candidate_id=application.candidate_id)
         ctx.session.add(identity)
     identity.name = blinded.name or cv.filename
-    identity.email = blinded.email
+    identity.email = blinded.email or identity.email
     identity.phone = blinded.phone
 
     cv.blind_text = blinded.text

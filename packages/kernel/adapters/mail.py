@@ -14,6 +14,7 @@ from kernel.trust import AdapterRejected
 DEFAULT_ALLOWED_DOMAINS = "example.test,mail.example.test,cds.example.test"
 SENDER_ADDRESS = "no-reply@cds.example.test"
 SENDER = f"AstraRH <{SENDER_ADDRESS}>"
+REPLY_TO = "hr@cds.example.test"
 SMTP_TIMEOUT_SECONDS = 10
 
 
@@ -37,6 +38,7 @@ def build(payload: dict[str, Any], key: str) -> EmailMessage:
     message = EmailMessage()
     message["From"] = SENDER
     message["To"] = recipient
+    message["Reply-To"] = os.environ.get("MAIL_REPLY_TO", REPLY_TO)
     message["Subject"] = payload["subject"]
     message["Message-ID"] = message_id(key)
     message.set_content(payload["body"])

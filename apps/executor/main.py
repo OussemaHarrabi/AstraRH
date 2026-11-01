@@ -11,6 +11,7 @@ from opentelemetry import trace
 from sqlalchemy import select
 
 from kernel import adapters, trust
+from kernel.adapters import mailbox
 from kernel.db import active_tenant_ids, tenant_session
 from kernel.heartbeat import beat
 from kernel.obs import setup_telemetry
@@ -18,6 +19,7 @@ from kernel.trust.models import Proposal
 
 POLL_SECONDS = 1
 RECONCILE_EVERY_SECONDS = 30
+MAILBOX_EVERY_SECONDS = 5
 
 log = logging.getLogger("astra.executor")
 tracer = trace.get_tracer("astra.executor")
@@ -38,12 +40,17 @@ def main() -> None:
     setup_telemetry()
     log.info("executor started")
     last_reconcile = 0.0
+    last_mailbox = 0.0
     while True:
         beat()
         try:
             tenants = active_tenant_ids()
             for tenant_id in tenants:
                 run_pass(tenant_id)
+            if time.monotonic() - last_mailbox > MAILBOX_EVERY_SECONDS:
+                last_mailbox = time.monotonic()
+                with tracer.start_as_current_span("executor.mailbox"):
+                    mailbox.poll_all()
             if time.monotonic() - last_reconcile > RECONCILE_EVERY_SECONDS:
                 last_reconcile = time.monotonic()
                 with tracer.start_as_current_span("executor.reconcile"):

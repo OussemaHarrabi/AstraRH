@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from kernel import explain, trust
 from kernel.ai.models import SecurityEvent
 from kernel.authz import require_role
+from kernel.comms.models import Attachment
 from kernel.errors import Conflict, KernelError, NotFound, ValidationFailed
 from kernel.explain import DecisionDraft
 from kernel.explain.models import DecisionRecord
@@ -190,6 +191,26 @@ async def upload_cvs(
         except (ValidationFailed, Conflict) as exc:
             rejected.append({"filename": filename, "reason": exc.message})
     return {"accepted": accepted, "rejected": rejected}
+
+
+class AttachmentBody(BaseModel):
+    attachment_id: UUID
+
+
+@router.post(
+    "/jobs/{job_id}/cvs/from-email",
+    status_code=202,
+    summary="Use a CV that arrived by email for this job",
+)
+def cv_from_email(job_id: UUID, body: AttachmentBody, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, WRITE_ROLES)
+        _job_or_404(ctx.session, job_id)
+        attachment = ctx.session.get(Attachment, body.attachment_id)
+        if attachment is None:
+            raise NotFound("Attachment not found")
+        cv = service.add_cv_from_attachment(ctx.session, ctx.actor.tenant_id, job_id, attachment)
+        return {"cv_id": str(cv.id), "application_id": str(cv.application_id)}
 
 
 @router.get("/jobs/{job_id}/cvs", summary="CV processing status")

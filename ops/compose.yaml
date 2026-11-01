@@ -147,6 +147,7 @@ services:
       DATABASE_URL: postgresql://astra_executor:${ASTRA_EXECUTOR_PASSWORD}@postgres:5432/astra
       SMTP_HOST: mailpit
       SMTP_PORT: "1025"
+      INBOUND_MAILBOXES: cds=hr@cds.example.test
     networks: [data, mail, telemetry]
     depends_on:
       migrate: { condition: service_completed_successfully }

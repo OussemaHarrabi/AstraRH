@@ -10,7 +10,7 @@ from sqlalchemy import exists, func, or_, select
 
 from kernel import comms, trust
 from kernel.authz import require_role
-from kernel.comms.models import Classification, Digest, Message, Thread
+from kernel.comms.models import Attachment, Classification, Digest, Message, Thread
 from kernel.comms.vocabulary import MessageType
 from kernel.db import utcnow
 from kernel.errors import Conflict, NotFound
@@ -265,6 +265,22 @@ def get_thread(thread_id: UUID, request: Request) -> dict[str, Any]:
                 )
             )
         }
+        attached: dict[UUID, list[dict[str, Any]]] = {}
+        for a in session.scalars(
+            select(Attachment)
+            .where(Attachment.message_id.in_([m.id for m in messages]))
+            .order_by(Attachment.created_at)
+        ):
+            attached.setdefault(a.message_id, []).append(
+                {
+                    "id": str(a.id),
+                    "filename": a.filename,
+                    "size": a.size,
+                    "status": a.status,
+                    "reason": a.reason,
+                    "used_for": a.used_for,
+                }
+            )
         out = []
         for m in messages:
             c = classes.get(m.id)
@@ -278,6 +294,7 @@ def get_thread(thread_id: UUID, request: Request) -> dict[str, Any]:
                     "body": m.body,
                     "sent_at": m.sent_at.isoformat(),
                     "sorting": _classification_json(c),
+                    "attachments": attached.get(m.id, []),
                     # Kept flat for the first-pass web page.
                     "needs_human": c.needs_human if c else None,
                     "human_reason": c.human_reason if c else None,

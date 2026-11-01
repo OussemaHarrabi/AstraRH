@@ -17,12 +17,14 @@ from sqlalchemy.orm import Session
 from kernel import explain, schedule, trust
 from kernel.ai import AgentContext, load_prompt
 from kernel.ai.graphs import AgentState, agent_node
-from kernel.comms.models import Classification, Message, Thread
+from kernel.comms.models import Attachment, Classification, Message, Thread
 from kernel.db import tenant_session, utcnow
+from kernel.errors import Conflict, ValidationFailed
 from kernel.events import EventOutbox, publish, subscribe
 from kernel.explain import DecisionDraft, Evidence
 from kernel.identity.models import UserAccount
 from kernel.trust.models import Proposal
+from packs.talent import service
 from packs.talent.blind import BLIND_TOKEN
 from packs.talent.events import (
     FollowupDue,
@@ -658,3 +660,21 @@ def _propose_cancellation(
         f"interview_cancel:{interview.id}",
         target={"application_id": str(application.id), "job_id": str(job.id)},
     )
+
+
+@subscribe("comms.attachment.received.v1", "talent.cv_from_email")
+def cv_from_email(session: Session, event: EventOutbox) -> None:
+    """A CV sent for a job the subject names becomes an application. Otherwise it waits in the
+    inbox for a recruiter to file it, since guessing the job would put a person in the wrong pile."""
+    attachment = session.get(Attachment, UUID(event.payload["attachment_id"]))
+    message = session.get(Message, attachment.message_id)
+    if attachment.status != "stored" or candidate_by_email(session, message.sender):
+        return  # already a candidate: a person decides whether this is a new application
+    job = service.job_for_subject(session, message.subject)
+    if job is None:
+        return
+    try:
+        with session.begin_nested():
+            service.add_cv_from_attachment(session, event.tenant_id, job.id, attachment)
+    except (Conflict, ValidationFailed) as exc:
+        attachment.reason = exc.message

@@ -15,6 +15,7 @@ from opentelemetry import trace
 from kernel import comms, registry
 from kernel.ai.graphs import setup_checkpoints
 from kernel.ai.runner import install_agent_task
+from kernel.comms import inbound
 from kernel.db import active_tenant_ids, tenant_session
 from kernel.events import relay_once
 from kernel.heartbeat import beat
@@ -36,6 +37,8 @@ def relay_loop() -> None:
         worked = 0
         try:
             for tenant_id in active_tenant_ids():
+                with tenant_session(tenant_id) as session:
+                    worked += inbound.process_pending(session, tenant_id)
                 worked += relay_once(tenant_id)
                 worked += registry.run_internal_actions(tenant_id)
         except Exception:

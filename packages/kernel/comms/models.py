@@ -1,7 +1,17 @@
 from datetime import date, datetime
 from uuid import UUID
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    LargeBinary,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
@@ -85,3 +95,41 @@ class DigestItem(TenantMixin, Base):
     message_id: Mapped[UUID] = mapped_column(
         UUID_TYPE, ForeignKey("comms.message.id"), nullable=False
     )
+
+
+class InboundMail(TenantMixin, Base):
+    """Raw mail as the provider gave it. The executor writes it; only the worker reads it."""
+
+    __tablename__ = "inbound_mail"
+    __table_args__ = (UniqueConstraint("tenant_id", "provider_id"), {"schema": "comms"})
+
+    provider_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    mailbox: Mapped[str] = mapped_column(String(320), nullable=False)
+    raw: Mapped[bytes | None] = mapped_column(LargeBinary)
+    size: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    # pending -> ingested | ignored | rejected. The raw copy is dropped once read.
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="pending", index=True)
+    reason: Mapped[str | None] = mapped_column(Text)
+    message_id: Mapped[UUID | None] = mapped_column(UUID_TYPE, ForeignKey("comms.message.id"))
+    processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Attachment(TenantMixin, Base):
+    """A file that came with an email. Stored only if it passes the upload gate."""
+
+    __tablename__ = "attachment"
+    __table_args__ = {"schema": "comms"}
+
+    message_id: Mapped[UUID] = mapped_column(
+        UUID_TYPE, ForeignKey("comms.message.id"), nullable=False, index=True
+    )
+    filename: Mapped[str] = mapped_column(String(160), nullable=False)
+    size: Mapped[int] = mapped_column(Integer, nullable=False)
+    content_type: Mapped[str | None] = mapped_column(String(128))
+    status: Mapped[str] = mapped_column(String(16), nullable=False)  # stored | rejected | used
+    reason: Mapped[str | None] = mapped_column(Text)
+    file_key: Mapped[str | None] = mapped_column(String(255))
+    sha256: Mapped[str | None] = mapped_column(String(64))
+    # What a service made of it, such as {"kind": "talent.application", "id": "..."}.
+    used_for: Mapped[dict | None] = mapped_column(JSONB)
