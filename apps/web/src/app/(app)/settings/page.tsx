@@ -10,10 +10,10 @@ import { useMe, useToast } from "@/ui/Shell";
 type Tab = "account" | "team" | "rules" | "templates" | "privacy";
 
 const TEAM = [
-  ["Nadia Ben Salah", "nadia@cds.example.test", "Recruiter"],
+  ["Nadia Bouzid", "nadia@cds.example.test", "Recruiter"],
   ["Leila Haddad", "leila@cds.example.test", "HR"],
-  ["Karim Jaziri", "karim@cds.example.test", "Manager"],
-  ["Sami Trabelsi", "sami@cds.example.test", "Finance"],
+  ["Karim Mansour", "karim@cds.example.test", "Manager"],
+  ["Sami Ferchichi", "sami@cds.example.test", "Finance"],
   ["Audit Office", "audit@cds.example.test", "Auditor"],
   ["Platform Admin", "admin@cds.example.test", "Admin"],
 ];

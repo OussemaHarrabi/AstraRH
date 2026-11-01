@@ -106,6 +106,10 @@ Oussema didn't approve the earlier HTML previews and asked for a more sophistica
 - Candidates shortlisted together were scheduled at the same moment, so all were offered and held the same times, and booking then failed. `schedule.lock_calendars` now serialises offers per participant, with a regression test.
 - The explanation panel hid evidence not tied to a score factor, such as the quote from a candidate's reply.
 
+**Later the same day**
+- Added live close-ups to the film: `tools/demo_video/record.mjs` zooms the page itself during recording, so text stays sharp and captions stay in place.
+- Wrote the root `README.md`, with 42 screenshots in `docs/screenshots/`. Its links and diagrams were checked by script, and its numbers against `docs/evals/`. Writing it found and fixed a crash when opening a policy document, and wrong names in the Settings team list.
+
 **Not done**
 - OneTake and HyperFrames weren't used. Installing OneTake was blocked by the permission system; the film uses plain recorded shots with cuts.
 - The landing's feature films are hidden on phones (the list still shows).

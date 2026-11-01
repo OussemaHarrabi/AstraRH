@@ -222,7 +222,7 @@ function Policies() {
   const { data, error, reload } = useLoad(() => get<PolicyDocument[]>("/knowledge/documents"), []);
   const [publishing, setPublishing] = useState<PolicyDocument | "new" | null>(null);
   const [opened, setOpened] = useState<string | null>(null);
-  const detail = useLoad(() => (opened ? get<{ title: string; sections: { heading?: string; title?: string; text?: string; body?: string }[] }>(`/knowledge/documents/${opened}`) : Promise.resolve(null)), [opened]);
+  const detail = useLoad(() => (opened ? get<{ title: string; content: { chunk_id: string; section: string; text: string }[] }>(`/knowledge/documents/${opened}`) : Promise.resolve(null)), [opened]);
 
   async function publish(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -268,10 +268,10 @@ function Policies() {
       <Panel title={detail.data?.title ?? "Read a policy"}>
         {!opened ? <p className="py-6 text-center text-ink-soft">Choose a document to read it, section by section.</p> : !detail.data ? <Loading /> : (
           <div className="max-h-[60vh] space-y-3 overflow-y-auto">
-            {detail.data.sections.map((section, index) => (
-              <section key={index}>
-                <h3 className="font-[560]">{section.heading ?? section.title}</h3>
-                <p className="mt-0.5 text-ink-soft whitespace-pre-wrap" dir="auto">{section.text ?? section.body}</p>
+            {detail.data.content.map((part) => (
+              <section key={part.chunk_id}>
+                <h3 className="font-[560]">{part.section}</h3>
+                <p className="mt-0.5 text-ink-soft whitespace-pre-wrap" dir="auto">{part.text}</p>
               </section>
             ))}
           </div>
