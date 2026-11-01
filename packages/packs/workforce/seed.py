@@ -30,7 +30,7 @@ from packs.workforce.models import (
 )
 
 ROOT = Path(__file__).resolve().parents[3]
-DATA = ROOT / "seed" / "workforce"
+DATA = ROOT / "data" / "workforce"
 BASELINE = Decimal("40")
 
 

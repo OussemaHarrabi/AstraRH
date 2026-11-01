@@ -15,7 +15,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
 import scoring  # noqa: E402
 
-SEED = pathlib.Path(__file__).resolve().parents[4] / "seed" / "workforce"
+SEED = pathlib.Path(__file__).resolve().parents[4] / "data" / "workforce"
 
 
 # --- unit tests -----------------------------------------------------------
