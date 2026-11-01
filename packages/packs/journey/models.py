@@ -21,6 +21,10 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
+# The worker imports pack models directly; load the core metadata they reference
+# so SQLAlchemy can resolve tenant/employee/position/skill/KPI foreign keys.
+import kernel.identity.models  # noqa: F401
+import kernel.people.models  # noqa: F401
 from kernel.db import Base, TenantMixin
 
 SCHEMA = "journey"
