@@ -1,6 +1,7 @@
 """Journey HTTP API. Read models and the two human actions; approvals stay in trust."""
 
 from datetime import date, datetime
+from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
@@ -41,6 +42,25 @@ class EvidenceBody(BaseModel):
 
 class CheckinBody(BaseModel):
     answers: dict[str, Any] = Field(min_length=1)
+
+
+class VerifyBody(BaseModel):
+    note: str | None = None
+
+
+class FlagBody(BaseModel):
+    kind: str = "ramp_support"
+    reason_code: str = Field(min_length=1, max_length=64)
+    facts: list[str] = Field(min_length=1)
+
+
+class ImpactBody(BaseModel):
+    recommendation_id: UUID
+    baseline_value: Decimal
+    post_value: Decimal
+    comparison_employee_ids: list[UUID] = Field(default_factory=list)
+    method: str = Field(min_length=1)
+    caveat: str = Field(min_length=1)
 
 
 def _iso(value: date | datetime | None) -> str | None:
@@ -212,6 +232,24 @@ def my_plan(request: Request) -> dict[str, Any]:
         return _plan_json(plans[0])
 
 
+@router.get("/plans/me/portal", summary="Today's three things and progress")
+def my_portal(request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, READ_ROLES)
+        data = service.portal(ctx.session, ctx.actor)
+        plan = data["plan"]
+        next_checkin = data["next_checkin"]
+        return {
+            **_plan_json(plan),
+            "today": data["today"],
+            "progress": data["progress"],
+            "buddy": data["buddy"],
+            "cohort": data["cohort"],
+            "next_checkin": _checkin_json(next_checkin) if next_checkin else None,
+            "ask": data["ask"],
+        }
+
+
 @router.get("/plans/{plan_id}", summary="A plan with tasks, check-ins and flags")
 def get_plan(plan_id: UUID, request: Request) -> dict[str, Any]:
     with request_context(request) as ctx:
@@ -314,6 +352,26 @@ def complete_task(
         return _task_json(task)
 
 
+@router.post(
+    "/plans/{plan_id}/tasks/{task_id}/verify",
+    summary="Propose manager verification for a milestone",
+)
+def verify_task(
+    plan_id: UUID, task_id: UUID, body: VerifyBody, request: Request
+) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, {"admin", "hr", "manager"})
+        proposal = service.propose_task_verification(
+            ctx.session,
+            ctx.actor.tenant_id,
+            plan_id,
+            task_id,
+            ctx.actor,
+            body.note,
+        )
+        return {"proposal_id": str(proposal.id), "status": proposal.status}
+
+
 @router.post("/plans/{plan_id}/checkins/{checkin_id}/submit", summary="Submit a structured pulse")
 def submit_checkin(
     plan_id: UUID, checkin_id: UUID, body: CheckinBody, request: Request
@@ -324,6 +382,56 @@ def submit_checkin(
             ctx.session, ctx.actor.tenant_id, plan_id, checkin_id, body.answers, ctx.actor
         )
         return _checkin_json(checkin)
+
+
+@router.post("/plans/{plan_id}/flags", summary="Record a factual support flag")
+def create_flag(plan_id: UUID, body: FlagBody, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, {"admin", "hr", "manager"})
+        flag = service.create_support_flag(
+            ctx.session,
+            ctx.actor.tenant_id,
+            plan_id,
+            body.kind,
+            body.reason_code,
+            body.facts,
+            ctx.actor,
+        )
+        return _flag_json(flag)
+
+
+@router.post("/plans/{plan_id}/flags/sweep", summary="Derive support flags from current facts")
+def sweep_flags(plan_id: UUID, request: Request) -> list[dict[str, Any]]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, {"admin", "hr", "manager"})
+        return [
+            _flag_json(flag)
+            for flag in service.sweep_support_flags(
+                ctx.session, ctx.actor.tenant_id, plan_id, ctx.actor
+            )
+        ]
+
+
+@router.post(
+    "/plans/{plan_id}/flags/{flag_id}/notify",
+    summary="Propose an HR notification for an open flag",
+)
+def notify_flag(plan_id: UUID, flag_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, {"admin", "hr", "manager"})
+        proposal = service.notify_support_flag(
+            ctx.session, ctx.actor.tenant_id, plan_id, flag_id, ctx.actor
+        )
+        return {"proposal_id": str(proposal.id), "status": proposal.status}
+
+
+@router.post("/plans/{plan_id}/complete", summary="Close the plan at Day 90")
+def complete_plan(plan_id: UUID, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, {"admin", "hr", "manager"})
+        plan = service.plan_for_actor(ctx.session, ctx.actor, plan_id)
+        dossier = service.complete_plan(ctx.session, ctx.actor.tenant_id, plan_id, ctx.actor)
+        return {"plan": _plan_json(plan), "dossier": dossier}
 
 
 @router.get("/plans/{plan_id}/dossier", summary="Day-90 review pack")
@@ -369,6 +477,24 @@ def list_recommendations(
         if employee_id is not None:
             statement = statement.where(TrainingRecommendation.employee_id == employee_id)
         return [_recommendation_json(item) for item in ctx.session.scalars(statement).all()]
+
+
+@router.post("/impact", summary="Record an observed training impact")
+def record_impact(body: ImpactBody, request: Request) -> dict[str, Any]:
+    with request_context(request) as ctx:
+        require_role(ctx.actor, {"admin", "hr", "manager"})
+        row = service.record_impact(
+            ctx.session,
+            ctx.actor.tenant_id,
+            body.recommendation_id,
+            baseline_value=body.baseline_value,
+            post_value=body.post_value,
+            comparison_employee_ids=body.comparison_employee_ids,
+            method=body.method,
+            caveat=body.caveat,
+            actor=ctx.actor,
+        )
+        return _impact_json(row)
 
 
 @router.get("/impact", summary="Observed training impact")
@@ -424,6 +550,7 @@ def get_heatmap(
                 continue
             result.append({**cell, "suppressed": False})
         return sorted(result, key=lambda item: (item["org_unit_id"], item["skill_id"]))
+
 
 
 

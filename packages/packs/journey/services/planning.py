@@ -222,12 +222,15 @@ def dossier(
     gaps: Sequence[Mapping[str, Any]],
 ) -> dict[str, Any]:
     """The Day-90 review pack. Evidence and missing items only; no salary, rating or ranking."""
-    completed = [task for task in tasks if str(task.get("status")) == "completed"]
+    completed = [
+        task for task in tasks if str(task.get("status")) in {"completed", "verified"}
+    ]
     with_evidence = [task for task in completed if task.get("evidence") not in (None, "", {}, [])]
     missing = [
         str(task.get("title", "task"))
         for task in tasks
-        if str(task.get("status")) != "completed" or task.get("evidence") in (None, "", {}, [])
+        if str(task.get("status")) not in {"completed", "verified"}
+        or task.get("evidence") in (None, "", {}, [])
     ]
     verified = [
         {
@@ -248,3 +251,4 @@ def dossier(
         "verified_skills": verified,
         "note": "Assembled for a human decision. No salary, rating or recommendation is included.",
     }
+

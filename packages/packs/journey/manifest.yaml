@@ -33,6 +33,13 @@ actions:
     approver_roles: [manager]
     view_roles: [manager, hr]
     description: Assign a buddy and a contact cadence.
+  - id: journey.task.verify
+    risk: R2
+    channel: internal
+    handler: packs.journey.handlers:verify_task
+    approver_roles: [manager, hr]
+    view_roles: [manager, hr, employee]
+    description: Verify a completed milestone after reviewing its evidence.
   - id: journey.checkin.schedule
     risk: R1
     description: Schedule the day 7/30/60/90 check-ins from the approved plan.
@@ -42,6 +49,9 @@ actions:
   - id: journey.task.complete
     risk: R1
     description: Record task completion and its evidence.
+  - id: journey.plan.complete
+    risk: R1
+    description: Close the plan after Day 90 and publish the verified baseline.
   - id: journey.checkin.notify
     risk: R2
     channel: external
@@ -113,4 +123,5 @@ publishes:
 consumes:
   - talent.candidate.hired.v1
   - trust.action.executed.v1
+
 

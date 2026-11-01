@@ -136,6 +136,17 @@ def assign_buddy(session: Session, tenant_id: UUID, payload: dict[str, Any], key
     return f"buddy_assigned:{buddy.id}"
 
 
+def verify_task(session: Session, tenant_id: UUID, payload: dict[str, Any], key: str) -> str:
+    task = session.get(OnboardingTask, UUID(str(payload["task_id"])), with_for_update=True)
+    if task is None:
+        raise ValueError("task not found")
+    if task.status != "completed" or not task.evidence:
+        raise ValueError("a completed milestone with evidence is required")
+    task.status = "verified"
+    task.approved_by = _uuid(payload.get("approved_by"))
+    return f"task_verified:{task.id}"
+
+
 def reassign_task(session: Session, tenant_id: UUID, payload: dict[str, Any], key: str) -> str:
     task = session.get(OnboardingTask, UUID(str(payload["task_id"])), with_for_update=True)
     if task is None:
@@ -244,6 +255,7 @@ def verify_training(
         ),
     )
     return f"training_verified:{enrollment.id}"
+
 
 
 
