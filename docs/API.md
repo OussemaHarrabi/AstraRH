@@ -10,7 +10,7 @@ python astra.py export-api
 npx --yes openapi-typescript@7 contracts/openapi.json -o contracts/openapi.d.ts
 ```
 
-The contract is generated from the merged `main` API. Do not hand-merge a pack's copy of
+The contract is generated from the merged integration branch API. Do not hand-merge a pack's copy of
 `contracts/openapi.json`; regenerate it after every merge.
 
 ## Conventions
