@@ -115,11 +115,25 @@ Local tools in development mode, all on loopback only:
 
 ## Try it
 
+**Live platform: https://civic-jobs-abroad-train.trycloudflare.com**
+
+| Company | Email | Password | Role |
+|---|---|---|---|
+| `cds` | `nadia@cds.example.test` | In our submission form | Recruiter, the best place to start |
+| `cds` | `leila@cds.example.test` | Same | HR |
+| `cds` | `sami@cds.example.test` | Same | Finance |
+| `cds` | `karim@cds.example.test` | Same | Manager |
+| `cds` | `mehdi@cds.example.test` | Same | Employee |
+| `cds` | `audit@cds.example.test` | Same | Auditor |
+| `cds` | `admin@cds.example.test` | Same | Admin |
+
+All the people and data in this demo company are fictional. Please don't enter real personal data.
+
 There are three ways in, depending on what you want.
 
 | You want to | Do this | You need |
 |---|---|---|
-| **Test the platform right away** | Open the public link from the team and log in with company `cds` | A browser, and the link and password from the team |
+| **Test the platform right away** | Open the live link above and log in with an account from the table | A browser and the password |
 | **Run your own copy** | [Run it with Docker](#run-it-with-docker) | Docker and an LLM key |
 | **Publish your own copy** | [Public link](#public-link) | Docker and an LLM key |
 
