@@ -3,6 +3,7 @@
 
 python astra.py init             create .env with generated secrets
 python astra.py up [--secure]    build and start (--secure: no dev ports or live reload)
+python astra.py public           production stack plus a public HTTPS link through a tunnel
 python astra.py down [--wipe]    stop (--wipe: also delete all local data)
 python astra.py ps               show service status
 python astra.py logs [service]   follow logs
@@ -114,6 +115,43 @@ def cmd_up(args: argparse.Namespace) -> int:
                 "Mail:    http://127.0.0.1:8025\nNeo4j:   http://127.0.0.1:7474\nMinIO:   http://127.0.0.1:9001"
             )
     return result.returncode
+
+
+def cmd_public(_: argparse.Namespace) -> int:
+    """Run the production stack and open it to the internet through one HTTPS link."""
+    require_env()
+    command = [
+        *compose_args(secure=True),
+        "-f",
+        "ops/compose.public.yaml",
+    ]
+    env = {**os.environ, **read_env(), "ASTRA_ENV": "production"}
+    started = subprocess.run(  # noqa: S603 - fixed command
+        [*command, "up", "--build", "--detach", "--wait", "--wait-timeout", "900"],
+        cwd=ROOT,
+        env=env,
+        check=False,
+    )
+    if started.returncode:
+        return started.returncode
+    for _attempt in range(30):
+        logs = subprocess.run(  # noqa: S603 - fixed command
+            [*command, "logs", "--no-color", "tunnel"],
+            cwd=ROOT,
+            env=env,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
+            check=False,
+        )
+        found = re.findall(r"https://[a-z0-9-]+\.trycloudflare\.com", logs.stdout + logs.stderr)
+        if found:
+            print(f"\nPublic link: {found[-1]}\nGrafana (this machine only): {GRAFANA_URL}")
+            return 0
+        time.sleep(2)
+    print("The stack is up, but the tunnel gave no link yet. Check: docker logs astrarh-tunnel-1")
+    return 1
 
 
 def cmd_down(args: argparse.Namespace) -> int:
@@ -445,6 +483,7 @@ def main() -> int:
     up = commands.add_parser("up")
     up.add_argument("--secure", action="store_true", help="no dev ports or live reload")
     up.set_defaults(run=cmd_up)
+    commands.add_parser("public").set_defaults(run=cmd_public)
     down = commands.add_parser("down")
     down.add_argument("--wipe", action="store_true", help="also delete all local data")
     down.set_defaults(run=cmd_down)

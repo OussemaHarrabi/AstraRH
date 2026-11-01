@@ -29,7 +29,7 @@ CDS Tunis, the company in the demo, is fictional, and so are its people, CVs and
 
 ## Contents
 
-1. [Quick start](#quick-start)
+1. [Quick start](#quick-start) and [Try it](#try-it)
 2. [The product, page by page](#the-product-page-by-page)
 3. [How the six core features work](#how-the-six-core-features-work)
 4. [Architecture](#architecture)
@@ -110,6 +110,18 @@ Local tools in development mode, all on loopback only:
 | Neo4j browser | http://127.0.0.1:7474 |
 | MinIO console | http://127.0.0.1:9001 |
 | PostgreSQL | `127.0.0.1:55432`, database `astra` |
+
+---
+
+## Try it
+
+There are three ways in, depending on what you want.
+
+| You want to | Do this | You need |
+|---|---|---|
+| **Test the platform right away** | Open the public link from the team and log in with company `cds` | A browser, and the link and password from the team |
+| **Run your own copy** | [Run it with Docker](#run-it-with-docker) | Docker and an LLM key |
+| **Publish your own copy** | [Public link](#public-link) | Docker and an LLM key |
 
 ---
 
@@ -405,8 +417,9 @@ Defined in [`ops/compose.yaml`](ops/compose.yaml). `ops/compose.dev.yaml` adds l
 | `otel-lgtm` | Grafana, Tempo, Loki, Prometheus | Telemetry | `telemetry`, `telemetry_ui` | 1.5 GB |
 | `migrate` | Alembic | One-shot migrations | `data` | 256 MB |
 | `minio-volume-init` | One-shot | Fixes volume ownership | None | None |
+| `tunnel` | Cloudflare `cloudflared` | Public link, in public mode only | `edge_public` | 128 MB |
 
-The long-running services' limits add up to about 10.4 GB.
+The long-running services' limits add up to about 10.4 GB, without the tunnel.
 
 Python services run read-only, with all capabilities dropped and `no-new-privileges`.
 
@@ -478,6 +491,10 @@ A sandbox SMTP server and mailbox, so the demo can never email a real person. It
 ### `otel-lgtm`
 
 A single container with Grafana, Tempo (traces), Loki (logs) and Prometheus (metrics), receiving OTLP from the Python services. See [Observability](#observability).
+
+### `tunnel`
+
+Only in public mode, from `ops/compose.public.yaml`. It runs `cloudflared` with a read-only filesystem, all capabilities dropped and no secrets, and forwards visitors to Caddy. See [Public link](#public-link).
 
 ### `migrate`
 
@@ -793,18 +810,75 @@ untrusted text -> sanitize -> guard -> model with NO tools -> strict schema -> q
 
 ## Infrastructure
 
-Everything runs in Docker Compose, started through `astra.py`, which works the same on Windows, macOS and Linux and makes `.env` win over shell variables.
+The whole platform is containerised. Every process and data store runs in Docker, so one machine with Docker can run all of it.
+
+### Run it with Docker
+
+You don't need Python packages, Node or a database on your machine: only Docker with at least 8 GB of memory (16 GB is more comfortable), Git and Python 3.12+ to run the small `astra.py` task runner.
+
+```bash
+git clone https://github.com/OussemaHarrabi/AstraRH.git
+```
+
+```bash
+cd AstraRH
+```
+
+```bash
+python astra.py init
+```
+
+Add `ANTHROPIC_API_KEY` and `GROQ_API_KEY` to the new `.env`. Then start the stack and load the demo data:
+
+```bash
+python astra.py up
+```
+
+```bash
+python astra.py seed
+```
+
+```bash
+python tools/demo_state.py
+```
+
+Open http://127.0.0.1:8080. To stop it:
+
+```bash
+python astra.py down
+```
+
+Data stays in Docker volumes across restarts. `python astra.py down --wipe` deletes it.
+
+The first build takes a while, because the `ml` image downloads its AI models and bakes them in, so it can run with no internet afterwards.
+
+### Images
+
+| Image | Built from | Runs |
+|---|---|---|
+| `astrarh-web` | `ops/docker/web.Dockerfile`, multi-stage (development target, or a standalone production build as a non-root user) | `web` |
+| `astrarh-python` | `ops/docker/python.Dockerfile`, non-root user `astra` | `api`, `executor`, `migrate` |
+| `astrarh-worker` | Same file, with the agent and LLM libraries | `worker` |
+| `astrarh-ml` | Same file, with Docling, Tesseract and the baked-in models | `ml` |
+| Pinned by digest | Official images | `caddy`, `postgres` (pgvector), `neo4j`, `minio`, `mailpit`, `otel-lgtm`, `tunnel` |
+
+Only the worker image installs agent and LLM libraries, and only the `ml` image contains the models and OCR.
+
+### Modes
+
+`astra.py` works the same on Windows, macOS and Linux, and makes `.env` win over shell variables. Each mode is a set of Compose files in `ops/`.
 
 | Mode | Command | Differences |
 |---|---|---|
 | Development | `python astra.py up` | Live reload, loopback tool ports, test runner |
+| Public | `python astra.py public` | Production settings and build, plus a public HTTPS link. See [Public link](#public-link) |
 | Hardened | `python astra.py up --secure` | No tool ports, production web build. Set `ASTRA_ENV` to anything but `dev` to turn off API docs and turn on secure cookies |
 
 The networks, which are the core of the deployment design:
 
 | Network | Internal | Connects |
 |---|---|---|
-| `edge_public` | No | `caddy` |
+| `edge_public` | No | `caddy`, `tunnel` |
 | `edge_internal` | Yes | `caddy`, `web`, `api` |
 | `data` | Yes | `api`, `worker`, `executor`, `migrate`, `postgres` |
 | `graph` | Yes | `api`, `worker`, `neo4j` |
@@ -815,7 +889,35 @@ The networks, which are the core of the deployment design:
 | `telemetry_ui` | No | `otel-lgtm` |
 | `llm_egress` | No | `worker` |
 
-**Deploying to a server** needs a Linux host with at least 16 GB of memory and 4 vCPUs, plus a domain with HTTPS. Caddy currently listens on HTTP behind loopback with `auto_https off`, so a public deployment changes the site address to the domain and turns automatic HTTPS and HSTS on. Secure cookies switch on with `ASTRA_ENV`.
+### Public link
+
+```bash
+python astra.py public
+```
+
+This starts the production stack and prints a public HTTPS link. The whole platform stays running in Docker on the host, and visitors reach it through that link:
+
+```mermaid
+flowchart LR
+  V[Visitor's browser] -->|HTTPS| CF[Cloudflare edge]
+  CF -->|outbound tunnel| T[tunnel container]
+  T --> C[caddy]
+  C --> W[web]
+  C -->|/api| A[api]
+  A --> D[(Postgres, MinIO, Neo4j)]
+```
+
+- **No port is opened on the host.** The `tunnel` container makes an outbound connection, so nothing needs configuring on the router or firewall.
+- **It reaches only Caddy.** The tunnel sits on the edge network alone and holds no secrets. `test_tunnel_reaches_only_the_edge_and_holds_no_secrets` checks this.
+- **The frontend and API share one address.** That keeps the `SameSite=Strict` session cookie and CSRF protection working as designed.
+- **Production settings apply.** Secure cookies are on, API docs are off, and the web app is a production build. Mailpit, Neo4j and MinIO have no published ports. Grafana stays on the host's loopback only.
+- **It restarts itself.** Every container uses `restart: unless-stopped`. The link keeps working while the host and Docker are running.
+
+The link is a Cloudflare quick tunnel, so it needs no account. It changes if the tunnel container is recreated: run `python astra.py public` again to see the current one. `python astra.py down` closes it.
+
+### Deploying to a server
+
+Deploying without a tunnel needs a Linux host with at least 16 GB of memory and 4 vCPUs, plus a domain with HTTPS. Caddy currently listens on HTTP behind loopback with `auto_https off`, so a public deployment changes the site address to the domain and turns automatic HTTPS and HSTS on. Secure cookies switch on with `ASTRA_ENV`.
 
 To use real mail, replace `SMTP_HOST` and the `mailbox` adapter's provider with SMTP and IMAP or Microsoft Graph. To use real storage, point the S3 settings at any S3-compatible service.
 
@@ -866,7 +968,15 @@ To use real mail, replace `SMTP_HOST` and the `mailbox` adapter's provider with 
 | Health | Compose and API | `/healthz`, `/readyz` with per-dependency status; heartbeat file checks on `worker` and `executor`, which Docker reports as unhealthy if stale for 90 seconds |
 | Business view | The app | `/agents` (runs, steps, tokens, cost, fallback, cache), `/audit`, `/reports`, inbox correction rate, `ai.security_event` |
 
-Everything is browsable in Grafana at http://127.0.0.1:3001 through its Explore view. Telemetry is configured through standard `OTEL_*` variables, so it can point at any OTLP backend.
+### Grafana
+
+The `otel-lgtm` container bundles Grafana with Tempo, Loki and Prometheus, and is part of every mode. Open **http://127.0.0.1:3001** on the machine running the stack and go to Explore:
+
+- **Tempo:** search traces by service, such as `astra-worker`, and follow a request across steps. A `trace_id` from the audit log or an agent run finds the matching trace.
+- **Prometheus:** chart `astra.llm.cost`, `astra.llm.tokens`, `astra.llm.latency` and `astra.security.flagged`.
+- **Loki:** read each service's logs.
+
+It's bound to loopback, so it's never reachable through the public link. Telemetry is configured through standard `OTEL_*` variables, so it can point at any OTLP backend.
 
 ---
 
@@ -955,6 +1065,7 @@ Calls the real model for about 3 cents, and writes [`docs/evals/screening.json`]
 |---|---|
 | `python astra.py init` | Create `.env` with generated secrets |
 | `python astra.py up [--secure]` | Build and start, and run migrations |
+| `python astra.py public` | Production stack plus a public HTTPS link |
 | `python astra.py down [--wipe]` | Stop, optionally deleting all data |
 | `python astra.py ps`, `logs [service]` | Status and logs |
 | `python astra.py seed [--no-cvs]` | Load the demo company through the real pipeline |

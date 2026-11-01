@@ -1,6 +1,11 @@
 {
 	admin off
 	auto_https off
+	# Only the host and the tunnel container can reach this port, so forwarded client addresses
+	# are believed from them. Login lockout then applies per real visitor, not to the whole tunnel.
+	servers {
+		trusted_proxies static private_ranges
+	}
 }
 
 :80 {

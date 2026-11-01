@@ -40,6 +40,17 @@ def test_ml_is_on_internal_networks_only():
     assert "networks: [ml, telemetry]" in service_block("ml")
 
 
+def test_tunnel_reaches_only_the_edge_and_holds_no_secrets():
+    text = (COMPOSE.parent / "compose.public.yaml").read_text(encoding="utf-8")
+    assert "networks: [edge_public]" in text
+    assert "http://caddy:80" in text
+    assert "environment" not in text
+    # Caddy is the only other service on that network.
+    for service in ["api", "worker", "executor", "ml", "web", "postgres", "neo4j", "minio", "mailpit"]:
+        assert "edge_public" not in service_block(service)
+    assert "edge_public" in service_block("caddy")
+
+
 def test_executor_cannot_reach_files_or_graph():
     networks = re.search(r"networks: \[(.*?)\]", service_block("executor")).group(1)
     assert "files" not in networks
