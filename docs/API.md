@@ -3,6 +3,7 @@
 - **Interactive docs:** `http://127.0.0.1:8080/api/docs` (dev mode; disabled in `--secure`).
 - **Machine contract:** [`contracts/openapi.json`](../contracts/openapi.json).
 - **Generated TypeScript types:** [`contracts/openapi.d.ts`](../contracts/openapi.d.ts).
+- **Detailed contract:** [`docs/API_CONTRACT.md`](API_CONTRACT.md) — every route, request schema, auth rule and data flow.
 - Regenerate both from the running API:
 
 ```bash
