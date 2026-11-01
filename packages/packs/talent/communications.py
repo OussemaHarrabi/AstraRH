@@ -6,10 +6,9 @@ Replies and reminders are built from one candidate's own file, and always wait f
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
 
-from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -40,6 +39,9 @@ from packs.talent.models import (
     Interview,
     Job,
 )
+
+if TYPE_CHECKING:
+    from langgraph.graph import StateGraph
 
 # load_prompt looks for a prompts folder beside the path it is given.
 PROMPT_ANCHOR = str(Path(__file__).parent / "agents" / "communications")
@@ -352,7 +354,10 @@ def answer_about_times(
     return True
 
 
-def build_reply_drafter() -> StateGraph:
+def build_reply_drafter() -> "StateGraph":
+    # Imported here so the API process, which has no agent libraries, can load this module.
+    from langgraph.graph import END, START, StateGraph
+
     graph = StateGraph(ReplyState)
     graph.add_node("draft_reply", draft_reply)
     graph.add_edge(START, "draft_reply")
@@ -485,7 +490,10 @@ def draft_followup(ctx: AgentContext, state: dict) -> dict:
     return {}
 
 
-def build_followup() -> StateGraph:
+def build_followup() -> "StateGraph":
+    # Imported here so the API process, which has no agent libraries, can load this module.
+    from langgraph.graph import END, START, StateGraph
+
     graph = StateGraph(AgentState)
     graph.add_node("draft_followup", draft_followup)
     graph.add_edge(START, "draft_followup")
@@ -594,7 +602,10 @@ def release_rejected_slots(session: Session, event: EventOutbox) -> None:
     interview.status = "slots_declined"
 
 
-def build_scheduler() -> StateGraph:
+def build_scheduler() -> "StateGraph":
+    # Imported here so the API process, which has no agent libraries, can load this module.
+    from langgraph.graph import END, START, StateGraph
+
     graph = StateGraph(AgentState)
     graph.add_node("propose_slots", propose_slots)
     graph.add_edge(START, "propose_slots")

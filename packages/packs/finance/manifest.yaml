@@ -1,0 +1,61 @@
+id: finance
+name: Finance
+owner: moetaz
+status: preview
+description: Tunisian payroll, CIVP placements, payment and reconciliation, with every figure replayable.
+models: packs.finance.models
+api: packs.finance.api:router
+
+actions:
+  - id: finance.rules.activate
+    risk: R3
+    channel: internal
+    handler: packs.finance.handlers:activate_rule_set
+    approver_roles: [admin, finance]
+    view_roles: [admin, finance, hr, auditor]
+    description: Make a rule set the active payroll rules. Needs a second person and password confirmation.
+  - id: finance.engagement.activate
+    risk: R2
+    channel: internal
+    handler: packs.finance.handlers:activate_engagement
+    approver_roles: [admin, finance, hr]
+    view_roles: [admin, finance, hr, auditor]
+    description: Make a validated engagement active so it can be paid.
+  - id: finance.engagement.amend
+    risk: R2
+    channel: internal
+    handler: packs.finance.handlers:amend_engagement
+    approver_roles: [admin, finance, hr]
+    view_roles: [admin, finance, hr, auditor]
+    description: Change pay, hours, title, place or a fixed-term end date from a date, keeping the history.
+
+  - id: finance.payroll.approve
+    risk: R3
+    channel: internal
+    handler: packs.finance.handlers:approve_run
+    approver_roles: [admin, finance]
+    view_roles: [admin, finance, auditor]
+    description: Approve a calculated payroll run. Needs a second person and password confirmation.
+
+publishes:
+  - finance.engagement.validated.v1
+  - finance.engagement.activated.v1
+  - finance.engagement.amended.v1
+  - finance.engagement.ending_soon.v1
+  - finance.civp.activated.v1
+  - finance.civp.payment_due.v1
+  - finance.civp.payment_reconciled.v1
+  - finance.civp.completed.v1
+  - finance.payroll.inputs_validated.v1
+  - finance.payroll.calculation_requested.v1
+  - finance.payroll.calculated.v1
+  - finance.payroll.approved.v1
+  - finance.payroll.rejected.v1
+  - finance.payroll.closed.v1
+  - finance.payment.submitted.v1
+  - finance.payment.reconciled.v1
+
+consumes:
+  - talent.candidate.hired.v1
+  - trust.action.executed.v1
+  - trust.proposal.rejected.v1

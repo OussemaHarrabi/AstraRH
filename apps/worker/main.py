@@ -21,6 +21,7 @@ from kernel.events import relay_once
 from kernel.heartbeat import beat
 from kernel.jobs import WORKER_QUEUES, get_job_app
 from kernel.obs import setup_telemetry
+from packs.finance import consumers as finance_consumers  # noqa: F401 - registers its consumers
 from packs.talent.communications import sweep_all_tenants
 
 HEARTBEAT_SECONDS = 30
