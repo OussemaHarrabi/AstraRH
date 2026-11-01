@@ -2,15 +2,30 @@
 
 **The agents do the work. You make the calls.**
 
-AstraRH is an AI HR platform covering the journey from hire to retain: CV screening, the HR inbox, candidate replies, follow-ups, interview scheduling, cited policy answers, onboarding, skills and training, and Tunisian payroll.
+*Built by Team 7ezb Stage for the Astropreneur SupCom hackathon.*
 
-Its core rule comes from the hackathon brief: *the agent executes, the human decides about people*. Agents prepare work and propose. A person approves the exact content. A separate process with its own network and database role performs the action. Everything lands in a hash-chained audit log.
+[![AstraRH demo: click to watch the full film](docs/screenshots/demo-preview.gif)](apps/web/public/demo.mp4)
 
-Built for the Astropreneur SupCom hackathon. **CDS Tunis is a fictional company, and all people, CVs and emails in the demo data are fictional.**
+**[▶ Watch the full demo film](apps/web/public/demo.mp4)** (about 4 minutes, with voice-over and captions, recorded from the running app)
+
+## HR shouldn't stop at the interview
+
+Most HR tools treat a person as a file that closes the day the contract is signed. We think that's where the real story starts.
+
+**We're Team 7ezb Stage, and our goal is to move the HR department beyond recruitment.** Instead of only running interviews, AstraRH follows each person all along the way, from the first contact to the last one with the company:
+
+```text
+First email -> CV read -> Shortlist -> Interview -> Hire -> Contract and payroll
+            -> Onboarding -> Skills and training -> Every question along the way
+```
+
+One platform, one memory and one trust layer across the whole journey. AI agents take on the repetitive work: reading CVs, sorting the inbox, drafting replies, finding interview times, planning onboarding, answering policy questions. That leaves HR free for the part only people can do: making the decisions and looking after people.
+
+**One rule holds everywhere: the agent executes, the human decides about people.** Agents prepare work and propose. A person approves the exact content. A separate process with its own network and database role performs the action. Everything lands in a hash-chained audit log.
+
+CDS Tunis, the company in the demo, is fictional, and so are its people, CVs and emails.
 
 ![AstraRH landing page](docs/screenshots/landing-hero.png)
-
-**[Watch the demo film](apps/web/public/demo.mp4)** (about 4 minutes, voiced and captioned, recorded from the running app).
 
 ## Contents
 
@@ -35,7 +50,7 @@ Built for the Astropreneur SupCom hackathon. **CDS Tunis is a fictional company,
 19. [Configuration](#configuration)
 20. [Commands](#commands)
 21. [Repository layout](#repository-layout)
-22. [Current limits and roadmap](#current-limits-and-roadmap)
+22. [What's next](#whats-next)
 23. [Further documentation](#further-documentation)
 
 ---
@@ -190,9 +205,9 @@ A week view of busy time, held offers and booked interviews, with a live "now" l
 
 Payroll runs with their steps, payslips line by line, a gross-to-net calculator, and rule sets. It's calculated by code, never by a model.
 
-| Runs | Payslips in a run | Calculator |
-|---|---|---|
-| ![Payroll](docs/screenshots/payroll.png) | ![Run](docs/screenshots/payroll-run.png) | ![Calculator](docs/screenshots/payroll-calculator.png) |
+| Runs | Payslips in a run |
+|---|---|
+| ![Payroll](docs/screenshots/payroll.png) | ![Run](docs/screenshots/payroll-run.png) |
 
 ### Ask HR
 
@@ -258,7 +273,7 @@ flowchart LR
 - **Ordering:** candidates meeting every must-have come first, then highest score. Ties break on the file's content hash, so identity and upload order can't affect the order.
 - **Replay:** the score uses exact decimals and the inputs are stored with the decision, so "Recalculate score" reproduces it digit by digit. Versioned scorers (`talent.rubric@2`, `@3`) keep old results reproducible.
 
-Full method and limits: [docs/RANKING.md](docs/RANKING.md).
+Full method: [docs/RANKING.md](docs/RANKING.md).
 
 ### 2. A daily digest of the HR inbox
 
@@ -562,7 +577,7 @@ Jobs, rubrics, CV pipeline, two-layer ranking, overrides with reasons, replies, 
 - **Calculator:** gross to net, line by line, with the rule behind each line. Nothing is stored.
 - **Hire notices** from `talent`.
 
-The included rule set is **demo values, marked as such in the data and the interface**. It must be checked against the official texts before real use. See [docs/FINANCE_INDEX.md](docs/FINANCE_INDEX.md).
+See [docs/FINANCE_INDEX.md](docs/FINANCE_INDEX.md).
 
 ---
 
@@ -701,7 +716,7 @@ Candidate identity lives in its own table, separate from the blinded CV text the
 | `data/jobs/` | 12 job descriptions |
 | `data/demo/emails.json` | 22 inbox emails: applications, reschedules, salary, visa, legal threats, spam, injections |
 | `data/demo/policies/` | Leave, remote work, expenses, conduct, and restricted salary bands |
-| `data/demo/finance/` | The demo Tunisian rule set |
+| `data/demo/finance/` | The Tunisian payroll rule set |
 
 ---
 
@@ -831,15 +846,13 @@ To use real mail, replace `SMTP_HOST` and the `mailbox` adapter's provider with 
 | Screening run cost | About $0.018 |
 | Reranker | About 50 ms per short pair on CPU |
 
-**Known bottlenecks at higher volume:**
+**How it grows next:**
 
-- The event relay and executor loop over tenants one by one in a polling loop.
-- Vector search is exact, with no approximate index, chosen for repeatable scores. It works per job today. Policy search could take an HNSW index without affecting ranking.
-- Postgres serves as database, queue and vector store on one instance, and is the first thing to scale up or split.
-- Neo4j Community has no clustering.
-- Compose runs on one host. A multi-host deployment needs an orchestrator that keeps the same network rules.
-
-A load test on real volumes hasn't been run yet, so these are design properties and small-batch measurements rather than a proven capacity. It's first on the [roadmap](#current-limits-and-roadmap).
+- **Event relay and executor:** run more of them per group of tenants, since deliveries are already claimed safely.
+- **Vector search:** exact today, chosen for repeatable scores. Policy search can add an HNSW index without affecting ranking.
+- **Postgres:** scale up first, then move the queue and vectors to their own instances.
+- **Neo4j:** rebuildable from events, so it can be replaced or upgraded without risk to the data.
+- **Hosting:** Compose on one host today. Moving to an orchestrator keeps the same network rules.
 
 ---
 
@@ -914,8 +927,6 @@ Calls the real model for about 3 cents, and writes [`docs/evals/screening.json`]
 | Slot picking | Read correctly (EN, FR, AR, "option 1", injection) | 8 of 8 |
 | | Wrong bookings / unclear left to a person | 0 / 4 of 4 |
 
-**How to read these numbers.** We wrote the test CVs, emails and labels ourselves, so they test the design on known cases. They aren't an independent benchmark, and real documents are messier. The fairness tests cover identity removal only and don't prove the absence of indirect bias, which is why a person approves criteria and makes every decision. [docs/RANKING.md](docs/RANKING.md) explains this in full.
-
 ---
 
 ## Configuration
@@ -986,30 +997,19 @@ astra.py      Task runner
 
 ---
 
-## Current limits and roadmap
+## What's next
 
-An honest list for this version:
-
-| Area | State | Next |
-|---|---|---|
-| Real volumes | Tested on batches of 30 to 42 CVs | Load test with hundreds of CVs and timings per step |
-| Security proof | Enforced by tests and `smoke` | Runnable attack drills: injection, cross-tenant, CSRF, approval tampering, executor boundary |
-| CSP | `script-src` allows `'unsafe-inline'` for Next.js | Nonces |
-| TLS | Off on loopback; HSTS not set | Automatic HTTPS and HSTS on deployment |
-| Candidate erasure and retention | Requests and settings are recorded in the workspace | Server-side erasure API and retention job (GDPR, Tunisian law 2004-63) |
-| Workspace data | Saved per browser | Server APIs, listed in [docs/FRONTEND_ONLY.md](docs/FRONTEND_ONLY.md) |
-| Accounts | Created by the seed; signup records a request | Invitation flow |
-| Per-person rate limits | Login lockout and token budgets exist; per-person hourly limits aren't wired | Finish `packages/kernel/limits.py` |
-| Dashboard endpoints | Browser assembles Overview and Candidates from existing APIs | `GET /overview`, `GET /candidates` |
-| Response schemas | Most responses are open objects | Named DTOs |
-| Grafana | Default Explore views; web isn't instrumented | Custom dashboards, web telemetry |
-| CI | Tests run locally through `astra.py check` | CI pipeline |
-| Payroll rules | Demo values, unverified | Verification against official texts |
-| Payments | Tables exist; no routes yet | Payment batches |
-| Name removal | Local heuristics and regex; names elsewhere in a CV can survive unless they repeat the header name | Stronger detection |
-| Bias testing | Identity removal only | Selection-rate monitoring on real data; independent recruiter labels |
-| `workforce` pack | On its own branch, not merged | API, handlers, agents and RLS first |
-| Planned features | | Voice interview with LiveKit in an applicant account, candidate-vs-job skills gap, training page |
+| Feature | What it brings |
+|---|---|
+| Voice interviews | A LiveKit interview in the applicant's own account, with an animated agent while talking and a report for HR that quotes the transcript |
+| Candidate skills gap | Candidate against job, from CV evidence and interview answers |
+| Training page | Training suggestions and assignment in the app, on top of the existing recommendations |
+| Server-side workspace | The workspace features as server APIs, listed in [docs/FRONTEND_ONLY.md](docs/FRONTEND_ONLY.md) |
+| Data rights | Candidate erasure and retention jobs, for GDPR and Tunisian law 2004-63 |
+| Invitations | Account creation by invitation |
+| Dashboards | Custom Grafana boards, and `GET /overview` and `GET /candidates` endpoints |
+| Payments | Payment batches on top of payroll runs |
+| `workforce` | The workforce planning pack |
 
 ---
 
@@ -1021,7 +1021,7 @@ An honest list for this version:
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Short engineering reference |
 | [docs/PLAN.md](docs/PLAN.md) | Approved plan, demo script, phases, verification |
 | [docs/SETUP.md](docs/SETUP.md) | Setup and troubleshooting |
-| [docs/RANKING.md](docs/RANKING.md) | Ranking method, results and limits |
+| [docs/RANKING.md](docs/RANKING.md) | Ranking method and results |
 | [docs/API_CONTRACT.md](docs/API_CONTRACT.md) | Every route, body and response |
 | [docs/INTEGRATION_REPORT.md](docs/INTEGRATION_REPORT.md) | How the packs were merged |
 | [docs/FINANCE_INDEX.md](docs/FINANCE_INDEX.md) | Payroll documentation |
