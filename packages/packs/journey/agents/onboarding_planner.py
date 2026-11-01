@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from datetime import date
 from typing import Any
+from uuid import UUID
 
 from sqlalchemy import select
 
@@ -22,6 +23,7 @@ from packs.journey.models import (
     OnboardingTemplate,
     TemplateTask,
 )
+from packs.journey.service import employee_target
 from packs.journey.services import planning
 
 
@@ -31,21 +33,36 @@ def _payload(event: EventOutbox | None) -> dict[str, Any]:
     return dict(event.payload)
 
 
+def _employee_for_payload(ctx: AgentContext, payload: dict[str, Any]) -> Employee | None:
+    """Hire events carry a person; engagement events carry the employee UUID."""
+    raw_employee = payload.get("employee_id")
+    if raw_employee:
+        try:
+            employee = ctx.session.get(Employee, UUID(str(raw_employee)))
+        except ValueError:
+            employee = ctx.session.scalar(
+                select(Employee).where(Employee.external_id == str(raw_employee))
+            )
+        if employee is not None:
+            return employee
+    raw_person = payload.get("person_id")
+    if raw_person:
+        try:
+            return ctx.session.scalar(
+                select(Employee).where(Employee.person_id == UUID(str(raw_person)))
+            )
+        except ValueError:
+            return None
+    return None
+
+
 def run(ctx: AgentContext, event: EventOutbox | None) -> None:
     payload = _payload(event)
-    employee_external = payload.get("employee_id")
-    if not employee_external:
-        return
-    employee = ctx.session.scalar(
-        select(Employee).where(Employee.external_id == str(employee_external))
-    )
+    employee = _employee_for_payload(ctx, payload)
     if employee is None:
         return
-    start = (
-        date.fromisoformat(str(payload["start_date"]))
-        if payload.get("start_date")
-        else employee.start_date
-    )
+    raw_start = payload.get("start_date") or payload.get("starts_on")
+    start = date.fromisoformat(str(raw_start)) if raw_start else employee.start_date
     existing = ctx.session.scalar(
         select(OnboardingPlan).where(
             OnboardingPlan.employee_id == employee.id,
@@ -175,5 +192,5 @@ def run(ctx: AgentContext, event: EventOutbox | None) -> None:
         f"Activate the 30/60/90 plan for {employee.display_name}",
         decision.id,
         f"journey-plan:{employee.id}:{start.isoformat()}",
-        target={"type": "employee", "id": str(employee.id)},
+        target=employee_target(ctx.session, employee),
     )

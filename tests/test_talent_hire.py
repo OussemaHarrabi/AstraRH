@@ -225,11 +225,6 @@ def test_the_hire_endpoint_checks_the_stage_the_reason_and_the_role(tenant, slug
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="K9: the API role cannot insert proposals, so a person cannot propose over HTTP yet. "
-    "See docs/FINANCE_PAYMENT_DESIGN.md. Remove this marker once the kernel allows it.",
-)
 def test_a_hire_can_be_proposed_over_http(tenant, slug):
     recruiter = signed_in(slug, make_user(tenant, ("recruiter",)))
     application = make_application(tenant, "interview")["application"]

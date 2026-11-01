@@ -47,6 +47,7 @@ from packs.journey.models import (
     TemplateTask,
     TrainingRecommendation,
 )
+from packs.journey.service import employee_target
 
 ROOT = Path(__file__).resolve().parents[3]
 SEED = ROOT / "seed" / "journey"
@@ -380,7 +381,7 @@ def _plan_proposal(
         f"Activate the onboarding plan for {employee.display_name}",
         record.id,
         key,
-        target={"type": "employee", "id": str(employee.id)},
+        target=employee_target(session, employee),
         requested_by=_user_id(maps["employees"].get("EMP-006"), users),
     )
 

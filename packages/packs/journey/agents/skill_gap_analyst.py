@@ -19,6 +19,7 @@ from kernel.explain import Evidence as DecisionEvidence
 from kernel.people.models import Employee, PersonSkillEvidence, Skill
 from packs.journey import events as _events  # noqa: F401 - registers the pack's events
 from packs.journey.models import SkillGap, SkillRequirement
+from packs.journey.service import employee_target
 from packs.journey.services import gap as gap_math
 
 SOURCE_MAP = {
@@ -172,7 +173,7 @@ def run(ctx: AgentContext, event: EventOutbox | None) -> None:
             f"Confirm the {skill.name} gap for {employee.display_name}",
             decision.id,
             f"journey-gap:{employee.id}:{skill.id}",
-            target={"type": "employee", "id": str(employee.id)},
+            target=employee_target(ctx.session, employee),
         )
         proposed += 1
         if proposed >= 3:

@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from kernel.authz import require_role
+from kernel.authz import require_role_any_scope
 from kernel.errors import NotFound
 from kernel.people.models import Employee
 from kernel.web import request_context
@@ -194,14 +194,14 @@ def _visible_employee_ids(session: Session, actor) -> set[UUID] | None:
 @router.get("/plans", summary="Plans visible to the signed-in user")
 def list_plans(request: Request) -> list[dict[str, Any]]:
     with request_context(request) as ctx:
-        require_role(ctx.actor, READ_ROLES)
+        require_role_any_scope(ctx.actor, READ_ROLES)
         return [_plan_json(plan) for plan in service.plans_for_actor(ctx.session, ctx.actor)]
 
 
 @router.get("/plans/me", summary="The signed-in employee's own plan")
 def my_plan(request: Request) -> dict[str, Any]:
     with request_context(request) as ctx:
-        require_role(ctx.actor, READ_ROLES)
+        require_role_any_scope(ctx.actor, READ_ROLES)
         plans = service.plans_for_actor(ctx.session, ctx.actor)
         if not plans:
             raise NotFound("No plan for this user")
@@ -211,7 +211,7 @@ def my_plan(request: Request) -> dict[str, Any]:
 @router.get("/plans/{plan_id}", summary="A plan with tasks, check-ins and flags")
 def get_plan(plan_id: UUID, request: Request) -> dict[str, Any]:
     with request_context(request) as ctx:
-        require_role(ctx.actor, READ_ROLES)
+        require_role_any_scope(ctx.actor, READ_ROLES)
         plan = service.plan_for_actor(ctx.session, ctx.actor, plan_id)
         tasks = ctx.session.scalars(
             select(OnboardingTask)
@@ -288,7 +288,7 @@ def complete_task(
     plan_id: UUID, task_id: UUID, body: EvidenceBody, request: Request
 ) -> dict[str, Any]:
     with request_context(request) as ctx:
-        require_role(ctx.actor, WRITE_ROLES)
+        require_role_any_scope(ctx.actor, WRITE_ROLES)
         evidence = dict(body.evidence)
         if body.summary:
             evidence.setdefault("summary", body.summary)
@@ -303,7 +303,7 @@ def submit_checkin(
     plan_id: UUID, checkin_id: UUID, body: CheckinBody, request: Request
 ) -> dict[str, Any]:
     with request_context(request) as ctx:
-        require_role(ctx.actor, WRITE_ROLES)
+        require_role_any_scope(ctx.actor, WRITE_ROLES)
         checkin = service.submit_checkin(
             ctx.session, ctx.actor.tenant_id, plan_id, checkin_id, body.answers, ctx.actor
         )
@@ -313,7 +313,7 @@ def submit_checkin(
 @router.get("/plans/{plan_id}/dossier", summary="Day-90 review pack")
 def get_dossier(plan_id: UUID, request: Request) -> dict[str, Any]:
     with request_context(request) as ctx:
-        require_role(ctx.actor, READ_ROLES)
+        require_role_any_scope(ctx.actor, READ_ROLES)
         plan = service.plan_for_actor(ctx.session, ctx.actor, plan_id)
         return service.dossier(ctx.session, plan)
 
@@ -325,7 +325,7 @@ def list_gaps(
     skill_id: UUID | None = None,
 ) -> list[dict[str, Any]]:
     with request_context(request) as ctx:
-        require_role(ctx.actor, READ_ROLES)
+        require_role_any_scope(ctx.actor, READ_ROLES)
         statement = select(SkillGap).order_by(SkillGap.created_at.desc())
         visible = _visible_employee_ids(ctx.session, ctx.actor)
         if visible is not None:
@@ -343,7 +343,7 @@ def list_recommendations(
     employee_id: UUID | None = None,
 ) -> list[dict[str, Any]]:
     with request_context(request) as ctx:
-        require_role(ctx.actor, READ_ROLES)
+        require_role_any_scope(ctx.actor, READ_ROLES)
         statement = select(TrainingRecommendation).order_by(
             TrainingRecommendation.created_at.desc()
         )
@@ -358,7 +358,7 @@ def list_recommendations(
 @router.get("/impact", summary="Observed training impact")
 def list_impact(request: Request) -> list[dict[str, Any]]:
     with request_context(request) as ctx:
-        require_role(ctx.actor, PEOPLE_ROLES)
+        require_role_any_scope(ctx.actor, PEOPLE_ROLES)
         statement = (
             select(ImpactMeasure)
             .join(
@@ -381,7 +381,7 @@ def get_heatmap(
     skill_id: UUID | None = Query(default=None),
 ) -> list[dict[str, Any]]:
     with request_context(request) as ctx:
-        require_role(ctx.actor, PEOPLE_ROLES)
+        require_role_any_scope(ctx.actor, PEOPLE_ROLES)
         rows = service.heatmap(ctx.session, org_unit_id=org_unit_id, skill_id=skill_id)
         cells: dict[tuple[str, str], dict[str, Any]] = {}
         for row in rows:

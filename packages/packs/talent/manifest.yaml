@@ -9,7 +9,7 @@ api: packs.talent.api:router
 ui:
   route: /jobs
   nav_label: Recruitment
-  roles: [admin, hr, recruiter, manager, auditor]
+  roles: [admin, hr, recruiter, auditor]
 
 actions:
   - id: talent.cv.read

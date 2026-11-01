@@ -14,6 +14,7 @@ from kernel.explain import Evidence as DecisionEvidence
 from kernel.people.models import Employee, PersonSkillEvidence, Skill
 from packs.journey import events as _events  # noqa: F401 - registers the pack's events
 from packs.journey.models import Course, SkillGap, TrainingRecommendation
+from packs.journey.service import employee_target
 from packs.journey.services import gap as gap_math
 
 
@@ -139,5 +140,5 @@ def run(ctx: AgentContext, event: EventOutbox | None) -> None:
         f"Assign {first.title} to close the {skill.name} gap",
         decision.id,
         f"journey-training:{gap.id}",
-        target={"type": "employee", "id": str(employee.id)},
+        target=employee_target(ctx.session, employee),
     )

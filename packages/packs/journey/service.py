@@ -11,7 +11,7 @@ from kernel.db import utcnow
 from kernel.errors import Conflict, NotFound
 from kernel.events import publish
 from kernel.identity.models import UserAccount
-from kernel.people.models import Employee
+from kernel.people.models import Employee, OrgUnit
 from packs.journey.events import EvidenceRecorded, PulseSubmitted
 from packs.journey.models import (
     Checkin,
@@ -26,6 +26,17 @@ from packs.journey.services import planning
 ADMIN_ROLES = {"admin", "hr", "auditor"}
 MANAGER_ROLE = "manager"
 EMPLOYEE_ROLE = "employee"
+
+
+def employee_target(session: Session, employee: Employee) -> dict[str, str]:
+    """The shared target shape for scoped approvals: employee plus their org unit."""
+    org = session.get(OrgUnit, employee.org_unit_id)
+    return {
+        "type": "employee",
+        "id": str(employee.id),
+        "employee_id": str(employee.id),
+        "org_unit": org.external_id if org is not None else "",
+    }
 
 
 def employee_for_actor(session: Session, actor) -> Employee | None:
