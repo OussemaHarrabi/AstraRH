@@ -95,7 +95,7 @@ export default function OverviewPage() {
       quiet(get<Plan[]>("/packs/journey/plans"), []),
       quiet(get<{ status: string }[]>("/packs/finance/payroll-runs"), []),
     ]);
-    return { proposals, runs, stats, hiring, bookings: bookings.items, plans, runsPay };
+    return { proposals, runs, stats, hiring, bookings: bookings.items, plans, runsPay, loadedAt: Date.now() };
   }, []);
 
   const moods = useMemo(() => (data ? moodsFrom(data.runs, data.proposals) : {}), [data]);
@@ -105,7 +105,7 @@ export default function OverviewPage() {
     if (!data) return [];
     // The last twelve hours, with quiet hours shown as quiet.
     const hour = 3_600_000;
-    const end = Math.ceil(Date.now() / hour) * hour;
+    const end = Math.ceil(data.loadedAt / hour) * hour;
     const points = Array.from({ length: 12 }, (_, index) => ({
       label: `${new Date(end - (11 - index) * hour).getHours()}:00`,
       value: 0,
@@ -176,7 +176,7 @@ export default function OverviewPage() {
         <Crew moods={moods} onPick={(agent) => router.push(`/agents?agent=${agent.id}`)} />
       </section>
 
-      <div className="grid grid-cols-2 divide-x divide-line rounded-xl border border-line bg-surface shadow-soft lg:grid-cols-5">
+      <div className="grid grid-cols-[minmax(0,1fr)] grid-cols-2 divide-x divide-line rounded-xl border border-line bg-surface shadow-soft lg:grid-cols-5">
         <Metric label="Decisions waiting" value={queue.length} href="/approvals" />
         <Metric label="Open jobs" value={hiring.jobs.length} href="/jobs" />
         <Metric label="Candidates ranked" value={hiring.candidates.length} href="/candidates" />
@@ -184,7 +184,7 @@ export default function OverviewPage() {
         <Metric label="AI spend, recent runs" value={`$${spent.toFixed(2)}`} href="/agents" />
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1.55fr_1fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[1.55fr_1fr]">
         <Panel
           flush
           title="Waiting for your decision"
@@ -208,7 +208,7 @@ export default function OverviewPage() {
                       <Face agent={agentById(agentId ?? "agent")} size={28} mood="waiting" />
                       <Link href={`/approvals?id=${proposal.id}`} className="min-w-0 flex-1">
                         <p className="truncate font-[500]">{proposal.summary}</p>
-                        <p className="text-[13px] text-ink-soft">{agentId ? agentById(agentId).name : "Agent"} proposed {ago(proposal.created_at)}</p>
+                        <p className="text-[13px] text-ink-soft">{agentId ? `${agentById(agentId).name} proposed` : "Prepared after a person's action,"} {ago(proposal.created_at)}</p>
                       </Link>
                       <span className="group-hover:hidden"><RiskTag risk={proposal.risk} /></span>
                       <span className="hidden gap-1.5 group-hover:flex">
@@ -249,7 +249,7 @@ export default function OverviewPage() {
         </Panel>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-3">
         <Panel title="Hiring pipeline" className="lg:col-span-2">
           {hiring.jobs.length === 0 ? (
             <p className="py-6 text-center text-ink-soft">Create a job to see its pipeline here.</p>
@@ -299,7 +299,7 @@ export default function OverviewPage() {
         </Panel>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
         <Panel title="Agent activity" action={<Link href="/agents" className="text-[13px] font-[520] text-door hover:underline">{AGENTS.length} agents</Link>}>
           {activity.length > 1 ? <AreaLine points={activity} unit=" runs" /> : <p className="py-6 text-center text-ink-soft">Runs will show here as agents work.</p>}
         </Panel>

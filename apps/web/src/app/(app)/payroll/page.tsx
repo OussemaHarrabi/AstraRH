@@ -74,7 +74,7 @@ function Calculator() {
     }
   }
   return (
-    <div className="mt-4 grid items-start gap-5 lg:grid-cols-[340px_1fr]">
+    <div className="mt-4 grid grid-cols-[minmax(0,1fr)] items-start gap-5 lg:grid-cols-[340px_1fr]">
       <Panel title="Gross to net">
         <form onSubmit={run} className="space-y-3">
           <Field label="Monthly gross, TND"><input name="gross" type="number" min={1} step="0.001" defaultValue={2500} required className="field tabular" /></Field>

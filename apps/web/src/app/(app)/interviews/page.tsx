@@ -152,7 +152,7 @@ export default function InterviewsPage() {
         }
       />
       <ErrorNote message={week.error} />
-      <div className="grid items-start gap-5 lg:grid-cols-[1fr_300px]">
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-5 lg:grid-cols-[1fr_300px]">
         <section className="overflow-hidden rounded-xl border border-line bg-surface shadow-soft">
           <div className="flex items-center gap-1 border-b border-line px-3 py-2">
             <Button variant="quiet" size="sm" aria-label="Previous week" onClick={() => setWeekOffset((value) => value - 1)}><Icon name="chevron" size={14} className="rotate-180" /></Button>

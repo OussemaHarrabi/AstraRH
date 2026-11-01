@@ -1,7 +1,7 @@
 """Prepare the demo company through the real API, after `astra.py seed`.
 
 Every step goes through the same agents and approvals a person would use: it ranks the seeded job,
-adds a second job from the CV corpus, approves a shortlist and books interviews.
+adds a second job from the CV corpus, approves a shortlist, books interviews and calculates payroll.
 Run with: python tools/demo_state.py. It costs a few cents in model calls.
 """
 
@@ -172,6 +172,63 @@ def book_interviews(job_id, how_many):
         print("Booked:", candidate["name"])
 
 
+def payroll():
+    """An active rule set, eight signed contracts and one calculated run, waiting for approval."""
+    login("sami@cds.example.test")
+    if not call("/packs/finance/rule-sets"):
+        definition = json.loads((ROOT / "data/demo/finance/rule_set_tn_2026_demo.json").read_text(encoding="utf-8"))
+        definition["valid_to"] = None
+        rule_set = call("/packs/finance/rule-sets", {"definition": definition})
+        call(f"/packs/finance/rule-sets/{rule_set['id']}/test", {})
+        call(f"/packs/finance/rule-sets/{rule_set['id']}/activate", {})
+        step_up_and_approve("admin@cds.example.test", "finance.rule_set.activate")
+        login("sami@cds.example.test")
+        wait(lambda: any(row["status"] == "active" for row in call("/packs/finance/rule-sets")), "rule set")
+    if not call("/packs/finance/payroll-runs"):
+        login("leila@cds.example.test")
+        employees = call("/people/employees")[:8]
+        login("sami@cds.example.test")
+        salaries = ["2850", "3400", "1950", "4200", "2300", "3100", "2600", "5200"]
+        for employee, salary in zip(employees, salaries):
+            engagement = call(
+                f"/packs/finance/employees/{employee['id']}/engagements",
+                {
+                    "type": "CDI",
+                    "starts_on": "2026-01-01",
+                    "job_title": "Engineer",
+                    "weekly_hours": 40,
+                    "external_request_id": f"demo-{employee['external_id']}",
+                    "pay_items": [{"code": "BASE_SALARY", "amount": salary, "valid_from": "2026-01-01"}],
+                },
+            )
+            issues = call(f"/packs/finance/engagements/{engagement['id']}/validate", {})["issues"]
+            for field in {issue["field"] for issue in issues if issue["code"] == "DOCUMENT_NOT_VERIFIED"}:
+                document = call(
+                    f"/packs/finance/engagements/{engagement['id']}/documents",
+                    {"doc_type": field.split(".", 1)[1], "note": "Checked for the demo"},
+                )
+                call(f"/packs/finance/documents/{document['id']}/review", {"decision": "verified", "note": "Checked"})
+            call(f"/packs/finance/engagements/{engagement['id']}/validate", {})
+            call(f"/packs/finance/engagements/{engagement['id']}/activate", {})
+        step_up_and_approve("admin@cds.example.test", "finance.engagement.activate", limit=8)
+        login("sami@cds.example.test")
+        wait(lambda: all(row["status"] == "active" for row in call("/packs/finance/engagements")), "contracts")
+        run = call(
+            "/packs/finance/payroll-runs",
+            {"period_start": "2026-10-01", "period_end": "2026-10-31", "pay_date": "2026-10-31", "external_request_id": "demo-2026-10"},
+        )
+        call(f"/packs/finance/payroll-runs/{run['id']}/calculate", {})
+        wait(lambda: call(f"/packs/finance/payroll-runs/{run['id']}")["calculation_state"] == "done", "payroll")
+        call(f"/packs/finance/payroll-runs/{run['id']}/submit", {})
+    print("Payroll ready")
+
+
+def step_up_and_approve(email, action, limit=1):
+    login(email)
+    call("/auth/step-up", {"password": PASSWORD})
+    approve(action, limit=limit)
+
+
 def main():
     login("nadia@cds.example.test")
     jobs = call("/packs/talent/jobs")
@@ -179,6 +236,8 @@ def main():
     book_interviews(jobs[0]["id"], 3)
     corpus_job()
     call("/comms/digest", {})
+    payroll()
+    login("nadia@cds.example.test")
     for job in call("/packs/talent/jobs"):
         print(job["title"], job["cv_counts"], len(call(f"/packs/talent/jobs/{job['id']}/shortlist")["candidates"]), "ranked")
 

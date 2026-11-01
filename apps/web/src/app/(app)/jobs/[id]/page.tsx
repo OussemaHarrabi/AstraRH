@@ -285,7 +285,7 @@ function Criteria({ job, onChanged }: { job: JobDetail; onChanged: () => void })
       </div>
       <ul className="p-2">
         {criteria.map((criterion, index) => (
-          <li key={criterion.id} className="row-hover grid items-center gap-3 rounded-lg px-2 py-2 md:grid-cols-[1fr_190px_110px]">
+          <li key={criterion.id} className="row-hover grid grid-cols-[minmax(0,1fr)] items-center gap-3 rounded-lg px-2 py-2 md:grid-cols-[1fr_190px_110px]">
             <div className="min-w-0">
               <p className="font-[520]">{criterion.label}</p>
               {criterion.description ? <p className="truncate text-ink-soft">{criterion.description}</p> : null}
@@ -348,7 +348,7 @@ function Posting({ job }: { job: JobDetail }) {
   const published = Boolean(live[job.id]);
   const link = typeof window === "undefined" ? "" : `${window.location.origin}/careers/${job.id}`;
   return (
-    <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_320px]">
+    <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[1fr_320px]">
       <article className="rounded-xl border border-line bg-surface p-6 shadow-soft">
         <p className="text-ink-soft">CDS Tunis</p>
         <h2 className="mt-1 text-[24px] font-[520]">{job.title}</h2>

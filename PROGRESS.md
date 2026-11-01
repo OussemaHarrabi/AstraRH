@@ -6,7 +6,9 @@
 
 **If you are resuming after a context reset, read in this order:** this section → `docs/PLAN.md` (the approved plan, full detail) → `docs/ARCHITECTURE.md` → `docs/SETUP.md`.
 
-- **Current phase:** P5 Communication and P6 Knowledge, backend first. Built, tested and committed in small steps (see the P5/P6 log). Backend APIs for the UI are done (steps 5 to 8). **Next, from the 2026-11-01 backend review, in order:** (1) live inbound mail: a worker poller that ingests new mail from the HR mailbox, turns CV attachments into applications, and turns a candidate's "Tuesday works" reply into a booking proposal; (2) the recruiter's calendar as a real source (ICS free/busy import plus busy-block API), not seed rows only; (3) security headers, per-user rate limits on model-backed routes, and candidate erasure/retention; (4) one `/overview` endpoint for the dashboard, and an up-to-date `docs/API.md`; (5) load test on real volumes plus runnable security drills; (6) root README and demo script. Then one browser pass, then the team branches.
+- **Current phase (2026-11-01):** The new frontend and a voiced demo film are done (see the frontend entry in the log). `docs/HANDOFF.md` is the full project brief. **Next, in order:** (1) backend for the front-only features in `docs/FRONTEND_ONLY.md`, starting with candidate erasure and retention; (2) `/overview` and `/candidates` endpoints, so the browser stops assembling them; (3) per-person limits: finish `packages/kernel/limits.py` or delete it; (4) load test on real volumes plus runnable security drills; (5) root README; (6) tighten the script CSP (`'unsafe-inline'`), a known weak spot; (7) the team branches.
+- **To rebuild the demo:** `python astra.py seed`, then `python tools/demo_state.py`. It ranks, books interviews and calculates payroll through the real API. The film's scripts are in `tools/demo_video/`.
+- **Web dev server:** on this Windows setup, Turbopack doesn't see edits through the Docker mount. After editing `apps/web/src`, run `docker restart astrarh-web-1`. A changed `package.json` or `next.config.ts` needs `python astra.py up`.
 - **Priority, set by Oussema on 2026-10-31:** ship the hackathon brief's six axes deep and solid first. Teammates' services and team tooling wait until that is done. Ship fast, and test in one final pass rather than retesting at each step.
 - **Original P5/P6 plan.** Steps 1 to 3 and 5 are built (see the log); step 4 still lacks slot holds and ICS:
   1. **Inbox and digest** (`packages/kernel/comms/`, schema `comms`): thread, message, classification, digest, digest_item, template. Fictional email seed (about 40) in `data/demo/emails.json` covering applications, reschedules, salary, visa, legal threats and spam, linked to demo candidates. LangGraph agent: classify each message through `ctx.read_untrusted` (type, urgency, needs-human with reason), then a daily digest grouped by type and urgency. Web page `/inbox`.
@@ -34,8 +36,9 @@
 | P4 Screening | **Done** |
 | P5 Communication | **In progress**: inbox, replies, follow-ups, booking, slot holds, invites, cancel/reschedule and inbox listing/handled/corrections built and tested. Backend done; UI pass left |
 | P6 Knowledge | **In progress**: cited answers, refusal, ticket handling, answer feedback and policy versions built and tested. UI pass left |
-| P7 AstraGraph | Not started |
-| P8 Integration and proof | Not started |
+| Frontend and demo film | **Done**: landing, login, signup and every sidebar page, in light, dark and phone layouts. Some features are front-only (`docs/FRONTEND_ONLY.md`) |
+| P7 AstraGraph | Graph page **done** (evidence, agents and decisions, company). Trust Center and Grafana dashboards not started |
+| P8 Integration and proof | Integration **done** (`docs/INTEGRATION_REPORT.md`). Load test, security drills and README not started |
 
 ## Facts to remember
 
@@ -85,6 +88,28 @@ Plan decisions are in `docs/PLAN.md` §2. Changes and additions since approval:
 | 2026-10-31 | **Self-hosted fonts through npm** | `next/font/google` needs internet at runtime in dev, and the web container has none |
 
 ## Log
+
+### Frontend and demo film: 2026-11-01
+
+Oussema didn't approve the earlier HTML previews and asked for a more sophisticated SaaS look, built directly in the app.
+
+**Built**
+- Design: one typeface (Instrument Sans), blue doors on white plaster, light and dark. Reference products: Mercury, Attio, Linear, Ashby.
+- Landing (`/`): a drawn dusk over the Gulf of Tunis, scroll-driven into a live product window; six feature films played by code (`ui/landing/loops.tsx`), which are animations with sample data; the crew; the hidden-text demo; eval results.
+- App: shell with command palette (Ctrl K), notifications and toasts; Overview, Approvals, Inbox, Jobs and job detail, Candidates, Interviews, Onboarding, Payroll, Ask HR, Agents, Graph, Audit log, Reports, Settings, and `/demo`.
+- Agent faces (`ui/Face.tsx`): eleven named agents whose mood comes from real run and proposal state. Graph (`ui/ForceGraph.tsx`): d3-force on canvas.
+- Front-only features are listed in `docs/FRONTEND_ONLY.md`.
+- `tools/demo_state.py` prepares the demo through the real API, including the corpus as a Security Analyst job and real payroll.
+- Demo film, about 4 minutes: `apps/web/public/demo.mp4`, recorded from the running app with Playwright, narrated with edge-tts (a Microsoft online voice; only the narration text is sent), joined with FFmpeg.
+
+**Real bug found while recording, fixed**
+- Candidates shortlisted together were scheduled at the same moment, so all were offered and held the same times, and booking then failed. `schedule.lock_calendars` now serialises offers per participant, with a regression test.
+- The explanation panel hid evidence not tied to a score factor, such as the quote from a candidate's reply.
+
+**Not done**
+- OneTake and HyperFrames weren't used. Installing OneTake was blocked by the permission system; the film uses plain recorded shots with cuts.
+- The landing's feature films are hidden on phones (the list still shows).
+- The film's "Tuesday works" email was sent by a script standing in for the candidate; everything after it ran for real.
 
 ### P5 Communication and P6 Knowledge: 2026-10-31
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { forceCenter, forceCollide, forceLink, forceManyBody, forceRadial, forceSimulation, type Simulation, type SimulationLinkDatum, type SimulationNodeDatum } from "d3-force";
+import { forceCenter, forceCollide, forceLink, forceManyBody, forceRadial, forceSimulation, forceX, forceY, type Simulation, type SimulationLinkDatum, type SimulationNodeDatum } from "d3-force";
 import { useEffect, useRef, useState } from "react";
 
 /** A living constellation: nodes settle by force, and small lights travel along the edges. */
@@ -81,11 +81,14 @@ export function ForceGraph({
       .force("center", forceCenter(0, 0).strength(0.05))
       .force("collide", forceCollide<SimNode>().radius((node) => (node.size ?? 6) + (rings ? 12 : 8)))
       .force("ring", forceRadial<SimNode>((node) => node.ring ?? 0, 0, 0).strength((node) => (node.ring === undefined ? 0 : 0.9)))
+      .force("x", forceX<SimNode>(0).strength(rings ? 0 : 0.09))
+      .force("y", forceY<SimNode>(0).strength(rings ? 0 : 0.13))
       .stop();
-    // Settle before the first paint, then frame the whole picture.
-    simulation.tick(220);
-    const extent = simNodes.reduce((widest, node) => Math.max(widest, Math.abs(node.x) / (wrapper.clientWidth / 2), Math.abs(node.y) / (height / 2)), 0.01);
-    view.current = { x: 0, y: 0, k: Math.min(1.3, 0.86 / extent) };
+    // Settle before the first paint, then frame the picture, ignoring a few stragglers.
+    simulation.tick(260);
+    const spreads = simNodes.map((node) => Math.max(Math.abs(node.x) / (wrapper.clientWidth / 2), Math.abs(node.y) / (height / 2))).sort((a, b) => a - b);
+    const extent = Math.max(0.01, spreads[Math.floor(spreads.length * 0.97)] ?? 0.01);
+    view.current = { x: 0, y: 0, k: Math.min(1.5, 0.84 / extent) };
     simulation.alpha(0.03).alphaDecay(0.01).restart();
     const liveLinks = links as unknown as SimLink[];
     for (const link of liveLinks) {

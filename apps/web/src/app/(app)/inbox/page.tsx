@@ -229,7 +229,7 @@ function InboxInner() {
       />
       <ErrorNote message={threads.error ?? digest.error} />
       {view === "digest" ? (
-        <div className="mt-4 grid items-start gap-5 lg:grid-cols-[1fr_minmax(0,1fr)]">
+        <div className="mt-4 grid grid-cols-[minmax(0,1fr)] items-start gap-5 lg:grid-cols-[1fr_minmax(0,1fr)]">
           <div className="space-y-5">
             {!digest.data ? <Loading rows={6} /> : null}
             {digest.data && groups.length === 0 ? (
@@ -284,7 +284,7 @@ function InboxInner() {
           </div>
         </div>
       ) : (
-        <div className="mt-4 grid overflow-hidden rounded-xl border border-line bg-surface shadow-soft lg:h-[calc(100vh-232px)] lg:min-h-[520px] lg:grid-cols-[370px_1fr]">
+        <div className="mt-4 grid grid-cols-[minmax(0,1fr)] overflow-hidden rounded-xl border border-line bg-surface shadow-soft lg:h-[calc(100vh-232px)] lg:min-h-[520px] lg:grid-cols-[370px_1fr]">
           <div className="flex min-h-0 flex-col border-b border-line lg:border-r lg:border-b-0">
             <div className="space-y-2 border-b border-line p-2">
               <div className="relative">

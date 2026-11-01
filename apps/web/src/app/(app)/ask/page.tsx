@@ -246,7 +246,7 @@ function Policies() {
   const current = publishing === "new" ? null : publishing;
 
   return (
-    <div className="mt-4 grid items-start gap-5 lg:grid-cols-[1fr_1fr]">
+    <div className="mt-4 grid grid-cols-[minmax(0,1fr)] items-start gap-5 lg:grid-cols-[1fr_1fr]">
       <Panel flush title="Policy documents" action={<Button size="sm" onClick={() => setPublishing("new")}><Icon name="plus" size={13} /> Publish</Button>}>
         <ErrorNote message={error} />
         <ul>

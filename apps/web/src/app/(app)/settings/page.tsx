@@ -44,7 +44,7 @@ function Account() {
   const [theme, setTheme] = useLocal<"system" | "light" | "dark">("theme", "system");
   if (!me) return null;
   return (
-    <div className="mt-4 grid items-start gap-5 lg:grid-cols-2">
+    <div className="mt-4 grid grid-cols-[minmax(0,1fr)] items-start gap-5 lg:grid-cols-2">
       <Panel title="Your profile">
         <div className="flex items-center gap-3">
           <Avatar name={me.display_name} size={48} />
@@ -182,7 +182,7 @@ function Privacy() {
     toast("Request recorded on this device. Deleting the data still needs the backend step.");
   }
   return (
-    <div className="mt-4 grid items-start gap-5 lg:grid-cols-2">
+    <div className="mt-4 grid grid-cols-[minmax(0,1fr)] items-start gap-5 lg:grid-cols-2">
       <Panel title="How long we keep candidate data">
         <label className="flex items-center gap-3">
           <input type="range" min={6} max={60} step={6} value={retention} onChange={(event) => setRetention(Number(event.target.value))} className="flex-1 accent-[var(--door)]" aria-label="Months to keep candidate data" />

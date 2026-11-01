@@ -400,9 +400,11 @@ export function CandidateDrawer({
       </div>
       <div className="space-y-4 p-5">
         {interview ? <InterviewCard interview={interview} onChanged={onChanged} /> : null}
-        {flagText(candidate.flags).map((warning) => (
-          <p key={warning} className="flex items-center gap-2 rounded-lg bg-bloom-wash px-3 py-2 font-[520] text-bloom"><Icon name="alert" /> {warning}</p>
-        ))}
+        {tab !== "cv"
+          ? flagText(candidate.flags).map((warning) => (
+              <p key={warning} className="flex items-center gap-2 rounded-lg bg-bloom-wash px-3 py-2 font-[520] text-bloom"><Icon name="alert" /> {warning}</p>
+            ))
+          : null}
         {tab === "evidence" ? (candidate.decision_record_id ? <WhyBody decisionId={candidate.decision_record_id} /> : <p className="text-ink-soft">No explanation is recorded for this candidate yet.</p>) : null}
         {tab === "cv" ? <CvText id={id} /> : null}
         {tab === "notes" ? <Notes id={id} /> : null}

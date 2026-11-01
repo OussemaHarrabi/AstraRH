@@ -77,7 +77,7 @@ export default function ReportsPage() {
         subtitle="How hiring, the inbox and the agents are doing, from live data."
         action={<Button variant="secondary" onClick={() => downloadCsv("hiring-report.csv", [["Stage", "Candidates"], ...Object.entries(counts).map(([stage, value]) => [stage, value])])}><Icon name="download" size={14} /> Export</Button>}
       />
-      <div className="grid grid-cols-2 divide-x divide-line rounded-xl border border-line bg-surface shadow-soft lg:grid-cols-4">
+      <div className="grid grid-cols-[minmax(0,1fr)] grid-cols-2 divide-x divide-line rounded-xl border border-line bg-surface shadow-soft lg:grid-cols-4">
         {[
           ["Attacks caught in CVs", String(flagged)],
           ["Sorting kept by people", accuracy === null ? "n/a" : `${Math.round(accuracy * 100)}%`],
@@ -90,7 +90,7 @@ export default function ReportsPage() {
           </div>
         ))}
       </div>
-      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+      <div className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
         <Panel title="Hiring funnel"><Funnel steps={funnel} /></Panel>
         <Panel title="AI spend by agent">
           {byAgent.length ? <HBars rows={byAgent} format={(value) => `$${value.toFixed(3)}`} /> : <p className="py-6 text-center text-ink-soft">No paid runs yet.</p>}

@@ -277,7 +277,7 @@ function Footer() {
         <div className="mt-8 flex flex-wrap gap-2.5 text-[15px]">
           <Link href="/signup" className="flex h-10 items-center gap-1.5 rounded-full bg-[#5468f0] px-5 font-[520] transition-colors hover:bg-[#6a7cf5]">Request access</Link>
           <Link href="/login" className="flex h-10 items-center rounded-full bg-white/10 px-5 transition-colors hover:bg-white/20">Log in</Link>
-          <Link href="/demo" className="flex h-10 items-center gap-1.5 rounded-full px-3 text-white/80 transition-colors hover:text-white"><Icon name="send" size={14} /> Watch the 3-minute demo</Link>
+          <Link href="/demo" className="flex h-10 items-center gap-1.5 rounded-full px-3 text-white/80 transition-colors hover:text-white"><Icon name="send" size={14} /> Watch the demo</Link>
         </div>
         <div className="mt-20 flex flex-wrap items-center justify-between gap-3 border-t border-white/12 pt-5 text-[14px] text-white/55">
           <span className="flex items-center gap-2"><Logo size={18} /> AstraRH, built for the Astropreneur SupCom hackathon</span>

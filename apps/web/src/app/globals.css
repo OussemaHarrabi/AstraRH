@@ -171,6 +171,11 @@ button:not(:disabled) {
   background: var(--door-wash);
 }
 
+/* The dev server's floating badge would sit on top of the account menu during a live demo. */
+nextjs-portal {
+  display: none !important;
+}
+
 .tabular {
   font-variant-numeric: tabular-nums;
 }

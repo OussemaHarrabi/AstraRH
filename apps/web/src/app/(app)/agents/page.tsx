@@ -150,8 +150,8 @@ function AgentsInner() {
       <ErrorNote message={error} />
       {!data && !error ? <Loading rows={8} /> : null}
       {data ? (
-        <div className="grid items-start gap-5 lg:grid-cols-[1fr_320px]">
-          <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-5 lg:grid-cols-[1fr_320px]">
+          <ul className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {AGENTS.map((agent) => {
               const mood = moodOf(agent);
               const entry = stats.get(agent.id);

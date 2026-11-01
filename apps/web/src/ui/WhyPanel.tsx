@@ -117,6 +117,22 @@ export function WhyBody({ decisionId }: { decisionId: string }) {
         </section>
       ) : null}
 
+      {why.evidence.some((item) => !item.factor_key) ? (
+        <section>
+          <h3 className="font-[560]">What this is based on</h3>
+          <div className="mt-1.5 space-y-1.5">
+            {why.evidence
+              .filter((item) => !item.factor_key)
+              .map((item) => (
+                <blockquote key={item.ref} dir="auto" className="border-l-2 border-door pl-2.5">
+                  <p>{item.quote}</p>
+                  <p className="text-[13px] text-ink-soft">From {item.source_type === "email" ? "their email, checked word for word" : item.source_type === "calendar" ? "the calendars" : "the file"}</p>
+                </blockquote>
+              ))}
+          </div>
+        </section>
+      ) : null}
+
       {why.counterfactuals.length > 0 ? (
         <section>
           <h3 className="font-[560]">What would change this</h3>

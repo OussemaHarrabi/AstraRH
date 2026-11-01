@@ -6,7 +6,7 @@ import { type FormEvent, Suspense, useEffect, useMemo, useState } from "react";
 import { type AgentRun, type ApiError, get, post, type Proposal, type Shortlist } from "@/lib/api";
 import { agentById, Face } from "@/ui/Face";
 import { Icon } from "@/ui/Icon";
-import { ago, Button, EmptyState, ErrorNote, Field, Loading, Modal, PageHeader, RiskTag, Tabs, Tag, titleCase, useLoad } from "@/ui/kit";
+import { ago, Button, EmptyState, ErrorNote, Field, humanDate, Loading, Modal, PageHeader, RiskTag, Tabs, Tag, titleCase, useLoad } from "@/ui/kit";
 import { useToast } from "@/ui/Shell";
 import { WhyBody } from "@/ui/WhyPanel";
 
@@ -95,16 +95,21 @@ function PayloadSummary({ proposal }: { proposal: Proposal }) {
   if (typeof proposal.payload.reason === "string") {
     return <p className="rounded-xl border border-line p-3.5">Reason given: {proposal.payload.reason}</p>;
   }
-  const facts = Object.entries(proposal.payload).filter(([, value]) => typeof value === "string" || typeof value === "number").slice(0, 8);
+  const facts = Object.entries(proposal.payload)
+    .filter(([key, value]) => (typeof value === "string" || typeof value === "number") && !key.endsWith("_id"))
+    .slice(0, 8);
   if (!facts.length) return null;
   return (
     <dl className="divide-y divide-line rounded-xl border border-line">
-      {facts.map(([key, value]) => (
-        <div key={key} className="flex gap-4 px-3.5 py-2">
-          <dt className="w-32 shrink-0 text-ink-soft">{titleCase(key)}</dt>
-          <dd className="min-w-0 break-words">{String(value)}</dd>
-        </div>
-      ))}
+      {facts.map(([key, value]) => {
+        const text = String(value);
+        return (
+          <div key={key} className="flex gap-4 px-3.5 py-2">
+            <dt className="w-32 shrink-0 text-ink-soft">{titleCase(key)}</dt>
+            <dd className="tabular min-w-0 break-words">{/^\d{4}-\d{2}-\d{2}T/.test(text) ? humanDate(text) : text}</dd>
+          </div>
+        );
+      })}
     </dl>
   );
 }
@@ -173,7 +178,7 @@ function Review({ proposal, agentId, onChanged }: { proposal: Proposal; agentId?
           <Face agent={agent} size={40} mood={pending ? "waiting" : "happy"} track />
           <div className="min-w-0 flex-1">
             <h2 className="text-[17px] font-[560]">{proposal.summary}</h2>
-            <p className="text-[13px] text-ink-soft">{agent.name}, {agent.role.toLowerCase()}, {ago(proposal.created_at)}</p>
+            <p className="text-[13px] text-ink-soft">{agentId ? `${agent.name}, ${agent.role.toLowerCase()}` : "Prepared after a person's action"}, {ago(proposal.created_at)}</p>
           </div>
           <RiskTag risk={proposal.risk} />
         </div>
@@ -290,7 +295,7 @@ function ApprovalsInner() {
       <PageHeader title="Approvals" subtitle="Agents can only suggest. Nothing here happens until a person approves it." />
       <Tabs tabs={STATUS_TABS.map((tab) => ({ id: tab.id, label: tab.label }))} value={status} onChange={(id) => { setStatus(id); setSelected(null); }} />
       <ErrorNote message={error} />
-      <div className="mt-4 grid overflow-hidden rounded-xl border border-line bg-surface shadow-soft lg:h-[calc(100vh-232px)] lg:min-h-[520px] lg:grid-cols-[360px_1fr]">
+      <div className="mt-4 grid grid-cols-[minmax(0,1fr)] overflow-hidden rounded-xl border border-line bg-surface shadow-soft lg:h-[calc(100vh-232px)] lg:min-h-[520px] lg:grid-cols-[360px_1fr]">
         <div className="flex min-h-0 flex-col border-b border-line lg:border-r lg:border-b-0">
           <div className="flex items-center gap-1 border-b border-line p-2">
             {(["all", "R2", "R3"] as const).map((value) => (
