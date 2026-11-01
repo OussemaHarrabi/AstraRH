@@ -406,23 +406,18 @@ def test_a_second_calculation_request_is_refused_while_one_waits(tenant, slug):
     assert run_of(http, run["id"])["status"] == "calculated"
 
 
-def test_an_employee_employed_for_part_of_the_period_is_flagged_not_paid(tenant, slug):
+def test_an_employee_employed_for_part_of_the_period_is_prorated(tenant, slug):
     http, _, [_, (late, late_emp, _)], run = one_run(
         tenant, slug, {}, {"starts_on": date(2026, 11, 15)}
     )
     done = calculate(http, tenant, run["id"])
-    assert done["totals"]["payslips"] == "1"
-    [issue] = issues(http, run["id"], status="open")
-    assert (issue["code"], issue["severity"], issue["field"]) == (
-        "PARTIAL_PERIOD",
-        "blocking",
-        f"employee:{late}",
-    )
-    assert late_emp in issue["message"]
-    assert done["open_issues"]["blocking"] == 1
+    assert done["totals"]["payslips"] == "2"
+    assert issues(http, run["id"], status="open") == []
+    late_slip = next(row for row in payslips(http, run["id"]) if row["employee"] == late_emp)
+    assert late_slip["gross"] == "1066.667"
 
 
-def test_a_pay_change_inside_the_period_is_flagged(tenant, slug):
+def test_a_pay_change_inside_the_period_is_prorated(tenant, slug):
     http, _, [(employee, _, engagement)], run = one_run(tenant, slug, {})
     with as_role("owner"), tenant_session(tenant) as session:
         item = session.scalar(select(PayItem).where(PayItem.engagement_id == engagement))
@@ -437,8 +432,9 @@ def test_a_pay_change_inside_the_period_is_flagged(tenant, slug):
             )
         )
     done = calculate(http, tenant, run["id"])
-    assert done["totals"]["payslips"] == "0"
-    assert codes(http, run["id"]) == {"PAY_CHANGE_IN_PERIOD"}
+    assert done["totals"]["payslips"] == "1"
+    assert codes(http, run["id"]) == set()
+    assert payslips(http, run["id"])[0]["gross"] == "2200.000"
 
 
 def test_an_employee_without_a_base_salary_is_flagged(tenant, slug):
@@ -502,8 +498,9 @@ def test_inputs_for_an_employee_who_gets_no_payslip_are_flagged(tenant, slug):
     batch = send_rows(http, [row(emp, "hours", "2026-11-20", quantity="8")])
     assert batch["status"] == "ready"
     run = create_run(http, input_batch_ids=[batch["id"]]).json()
-    calculate(http, tenant, run["id"])
-    assert codes(http, run["id"]) == {"PARTIAL_PERIOD", "INPUT_WITHOUT_PAYSLIP"}
+    done = calculate(http, tenant, run["id"])
+    assert done["totals"]["payslips"] == "1"
+    assert codes(http, run["id"]) == set()
 
 
 def test_a_batch_that_still_has_open_issues_blocks_the_run(tenant, slug):

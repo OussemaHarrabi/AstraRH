@@ -5,7 +5,7 @@ Calculation runs in the worker, started by an event, because only the worker may
 
 from dataclasses import dataclass
 from datetime import date
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 from uuid import UUID
 
@@ -301,7 +301,9 @@ def calculate(session: Session, tenant_id: UUID, run_id: UUID) -> PayrollRun | N
             if item_end < item_start:
                 continue
             item_days = Decimal((item_end - item_start).days + 1)
-            prorated_amount = item.amount * item_days / period_days
+            prorated_amount = (item.amount * item_days / period_days).quantize(
+                Decimal("0.001"), rounding=ROUND_HALF_UP
+            )
             if item.code == "REIMBURSEMENT":
                 reimbursements += prorated_amount
             else:
