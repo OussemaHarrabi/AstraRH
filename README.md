@@ -115,7 +115,7 @@ Local tools in development mode, all on loopback only:
 
 ## Try it
 
-**Live platform: https://civic-jobs-abroad-train.trycloudflare.com**
+**Live platform: https://custody-sisters-accommodation-events.trycloudflare.com**
 
 | Company | Email | Password | Role |
 |---|---|---|---|
