@@ -1,12 +1,47 @@
-# AstraRH
+<h1 align="center">AstraRH</h1>
 
-**The agents do the work. You make the calls.**
+<p align="center"><strong>The agents do the work. You make the calls.</strong></p>
 
-*Built by Team 7ezb Stage for the Astropreneur SupCom hackathon.*
+<p align="center">🏆 <strong>2nd place at Astropreneur 2.0</strong>, built by Team 7ezb Stage:<br>Oussema Harrabi, Moetaz Dhahri, Khaled Blouza and Wassim Hajji</p>
 
-[![AstraRH demo: click to watch the full film](docs/screenshots/demo-preview.gif)](apps/web/public/demo.mp4)
+<p align="center">
+  <img alt="2nd place, Astropreneur 2.0" src="https://img.shields.io/badge/Astropreneur_2.0-2nd_place-C43A80?style=for-the-badge">
+  <a href="https://drive.google.com/file/d/1RNh0lXzCYI6dHSxiETA2KPcmO1r07is6/view?usp=sharing"><img alt="Watch the demo film" src="https://img.shields.io/badge/Demo_film-Watch-4254DB?style=for-the-badge&logo=googledrive&logoColor=white"></a>
+  <img alt="868 tests passing" src="https://img.shields.io/badge/tests-868_passing-2E9E6A?style=for-the-badge">
+</p>
 
-**[▶ Watch the full demo film](apps/web/public/demo.mp4)** (about 4 minutes, with voice-over and captions, recorded from the running app)
+<p align="center">
+  <img alt="Next.js 16" src="https://img.shields.io/badge/Next.js_16-000000?style=flat-square&logo=nextdotjs&logoColor=white">
+  <img alt="React 19" src="https://img.shields.io/badge/React_19-20232A?style=flat-square&logo=react&logoColor=61DAFB">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white">
+  <img alt="Tailwind CSS 4" src="https://img.shields.io/badge/Tailwind_CSS_4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white">
+  <img alt="Python" src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white">
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white">
+  <img alt="LangGraph" src="https://img.shields.io/badge/LangGraph-1C3C3C?style=flat-square&logo=langchain&logoColor=white">
+  <img alt="Claude Haiku" src="https://img.shields.io/badge/Claude_Haiku-D97757?style=flat-square&logo=anthropic&logoColor=white">
+  <br>
+  <img alt="PostgreSQL 17 with pgvector" src="https://img.shields.io/badge/PostgreSQL_17_+_pgvector-4169E1?style=flat-square&logo=postgresql&logoColor=white">
+  <img alt="Neo4j" src="https://img.shields.io/badge/Neo4j-4581C3?style=flat-square&logo=neo4j&logoColor=white">
+  <img alt="MinIO" src="https://img.shields.io/badge/MinIO-C72E49?style=flat-square&logo=minio&logoColor=white">
+  <img alt="Caddy" src="https://img.shields.io/badge/Caddy-1F88C0?style=flat-square&logo=caddy&logoColor=white">
+  <img alt="Docker Compose" src="https://img.shields.io/badge/Docker_Compose-2496ED?style=flat-square&logo=docker&logoColor=white">
+  <img alt="OpenTelemetry" src="https://img.shields.io/badge/OpenTelemetry-000000?style=flat-square&logo=opentelemetry&logoColor=white">
+  <img alt="Grafana" src="https://img.shields.io/badge/Grafana-F46800?style=flat-square&logo=grafana&logoColor=white">
+</p>
+
+[![AstraRH demo: click to watch the full film](docs/screenshots/demo-preview.gif)](https://drive.google.com/file/d/1RNh0lXzCYI6dHSxiETA2KPcmO1r07is6/view?usp=sharing)
+
+**[▶ Watch the full demo film](https://drive.google.com/file/d/1RNh0lXzCYI6dHSxiETA2KPcmO1r07is6/view?usp=sharing)** (about 4 minutes, with voice-over and captions, recorded from the running app). A copy is also in the repo at [`apps/web/public/demo.mp4`](apps/web/public/demo.mp4).
+
+## What's inside
+
+- **Eleven AI agents, one job each.** They read CVs, sort the inbox, draft replies, find interview times, plan onboarding and answer policy questions. They never call each other: events connect them.
+- **CV ranking with proof.** Each CV is read with the name hidden. Every point quotes the CV, the quote is checked word for word, and the score itself is plain arithmetic, not AI.
+- **A person approves every decision.** Approvals are bound to the exact content, a separate executor acts once, and every action lands in a hash-chained audit log.
+- **Built against prompt injection.** Hidden text is cut before reading, and the model that reads untrusted text has no tools to misuse.
+- **The candidate's whole journey.** Replies in English, French and Arabic, follow-ups so nobody is left in silence, interviews booked on real free times, and policy answers with citations.
+- **HR beyond recruitment.** Tunisian contracts (CDI, CDD, CIVP), deterministic payroll (CNSS, IRPP), 30/60/90-day onboarding, skill gaps and training plans.
+- **Runs on your own servers.** Multi-tenant with row-level security, one Docker Compose command, full observability, and 868 passing tests.
 
 ## HR shouldn't stop at the interview
 
@@ -115,27 +150,15 @@ Local tools in development mode, all on loopback only:
 
 ## Try it
 
-**Live platform: https://custody-sisters-accommodation-events.trycloudflare.com**
-
-| Company | Email | Password | Role |
-|---|---|---|---|
-| `cds` | `nadia@cds.example.test` | In our submission form | Recruiter, the best place to start |
-| `cds` | `leila@cds.example.test` | Same | HR |
-| `cds` | `sami@cds.example.test` | Same | Finance |
-| `cds` | `karim@cds.example.test` | Same | Manager |
-| `cds` | `mehdi@cds.example.test` | Same | Employee |
-| `cds` | `audit@cds.example.test` | Same | Auditor |
-| `cds` | `admin@cds.example.test` | Same | Admin |
-
-All the people and data in this demo company are fictional. Please don't enter real personal data.
-
-There are three ways in, depending on what you want.
+The public demo ran during the hackathon and is now offline. There are three ways in, depending on what you want.
 
 | You want to | Do this | You need |
 |---|---|---|
-| **Test the platform right away** | Open the live link above and log in with an account from the table | A browser and the password |
-| **Run your own copy** | [Run it with Docker](#run-it-with-docker) | Docker and an LLM key |
+| **See it working** | [Watch the demo film](https://drive.google.com/file/d/1RNh0lXzCYI6dHSxiETA2KPcmO1r07is6/view?usp=sharing) | A browser |
+| **Run your own copy** | Follow the [Quick start](#quick-start), then log in with an account from its table | Docker and an LLM key |
 | **Publish your own copy** | [Public link](#public-link) | Docker and an LLM key |
+
+All the people and data in the demo company are fictional. Please don't enter real personal data.
 
 ---
 
